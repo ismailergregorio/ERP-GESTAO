@@ -36,7 +36,7 @@ public class ModelTbFuncionario {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "centro_custo_id", nullable = false)
-    private ModelTbCentroCusto centroCusto;
+    private ModelTbCentroCusto centroCusto_id;
 
     @CreatedDate
     @Column(name = "data_criacao", nullable = false, updatable = false)

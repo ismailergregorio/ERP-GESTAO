@@ -1,4 +1,4 @@
-package com.devteciot.API_erp.Models;
+package com.devteciot.API_erp.Models.ModelEntrada;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.devteciot.API_erp.Models.ModelTbProdutos;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,11 +32,11 @@ public class ModelTbEntradaProduto {
 
  @ManyToOne(fetch = FetchType.LAZY)
  @JoinColumn(name = "entrada_id", nullable = false)
- private ModelTbEntrada entrada;
+ private ModelTbEntrada entrada_id;
 
  @ManyToOne(fetch = FetchType.LAZY)
  @JoinColumn(name = "produto_id", nullable = false)
- private ModelTbProdutos produto;
+ private ModelTbProdutos produto_id;
 
  @Column(name = "quantidade", nullable = false)
  private Integer quantidade;

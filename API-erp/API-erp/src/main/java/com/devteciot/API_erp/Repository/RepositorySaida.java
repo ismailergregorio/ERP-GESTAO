@@ -2,7 +2,7 @@ package com.devteciot.API_erp.Repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.devteciot.API_erp.Models.ModelTbSaida;
+import com.devteciot.API_erp.Models.ModelSaida.ModelTbSaida;
 
 public interface RepositorySaida extends JpaRepository<ModelTbSaida, Long> {
 
