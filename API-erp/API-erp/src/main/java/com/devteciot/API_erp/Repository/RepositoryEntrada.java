@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.devteciot.API_erp.Models.ModelEntrada.ModelTbEntrada;
 
 public interface RepositoryEntrada extends JpaRepository<ModelTbEntrada, Long> {
- 
+
 }
