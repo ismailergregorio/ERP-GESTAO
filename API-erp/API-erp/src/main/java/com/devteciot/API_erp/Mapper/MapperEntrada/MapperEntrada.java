@@ -8,8 +8,8 @@ public class MapperEntrada {
    return new DTOEntradaGet(
     dto.getId(),
     dto.getNotaFiscal(),
-    dto.getFornecedor_id().getId(),
-    dto.getTipoEntrada_id().getId(),
+    dto.getFornecedor().getId(),
+    dto.getTipoEntrada().getId(),
     dto.getObservacao(),
     dto.getDataCriacao()
    );

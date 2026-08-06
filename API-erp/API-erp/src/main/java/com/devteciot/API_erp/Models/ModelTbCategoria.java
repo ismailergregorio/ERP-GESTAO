@@ -27,8 +27,8 @@ public class ModelTbCategoria {
  @Column(name = "nome", nullable = false, length = 100)
  private String nome;
 
- @Column(name = "ativo", nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
- private Boolean ativo;
+ @Column(name = "ativo", nullable = false)
+ private Boolean ativo = true;
  
  @CreatedDate
  @Column(name = "data_criacao", nullable = false, length = 100)

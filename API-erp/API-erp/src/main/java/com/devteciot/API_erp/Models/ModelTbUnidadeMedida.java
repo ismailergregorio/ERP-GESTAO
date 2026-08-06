@@ -30,8 +30,8 @@ public class ModelTbUnidadeMedida {
  @Column(name = "sigla", nullable = false, length = 10)
  private String sigua;
 
- @Column(name = "ativo", nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE" )
- private Boolean ativo;
+ @Column(name = "ativo", nullable = false)
+ private Boolean ativo = true;
 
  @CreatedDate
  @Column(name = "data_criacao", nullable = false, length = 100)

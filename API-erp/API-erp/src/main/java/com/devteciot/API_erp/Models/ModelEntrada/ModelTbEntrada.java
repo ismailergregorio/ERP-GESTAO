@@ -34,11 +34,11 @@ public class ModelTbEntrada {
 
  @ManyToOne(fetch = FetchType.LAZY)
  @JoinColumn(name = "fornecedor_id", nullable = false)
- private ModelTbFornecedores fornecedor_id;
+ private ModelTbFornecedores fornecedor;
 
  @ManyToOne(fetch = FetchType.LAZY)
  @JoinColumn(name = "tipo_entrada_id", nullable = false)
- private ModelTbTipoEntrada tipoEntrada_id;
+ private ModelTbTipoEntrada tipoEntrada;
 
  @Column(name = "observacao", length = 250)
  private String observacao;

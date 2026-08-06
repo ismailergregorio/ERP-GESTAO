@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 
 public record DTOProdutosPost(
   String nome,
-  Long unidadeMedida,
-  Long categoria,
+  Long unidadeMedidaId,
+  Long categoriaId,
   BigDecimal valorUnitario,
   Integer estoque,
   Integer estoqueMinimo,
