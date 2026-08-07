@@ -23,7 +23,7 @@ public class ModelTbSaida {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "funcionario_id", nullable = false)
-    private ModelTbFuncionario funcionario_id;
+    private ModelTbFuncionario funcionario;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tipo_saida_id", nullable = false)
