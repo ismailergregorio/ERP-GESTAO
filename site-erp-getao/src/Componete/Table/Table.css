@@ -1,0 +1,77 @@
+.table-container {
+  background: var(--surface);
+
+  border-radius: 12px;
+
+  overflow: hidden;
+
+  border: 1px solid var(--border);
+
+  box-shadow: var(--card-shadow);
+}
+
+.table {
+  width: 100%;
+
+  border-collapse: collapse;
+}
+
+.table thead {
+  background: var(--primary);
+}
+
+.table th {
+  color: white;
+
+  padding: 16px;
+
+  font-weight: 600;
+
+  text-align: left;
+}
+
+.table td {
+  padding: 16px;
+
+  border-bottom: 1px solid var(--border);
+
+  color: var(--text-primary);
+}
+
+.table tbody tr {
+  transition: 0.2s;
+}
+
+.table tbody tr:hover {
+  background: var(--surface-hover);
+}
+
+.table-actions {
+  display: flex;
+
+  justify-content: center;
+
+  gap: 8px;
+}
+
+.table button {
+  border: none;
+
+  cursor: pointer;
+
+  width: 34px;
+
+  height: 34px;
+
+  border-radius: 8px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+}
+
+.table button:hover {
+  opacity: 0.8;
+}

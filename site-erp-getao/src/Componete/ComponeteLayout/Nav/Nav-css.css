@@ -1,0 +1,272 @@
+.nav {
+    width: var(--sidebar-width);
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+
+    background: var(--sidebar);
+    color: var(--text-light);
+
+    padding: 1.5rem 1rem;
+
+    transition: width .3s ease;
+    overflow-x: hidden;
+}
+
+/* Menu recolhido */
+
+.nav.collapsed {
+    width: 80px;
+}
+
+/* Logo */
+
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin-bottom: 2rem;
+
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.nav.collapsed .nav-logo span {
+    display: none;
+}
+
+/* Lista */
+
+.nav-list {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-list li {
+    width: 100%;
+}
+
+/* Link */
+
+.nav-link,
+.nav-button {
+
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    /* justify-content: space-between; */
+    gap: 0.5rem;
+
+    padding: .9rem 1rem;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    color: var(--text-light);
+
+    text-decoration: none;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    transition: .25s;
+}
+
+.nav-link:hover,
+.nav-button:hover {
+
+    background: rgba(255,255,255,.08);
+
+}
+
+.nav-link.active {
+
+    background: var(--primary);
+
+}
+
+/* Parte esquerda */
+
+.nav-start {
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+}
+
+/* Ícone */
+
+.nav-icon {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 22px;
+    min-width: 22px;
+
+}
+
+/* Texto */
+
+.menu-text{
+    white-space: nowrap;
+}
+
+/* Menu recolhido */
+
+.nav.collapsed .nav-link,
+.nav.collapsed .nav-button {
+
+    justify-content: center;
+    padding: .9rem;
+
+}
+
+.nav.collapsed .nav-start {
+
+    width: 100%;
+    justify-content: center;
+
+}
+
+.nav.collapsed .menu-text {
+
+    display: none;
+
+}
+
+/* Esconde apenas a seta */
+
+.nav.collapsed .arrow {
+
+    display: none;
+
+}
+
+/* Esconde submenu */
+
+.nav.collapsed .submenu {
+
+    display: none;
+
+}
+
+/* Submenu */
+
+.submenu {
+
+    list-style: none;
+
+    margin: 4px 0 8px 34px;
+
+    padding-left: 12px;
+
+    border-left: 1px solid rgba(255,255,255,.15);
+
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+}
+
+.submenu li {
+
+    width: 100%;
+
+}
+
+.submenu-link {
+
+    display: block;
+
+    padding: 10px 12px;
+
+    color: rgba(255,255,255,.75);
+
+    text-decoration: none;
+
+    border-radius: 8px;
+
+    transition: .2s;
+
+}
+
+.submenu-link:hover {
+
+    color: #FFF;
+
+    background: rgba(255,255,255,.08);
+
+}
+
+.submenu-link.active {
+
+    background: var(--primary);
+
+    color: #FFF;
+
+}
+
+/* Usuário */
+
+.nav-user {
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin-top: auto;
+    padding-top: 16px;
+
+    border-top: 1px solid rgba(255,255,255,.15);
+
+}
+
+.nav-user img {
+
+    width: 46px;
+    height: 46px;
+
+    border-radius: 50%;
+
+}
+
+.nav-user strong {
+
+    display: block;
+
+}
+
+.nav-user span {
+
+    font-size: .75rem;
+    opacity: .7;
+
+}
+
+.nav.collapsed .nav-user div {
+
+    display: none;
+
+}
+
+.nav.collapsed .nav-user {
+
+    justify-content: center;
+
+}

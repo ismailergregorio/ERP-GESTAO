@@ -1,0 +1,143 @@
+:root {
+  /* ===========================
+       Cores Principais
+    =========================== */
+
+  --primary: #0f3d91;
+  --primary-dark: #0b2e6b;
+  --primary-light: #2f6fe4;
+
+  --secondary: #144aa8;
+
+  /* ===========================
+       Background
+    =========================== */
+
+  --background: #f4f7fc;
+  --surface: #ffffff;
+  --surface-hover: #f8fafd;
+
+  --sidebar: #082b66;
+  --sidebar-hover: #0e4bb7;
+  --sidebar-active: #1a5fd0;
+
+  /* ===========================
+       Texto
+    =========================== */
+
+  --text-primary: #1d2939;
+  --text-secondary: #667085;
+  --text-light: #ffffff;
+
+  /* ===========================
+       Bordas
+    =========================== */
+
+  --border: #e4e7ec;
+  --border-light: #f2f4f7;
+
+  /* ===========================
+       Status
+    =========================== */
+
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --danger: #dc2626;
+  --info: #2563eb;
+
+  /* ===========================
+       Cards
+    =========================== */
+
+  --card-bg: #ffffff;
+  --card-radius: 12px;
+  --card-shadow: 0 4px 12px rgba(15, 61, 145, 0.08);
+
+  /* ===========================
+       Header
+    =========================== */
+
+  --header-height: 70px;
+
+  /* ===========================
+       Sidebar
+    =========================== */
+
+  --sidebar-width: 260px;
+  --sidebar-width-collapse: 80px;
+
+  /* ===========================
+       Espaçamentos
+    =========================== */
+
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* ===========================
+       Fontes
+    =========================== */
+
+  --font-family: "Inter", sans-serif;
+
+  --font-xs: 0.75rem;
+  --font-sm: 0.875rem;
+  --font-md: 1rem;
+  --font-lg: 1.25rem;
+  --font-xl: 1.5rem;
+  --font-2xl: 2rem;
+
+  /* ===========================
+       Peso da Fonte
+    =========================== */
+
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* ===========================
+       Transições
+    =========================== */
+
+  --transition: 0.25s ease;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html,
+body,
+#root{
+    width:100%;
+    height:100%;
+}
+
+body{
+    background:var(--background);
+    color:var(--text-primary);
+    font-family:var(--font-family);
+}
+
+a{
+    color:inherit;
+    text-decoration:none;
+}
+
+button{
+    font:inherit;
+    cursor:pointer;
+    border:none;
+}
+
+input,
+select,
+textarea{
+    font:inherit;
+    outline:none;
+}
