@@ -1,4 +1,170 @@
-.configuration{
- display: flex;
- gap: 0.4rem;
+.configuration {
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 1.5rem;
+
+    align-items: start;
+}
+
+
+/* =========================================
+   TELA MÉDIA
+   ========================================= */
+
+@media (max-width: 1100px) {
+
+    .configuration {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+
+/* =========================================
+   TELA PEQUENA
+   ========================================= */
+
+@media (max-width: 700px) {
+
+    .configuration {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+/* css para tipo de saida */
+
+.form-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Campo */
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Label */
+
+.form-group label {
+  font-size: var(--font-sm);
+
+  font-weight: var(--fw-medium);
+
+  color: var(--text-primary);
+}
+
+/* Input */
+
+.form-group input {
+  width: 100%;
+
+  height: 44px;
+
+  padding: 0 12px;
+
+  border: 1px solid var(--border);
+
+  border-radius: 8px;
+
+  background: var(--surface);
+
+  color: var(--text-primary);
+
+  font-size: var(--font-sm);
+
+  outline: none;
+
+  transition: 0.2s ease;
+}
+
+.form-group input::placeholder {
+  color: var(--text-secondary);
+
+  opacity: 0.7;
+}
+
+/* Input selecionado */
+
+.form-group input:focus {
+  border-color: var(--primary);
+
+  box-shadow: 0 0 0 3px rgba(15, 61, 145, 0.1);
+}
+
+/* Área dos botões */
+
+.modal-actions {
+  display: flex;
+
+  justify-content: flex-end;
+
+  align-items: center;
+
+  gap: 0.75rem;
+
+  padding-top: 0.5rem;
+}
+
+/* Botões */
+
+.btn-cancel,
+.btn-primary {
+  height: 40px;
+
+  padding: 0 1.2rem;
+
+  border-radius: 8px;
+
+  font-size: var(--font-sm);
+
+  font-weight: var(--fw-medium);
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+/* Cancelar */
+
+.btn-cancel {
+  background: transparent;
+
+  border: 1px solid var(--border);
+
+  color: var(--text-secondary);
+}
+
+.btn-cancel:hover {
+  background: var(--surface-hover);
+
+  color: var(--text-primary);
+}
+
+/* Adicionar */
+
+.btn-primary {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border: none;
+
+  background: var(--primary);
+
+  color: var(--text-light);
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
 }
