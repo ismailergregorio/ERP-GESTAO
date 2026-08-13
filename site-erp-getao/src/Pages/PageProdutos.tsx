@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 import type { CategoriaCategoria } from "./PageConfiguracao/TabelaCategorias";
 import type { TabelaUnidadeMedida } from "./PageConfiguracao/TabelaUnidadeMedida";
 
-import { Pencil, Trash2, History } from "lucide-react";
+import { Pencil, History } from "lucide-react";
 
 import Modal from "../Componete/Modal/Modal";
 
@@ -307,27 +307,27 @@ export default function Produtos() {
        EXCLUIR
     ===================================================== */
 
-  async function excluirProduto(produto: TabelaProdutos) {
-    const confirmar = window.confirm(
-      `Deseja realmente excluir o produto "${produto.nome}"?`,
-    );
+  // async function excluirProduto(produto: TabelaProdutos) {
+  //   const confirmar = window.confirm(
+  //     `Deseja realmente excluir o produto "${produto.nome}"?`,
+  //   );
 
-    if (!confirmar) {
-      return;
-    }
+  //   if (!confirmar) {
+  //     return;
+  //   }
 
-    try {
-      await api.delete(`/${base}/${produto.id}`);
+  //   try {
+  //     await api.delete(`/${base}/${produto.id}`);
 
-      await getProdutos();
+  //     await getProdutos();
 
-      toast.success("Produto excluído com sucesso!");
-    } catch (e: any) {
-      console.error(e);
+  //     toast.success("Produto excluído com sucesso!");
+  //   } catch (e: any) {
+  //     console.error(e);
 
-      toast.error(e.response?.data?.message ?? "Erro ao excluir produto.");
-    }
-  }
+  //     toast.error(e.response?.data?.message ?? "Erro ao excluir produto.");
+  //   }
+  // }
 
   /* =====================================================
        HISTÓRICO

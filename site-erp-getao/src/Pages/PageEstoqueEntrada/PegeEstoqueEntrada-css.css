@@ -1,0 +1,101 @@
+.passo {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Círculo da etapa */
+
+.p {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  font-size: 0.5rem;
+  gap: 5px;
+
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    transform 0.3s ease;
+}
+.nume {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  padding: 1rem;
+  color: var(--text-light);
+  background: var(--text-secondary);
+}
+.n1 {
+  position: relative;
+  left: 22px;
+}
+.n2 {
+  position: relative;
+  right: 39px;
+}
+.passo hr {
+  position: relative;
+  bottom: 10px;
+}
+
+/* Etapa ativa */
+
+.nume.ativo {
+  background: var(--secondary);
+  color: var(--text-light);
+
+  transform: scale(1.05);
+}
+
+/* Linha */
+
+.passo hr {
+  flex: 1;
+
+  height: 0.2rem;
+
+  margin: 0 2px;
+
+  border: none;
+
+  background: var(--text-secondary);
+
+  transition: background-color 0.3s ease;
+}
+
+/* Linha ativa */
+
+.passo hr.ativo {
+  background: var(--secondary);
+}
+.form-group.entrada {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.for {
+  margin: 1rem 1rem;
+}
+.header-entrade-produtos {
+  display: flex;
+  justify-content: space-between;
+}
+
+.form-group.add {
+  display: grid;
+  grid-template-columns: 1fr 0.5fr 0.5fr 0.3fr;
+  gap: 1rem;
+  align-items:end;
+}
+.footer-info{
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 10px;
+}

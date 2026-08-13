@@ -7,8 +7,8 @@ public class MapperEntradaProduto {
  public static DTOEntrdaProdutoGet toDTOEntradaProduto(ModelTbEntradaProduto dto) {
   return new DTOEntrdaProdutoGet(
     dto.getId(),
-    dto.getEntrada_id().getId(),
-    dto.getProduto_id().getId(),
+    dto.getEntrada().getId(),
+    dto.getProduto().getId(),
     dto.getQuantidade(),
     dto.getValorUnitario(),
     dto.getValorTotal(),

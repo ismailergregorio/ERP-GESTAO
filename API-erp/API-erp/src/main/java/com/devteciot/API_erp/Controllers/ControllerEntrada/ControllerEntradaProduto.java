@@ -17,40 +17,117 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ControllerEntradaProduto {
 
- private final ServiceEntradaProduto serviceEntradaProduto;
+    private final ServiceEntradaProduto serviceEntradaProduto;
 
- @PostMapping
- @ResponseStatus(HttpStatus.CREATED)
- public DTOEntrdaProdutoGet salvar(@Valid @RequestBody DTOEntrdaProdutoPost dto) {
 
-  return serviceEntradaProduto.saveEntradaProduto(dto);
- }
+    /*
+     * =====================================================
+     * POST - SALVAR UM PRODUTO
+     * =====================================================
+     */
 
- @GetMapping
- public List<DTOEntrdaProdutoGet> listar() {
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public DTOEntrdaProdutoGet salvar(
+            @Valid @RequestBody DTOEntrdaProdutoPost dto) {
 
-  return serviceEntradaProduto.getListaEntradaProduto();
- }
+        return serviceEntradaProduto
+                .saveEntradaProduto(dto);
+    }
 
- @GetMapping("/{id}")
- public DTOEntrdaProdutoGet buscar(@PathVariable Long id) {
 
-  return serviceEntradaProduto.getEntradaProduto(id);
- }
+    /*
+     * =====================================================
+     * POST - SALVAR LISTA DE PRODUTOS
+     * =====================================================
+     */
 
- @PutMapping("/{id}")
- public DTOEntrdaProdutoGet atualizar(
-   @PathVariable Long id,
-   @Valid @RequestBody DTOEntrdaProdutoPost dto) {
+    @PostMapping("/lista")
+    @ResponseStatus(HttpStatus.CREATED)
+    public List<DTOEntrdaProdutoGet> salvarLista(
+            @Valid @RequestBody List<DTOEntrdaProdutoPost> dtos) {
 
-  return serviceEntradaProduto.updateEntradaProduto(id, dto);
- }
+        return serviceEntradaProduto
+                .postListaProdutos(dtos);
+    }
 
- @DeleteMapping("/{id}")
- @ResponseStatus(HttpStatus.NO_CONTENT)
- public void excluir(@PathVariable Long id) {
 
-  serviceEntradaProduto.deleteEntradaProduto(id);
- }
+    /*
+     * =====================================================
+     * GET - LISTAR TODOS OS PRODUTOS
+     * =====================================================
+     */
+
+    @GetMapping
+    public List<DTOEntrdaProdutoGet> listar() {
+
+        return serviceEntradaProduto
+                .getListaEntradaProduto();
+    }
+
+
+    /*
+     * =====================================================
+     * GET - BUSCAR PRODUTO PELO ID
+     * =====================================================
+     */
+
+    @GetMapping("/{id}")
+    public DTOEntrdaProdutoGet buscar(
+            @PathVariable Long id) {
+
+        return serviceEntradaProduto
+                .getEntradaProduto(id);
+    }
+
+
+    /*
+     * =====================================================
+     * GET - LISTAR PRODUTOS DE UMA ENTRADA
+     * =====================================================
+     */
+
+    @GetMapping("/entrada/{entradaId}")
+    public List<DTOEntrdaProdutoGet> listarPorEntrada(
+            @PathVariable Long entradaId) {
+
+        return serviceEntradaProduto
+                .getProdutosPorEntrada(entradaId);
+    }
+
+
+    /*
+     * =====================================================
+     * PUT - ATUALIZAR
+     * =====================================================
+     */
+
+    @PutMapping("/{id}")
+    public DTOEntrdaProdutoGet atualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody DTOEntrdaProdutoPost dto) {
+
+        return serviceEntradaProduto
+                .updateEntradaProduto(
+                        id,
+                        dto
+                );
+    }
+
+
+    /*
+     * =====================================================
+     * DELETE - EXCLUIR
+     * =====================================================
+     */
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void excluir(
+            @PathVariable Long id) {
+
+        serviceEntradaProduto
+                .deleteEntradaProduto(id);
+    }
 
 }

@@ -7,16 +7,27 @@ interface ModalProps {
   title?: string;
   children: ReactNode;
   onClose: () => void;
+  tamanho?: "min" | "max";
+
 }
 
-export default function Modal({ open, title, children, onClose }: ModalProps) {
+export default function Modal({
+  open,
+  title,
+  children,
+  onClose,
+  tamanho,
+}: ModalProps) {
   if (!open) {
     return null;
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(event) => event.stopPropagation()}>
+    <div className={"modal-overlay"} onClick={onClose}>
+      <div
+        className={`modal ${tamanho ?? ""}`}
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className="modal-header">
           <h2>{title}</h2>
 

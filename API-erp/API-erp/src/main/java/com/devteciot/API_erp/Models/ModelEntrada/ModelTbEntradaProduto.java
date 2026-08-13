@@ -32,11 +32,11 @@ public class ModelTbEntradaProduto {
 
  @ManyToOne(fetch = FetchType.LAZY)
  @JoinColumn(name = "entrada_id", nullable = false)
- private ModelTbEntrada entrada_id;
+ private ModelTbEntrada entrada;
 
  @ManyToOne(fetch = FetchType.LAZY)
  @JoinColumn(name = "produto_id", nullable = false)
- private ModelTbProdutos produto_id;
+ private ModelTbProdutos produto;
 
  @Column(name = "quantidade", nullable = false)
  private Integer quantidade;

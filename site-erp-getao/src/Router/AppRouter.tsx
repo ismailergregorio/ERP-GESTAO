@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import Home from "../Pages/PageHome";
-import Estoque from "../Pages/PageEstoqueEntrada";
+import Estoque from "../Pages/PageEstoqueEntrada/PageEstoqueEntrada";
 import Configuracao from "../Pages/PageConfiguracao/PageConfiguracao";
 import PageProdutos from "../Pages/PageProdutos";
 import Fornecedores from "../Pages/PageFornecedores";
