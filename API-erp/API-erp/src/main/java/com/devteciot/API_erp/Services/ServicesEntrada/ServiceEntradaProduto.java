@@ -1,7 +1,6 @@
 package com.devteciot.API_erp.Services.ServicesEntrada;
 
 import java.math.BigDecimal;
-import java.sql.Driver;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -23,160 +22,170 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ServiceEntradaProduto {
 
-  private final RepositoryEntradaProduto repositoryEntradaProduto;
-  private final RepositoryEntrada repositoryEntrada;
-  private final RepositoryProduto repositoryProdutos;
+    private final RepositoryEntradaProduto repositoryEntradaProduto;
+    private final RepositoryEntrada repositoryEntrada;
+    private final RepositoryProduto repositoryProdutos;
 
-  @Transactional
-  public DTOEntrdaProdutoGet saveEntradaProduto(DTOEntrdaProdutoPost dto) {
+    @Transactional
+    public DTOEntrdaProdutoGet saveEntradaProduto(DTOEntrdaProdutoPost dto) {
 
-    ModelTbEntrada entrada = repositoryEntrada.findById(dto.entrada_id())
-        .orElseThrow(() -> new RuntimeException("Entrada não encontrada."));
+        ModelTbEntrada entrada = repositoryEntrada.findById(dto.entrada_id())
+                .orElseThrow(() -> new RuntimeException("Entrada não encontrada."));
 
-    ModelTbProdutos produto = repositoryProdutos.findById(dto.produto_id())
-        .orElseThrow(() -> new RuntimeException("Produto não encontrado."));
+        ModelTbProdutos produto = repositoryProdutos.findById(dto.produto_id())
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado."));
 
-    ModelTbEntradaProduto entradaProduto = new ModelTbEntradaProduto();
+        ModelTbEntradaProduto entradaProduto = new ModelTbEntradaProduto();
 
-    entradaProduto.setEntrada(entrada);
-    entradaProduto.setProduto(produto);
-    entradaProduto.setQuantidade(dto.quantidade());
-    entradaProduto.setValorUnitario(dto.valorUnitario());
+        entradaProduto.setEntrada(entrada);
+        entradaProduto.setProduto(produto);
+        entradaProduto.setQuantidade(dto.quantidade());
+        entradaProduto.setValorUnitario(dto.valorUnitario());
 
-    BigDecimal total = dto.valorUnitario()
-        .multiply(BigDecimal.valueOf(dto.quantidade()));
+        BigDecimal total = dto.valorUnitario()
+                .multiply(BigDecimal.valueOf(dto.quantidade()));
 
-    entradaProduto.setValorTotal(total);
+        entradaProduto.setValorTotal(total);
 
-    repositoryEntradaProduto.save(entradaProduto);
+        produto.setEstoque(produto.getEstoque() + dto.quantidade());
+        repositoryProdutos.save(produto);
 
-    return MapperEntradaProduto.toDTOEntradaProduto(entradaProduto);
-  }
+        repositoryEntradaProduto.save(entradaProduto);
 
-  @Transactional
-  public List<DTOEntrdaProdutoGet> postListaProdutos(
-      List<DTOEntrdaProdutoPost> dtos) {
-
-    if (dtos == null || dtos.isEmpty()) {
-      throw new RuntimeException(
-          "A lista de produtos não pode estar vazia.");
+        return MapperEntradaProduto.toDTOEntradaProduto(entradaProduto);
     }
 
-    List<ModelTbEntradaProduto> produtos = dtos.stream()
-        .map(dto -> {
+    @Transactional
+    public List<DTOEntrdaProdutoGet> postListaProdutos(
+            List<DTOEntrdaProdutoPost> dtos) {
 
-          ModelTbEntrada entrada = repositoryEntrada.findById(
-              dto.entrada_id()).orElseThrow(
-                  () -> new RuntimeException(
-                      "Entrada não encontrada: "
-                          + dto.entrada_id()));
+        if (dtos == null || dtos.isEmpty()) {
+            throw new RuntimeException(
+                    "A lista de produtos não pode estar vazia.");
+        }
 
-          ModelTbProdutos produto = repositoryProdutos.findById(
-              dto.produto_id()).orElseThrow(
-                  () -> new RuntimeException(
-                      "Produto não encontrado: "
-                          + dto.produto_id()));
+        List<ModelTbEntradaProduto> produtos = dtos.stream()
+                .map(dto -> {
 
-          ModelTbEntradaProduto entradaProduto = new ModelTbEntradaProduto();
+                    ModelTbEntrada entrada = repositoryEntrada.findById(
+                            dto.entrada_id()).orElseThrow(
+                                    () -> new RuntimeException(
+                                            "Entrada não encontrada: "
+                                                    + dto.entrada_id()));
 
-          entradaProduto.setEntrada(
-              entrada);
+                    ModelTbProdutos produto = repositoryProdutos.findById(
+                            dto.produto_id()).orElseThrow(
+                                    () -> new RuntimeException(
+                                            "Produto não encontrado: "
+                                                    + dto.produto_id()));
 
-          entradaProduto.setProduto(
-              produto);
+                    ModelTbEntradaProduto entradaProduto = new ModelTbEntradaProduto();
 
-          entradaProduto.setQuantidade(
-              dto.quantidade());
+                    entradaProduto.setEntrada(
+                            entrada);
 
-          entradaProduto.setValorUnitario(
-              dto.valorUnitario());
+                    entradaProduto.setProduto(
+                            produto);
 
-          BigDecimal total = dto.valorUnitario()
-              .multiply(
-                  BigDecimal.valueOf(
-                      dto.quantidade()));
+                    entradaProduto.setQuantidade(
+                            dto.quantidade());
 
-          entradaProduto.setValorTotal(
-              total);
+                    entradaProduto.setValorUnitario(
+                            dto.valorUnitario());
 
-          return entradaProduto;
-        })
-        .toList();
+                    BigDecimal total = dto.valorUnitario()
+                            .multiply(
+                                    BigDecimal.valueOf(
+                                            dto.quantidade()));
 
-    List<ModelTbEntradaProduto> produtosSalvos = repositoryEntradaProduto.saveAll(
-        produtos);
+                    entradaProduto.setValorTotal(
+                            total);
 
-    return produtosSalvos.stream()
-        .map(
-            MapperEntradaProduto::toDTOEntradaProduto)
-        .toList();
-  }
+                    if (produto.getEstoque() != null) {
+                        produto.setEstoque(produto.getEstoque() + dto.quantidade());
+                    } else {
+                        produto.setEstoque(0 + dto.quantidade());
+                    };
+                    repositoryProdutos.save(produto);
 
-  public List<DTOEntrdaProdutoGet> getProdutosPorEntrada(
-      Long entradaId) {
+                    return entradaProduto;
+                })
+                .toList();
 
-    repositoryEntrada.findById(entradaId)
-        .orElseThrow(() -> new RuntimeException(
-            "Entrada não encontrada."));
+        List<ModelTbEntradaProduto> produtosSalvos = repositoryEntradaProduto.saveAll(
+                produtos);
 
-    return repositoryEntradaProduto
-        .findByEntrada_Id(entradaId)
-        .stream()
-        .map(
-            MapperEntradaProduto::toDTOEntradaProduto)
-        .toList();
-  }
+        return produtosSalvos.stream()
+                .map(
+                        MapperEntradaProduto::toDTOEntradaProduto)
+                .toList();
+    }
 
-  public List<DTOEntrdaProdutoGet> getListaEntradaProduto() {
+    public List<DTOEntrdaProdutoGet> getProdutosPorEntrada(
+            Long entradaId) {
 
-    return repositoryEntradaProduto.findAll()
-        .stream()
-        .map(MapperEntradaProduto::toDTOEntradaProduto)
-        .toList();
-  }
+        repositoryEntrada.findById(entradaId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Entrada não encontrada."));
 
-  public DTOEntrdaProdutoGet getEntradaProduto(Long id) {
+        return repositoryEntradaProduto
+                .findByEntrada_Id(entradaId)
+                .stream()
+                .map(
+                        MapperEntradaProduto::toDTOEntradaProduto)
+                .toList();
+    }
 
-    ModelTbEntradaProduto entradaProduto = repositoryEntradaProduto.findById(id)
-        .orElseThrow(() -> new RuntimeException("Item da entrada não encontrado."));
+    public List<DTOEntrdaProdutoGet> getListaEntradaProduto() {
 
-    return MapperEntradaProduto.toDTOEntradaProduto(entradaProduto);
-  }
+        return repositoryEntradaProduto.findAll()
+                .stream()
+                .map(MapperEntradaProduto::toDTOEntradaProduto)
+                .toList();
+    }
 
-  @Transactional
-  public DTOEntrdaProdutoGet updateEntradaProduto(Long id, DTOEntrdaProdutoPost dto) {
+    public DTOEntrdaProdutoGet getEntradaProduto(Long id) {
 
-    ModelTbEntradaProduto entradaProduto = repositoryEntradaProduto.findById(id)
-        .orElseThrow(() -> new RuntimeException("Item da entrada não encontrado."));
+        ModelTbEntradaProduto entradaProduto = repositoryEntradaProduto.findById(id)
+                .orElseThrow(() -> new RuntimeException("Item da entrada não encontrado."));
 
-    ModelTbEntrada entrada = repositoryEntrada.findById(dto.entrada_id())
-        .orElseThrow(() -> new RuntimeException("Entrada não encontrada."));
+        return MapperEntradaProduto.toDTOEntradaProduto(entradaProduto);
+    }
 
-    ModelTbProdutos produto = repositoryProdutos.findById(dto.produto_id())
-        .orElseThrow(() -> new RuntimeException("Produto não encontrado."));
+    @Transactional
+    public DTOEntrdaProdutoGet updateEntradaProduto(Long id, DTOEntrdaProdutoPost dto) {
 
-    entradaProduto.setEntrada(entrada);
-    entradaProduto.setProduto(produto);
-    entradaProduto.setQuantidade(dto.quantidade());
-    entradaProduto.setValorUnitario(dto.valorUnitario());
+        ModelTbEntradaProduto entradaProduto = repositoryEntradaProduto.findById(id)
+                .orElseThrow(() -> new RuntimeException("Item da entrada não encontrado."));
 
-    BigDecimal total = dto.valorUnitario()
-        .multiply(BigDecimal.valueOf(dto.quantidade()));
+        ModelTbEntrada entrada = repositoryEntrada.findById(dto.entrada_id())
+                .orElseThrow(() -> new RuntimeException("Entrada não encontrada."));
 
-    entradaProduto.setValorTotal(total);
+        ModelTbProdutos produto = repositoryProdutos.findById(dto.produto_id())
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado."));
 
-    repositoryEntradaProduto.save(entradaProduto);
+        entradaProduto.setEntrada(entrada);
+        entradaProduto.setProduto(produto);
+        entradaProduto.setQuantidade(dto.quantidade());
+        entradaProduto.setValorUnitario(dto.valorUnitario());
 
-    return MapperEntradaProduto.toDTOEntradaProduto(entradaProduto);
-  }
+        BigDecimal total = dto.valorUnitario()
+                .multiply(BigDecimal.valueOf(dto.quantidade()));
 
-  @Transactional
-  public void deleteEntradaProduto(Long id) {
+        entradaProduto.setValorTotal(total);
 
-    ModelTbEntradaProduto entradaProduto = repositoryEntradaProduto.findById(id)
-        .orElseThrow(() -> new RuntimeException("Item da entrada não encontrado."));
+        repositoryEntradaProduto.save(entradaProduto);
 
-    repositoryEntradaProduto.delete(entradaProduto);
-  }
+        return MapperEntradaProduto.toDTOEntradaProduto(entradaProduto);
+    }
+
+    @Transactional
+    public void deleteEntradaProduto(Long id) {
+
+        ModelTbEntradaProduto entradaProduto = repositoryEntradaProduto.findById(id)
+                .orElseThrow(() -> new RuntimeException("Item da entrada não encontrado."));
+
+        repositoryEntradaProduto.delete(entradaProduto);
+    }
 
 }

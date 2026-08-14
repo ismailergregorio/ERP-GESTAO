@@ -106,69 +106,57 @@ export default function EntradaEstoque() {
 
   const [modalItensOpen, setModalItensOpen] = useState(false);
 
-  const [entradaSelecionada, setEntradaSelecionada] =
-    useState<Entrada | null>(null);
+  const [entradaSelecionada, setEntradaSelecionada] = useState<Entrada | null>(
+    null,
+  );
 
-  const [itensEntrada, setItensEntrada] =
-    useState<ProdutoListaTable[]>([]);
+  const [itensEntrada, setItensEntrada] = useState<ProdutoListaTable[]>([]);
 
-  const [carregandoItens, setCarregandoItens] =
-    useState(false);
+  const [carregandoItens, setCarregandoItens] = useState(false);
 
   /* =====================================================
      DADOS
   ===================================================== */
 
-  const [entradas, setEntradas] =
-    useState<Entrada[]>([]);
+  const [entradas, setEntradas] = useState<Entrada[]>([]);
 
-  const [fornecedores, setFornecedores] =
-    useState<Fornecedor[]>([]);
+  const [fornecedores, setFornecedores] = useState<Fornecedor[]>([]);
 
-  const [tiposEntrada, setTiposEntrada] =
-    useState<TipoEntrada[]>([]);
+  const [tiposEntrada, setTiposEntrada] = useState<TipoEntrada[]>([]);
 
-  const [produtos, setProdutos] =
-    useState<Produto[]>([]);
+  const [produtos, setProdutos] = useState<Produto[]>([]);
 
   /* =====================================================
      DADOS DA ENTRADA
   ===================================================== */
 
-  const [notafiscal, setNotaFiscal] =
-    useState<number | undefined>();
+  const [notafiscal, setNotaFiscal] = useState<number | undefined>();
 
-  const [fornecedor_id, setFornecedor_id] =
-    useState<number | undefined>();
+  const [fornecedor_id, setFornecedor_id] = useState<number | undefined>();
 
-  const [tipoEntrada_id, setTipoEntrada_id] =
-    useState<number | undefined>();
+  const [tipoEntrada_id, setTipoEntrada_id] = useState<number | undefined>();
 
-  const [observacao, setObservacao] =
-    useState("");
+  const [observacao, setObservacao] = useState("");
 
-  const [entradaRegistrada, setEntradaRegistrada] =
-    useState<Entrada | null>(null);
+  const [entradaRegistrada, setEntradaRegistrada] = useState<Entrada | null>(
+    null,
+  );
 
   /* =====================================================
      PRODUTO ATUAL
   ===================================================== */
 
-  const [produto, setProduto] =
-    useState<number | undefined>();
+  const [produto, setProduto] = useState<number | undefined>();
 
-  const [quantidade, setQuantidade] =
-    useState<number | undefined>();
+  const [quantidade, setQuantidade] = useState<number | undefined>();
 
-  const [valorUni, setValorUni] =
-    useState<number | undefined>();
+  const [valorUni, setValorUni] = useState<number | undefined>();
 
   /* =====================================================
      LISTA DE PRODUTOS DA NOVA ENTRADA
   ===================================================== */
 
-  const [listaProdutos, setListaProdutos] =
-    useState<ProdutoListaTable[]>([]);
+  const [listaProdutos, setListaProdutos] = useState<ProdutoListaTable[]>([]);
 
   /* =====================================================
      BUSCAR ENTRADAS
@@ -176,18 +164,13 @@ export default function EntradaEstoque() {
 
   async function getEntradas() {
     try {
-      const resposta =
-        await api.get(`/${base}`);
+      const resposta = await api.get(`/${base}`);
 
       setEntradas(resposta.data);
-
     } catch (e: any) {
       console.error(e);
 
-      toast.error(
-        e.response?.data?.message ??
-          "Erro ao buscar entradas."
-      );
+      toast.error(e.response?.data?.message ?? "Erro ao buscar entradas.");
     }
   }
 
@@ -197,18 +180,13 @@ export default function EntradaEstoque() {
 
   async function getFornecedores() {
     try {
-      const resposta =
-        await api.get(`/${baseFornecedores}`);
+      const resposta = await api.get(`/${baseFornecedores}`);
 
       setFornecedores(resposta.data);
-
     } catch (e: any) {
       console.error(e);
 
-      toast.error(
-        e.response?.data?.message ??
-          "Erro ao buscar fornecedores."
-      );
+      toast.error(e.response?.data?.message ?? "Erro ao buscar fornecedores.");
     }
   }
 
@@ -218,17 +196,14 @@ export default function EntradaEstoque() {
 
   async function getTiposEntrada() {
     try {
-      const resposta =
-        await api.get(`/${baseTiposEntrada}`);
+      const resposta = await api.get(`/${baseTiposEntrada}`);
 
       setTiposEntrada(resposta.data);
-
     } catch (e: any) {
       console.error(e);
 
       toast.error(
-        e.response?.data?.message ??
-          "Erro ao buscar tipos de entrada."
+        e.response?.data?.message ?? "Erro ao buscar tipos de entrada.",
       );
     }
   }
@@ -239,18 +214,13 @@ export default function EntradaEstoque() {
 
   async function getProdutos() {
     try {
-      const resposta =
-        await api.get(`/${baseProdutos}`);
+      const resposta = await api.get(`/${baseProdutos}`);
 
       setProdutos(resposta.data);
-
     } catch (e: any) {
       console.error(e);
 
-      toast.error(
-        e.response?.data?.message ??
-          "Erro ao buscar produtos."
-      );
+      toast.error(e.response?.data?.message ?? "Erro ao buscar produtos.");
     }
   }
 
@@ -259,41 +229,31 @@ export default function EntradaEstoque() {
   ===================================================== */
 
   async function PostEntrada() {
-    if (
-      notafiscal === undefined ||
-      notafiscal <= 0
-    ) {
-      toast.warning(
-        "Informe o número da nota fiscal."
-      );
+    if (notafiscal === undefined || notafiscal <= 0) {
+      toast.warning("Informe o número da nota fiscal.");
 
       return;
     }
 
     if (fornecedor_id === undefined) {
-      toast.warning(
-        "Selecione um fornecedor."
-      );
+      toast.warning("Selecione um fornecedor.");
 
       return;
     }
 
     if (tipoEntrada_id === undefined) {
-      toast.warning(
-        "Selecione um tipo de entrada."
-      );
+      toast.warning("Selecione um tipo de entrada.");
 
       return;
     }
 
     try {
-      const resposta =
-        await api.post(`/${base}`, {
-          notaFiscal: notafiscal,
-          fornecedor_id: fornecedor_id,
-          tipoEntrada_id: tipoEntrada_id,
-          observacao: observacao,
-        });
+      const resposta = await api.post(`/${base}`, {
+        notaFiscal: notafiscal,
+        fornecedor_id: fornecedor_id,
+        tipoEntrada_id: tipoEntrada_id,
+        observacao: observacao,
+      });
 
       /*
        * Guarda o ID da entrada criada.
@@ -301,23 +261,15 @@ export default function EntradaEstoque() {
        * Esse ID será utilizado em todos
        * os produtos adicionados.
        */
-      setEntradaRegistrada(
-        resposta.data
-      );
+      setEntradaRegistrada(resposta.data);
 
       setEtapa(2);
 
-      toast.success(
-        "Entrada criada com sucesso."
-      );
-
+      toast.success("Entrada criada com sucesso.");
     } catch (e: any) {
       console.error(e);
 
-      toast.error(
-        e.response?.data?.message ??
-          "Erro ao criar entrada."
-      );
+      toast.error(e.response?.data?.message ?? "Erro ao criar entrada.");
     }
   }
 
@@ -328,15 +280,10 @@ export default function EntradaEstoque() {
   function selecionarProduto(id: number) {
     setProduto(id);
 
-    const produtoSelecionado =
-      produtos.find(
-        (item) => item.id === id
-      );
+    const produtoSelecionado = produtos.find((item) => item.id === id);
 
     if (produtoSelecionado) {
-      setValorUni(
-        produtoSelecionado.valorUnitario
-      );
+      setValorUni(produtoSelecionado.valorUnitario);
     }
   }
 
@@ -345,8 +292,7 @@ export default function EntradaEstoque() {
   ===================================================== */
 
   const valorTot =
-    quantidade !== undefined &&
-    valorUni !== undefined
+    quantidade !== undefined && valorUni !== undefined
       ? quantidade * valorUni
       : 0;
 
@@ -356,39 +302,25 @@ export default function EntradaEstoque() {
 
   function addProdutoNew() {
     if (!entradaRegistrada) {
-      toast.warning(
-        "A entrada ainda não foi criada."
-      );
+      toast.warning("A entrada ainda não foi criada.");
 
       return;
     }
 
     if (produto === undefined) {
-      toast.warning(
-        "Selecione um produto."
-      );
+      toast.warning("Selecione um produto.");
 
       return;
     }
 
-    if (
-      quantidade === undefined ||
-      quantidade <= 0
-    ) {
-      toast.warning(
-        "Informe uma quantidade válida."
-      );
+    if (quantidade === undefined || quantidade <= 0) {
+      toast.warning("Informe uma quantidade válida.");
 
       return;
     }
 
-    if (
-      valorUni === undefined ||
-      valorUni < 0
-    ) {
-      toast.warning(
-        "Informe um valor unitário válido."
-      );
+    if (valorUni === undefined || valorUni < 0) {
+      toast.warning("Informe um valor unitário válido.");
 
       return;
     }
@@ -397,54 +329,37 @@ export default function EntradaEstoque() {
      * Não permite adicionar o mesmo produto
      * duas vezes na mesma entrada.
      */
-    const produtoJaAdicionado =
-      listaProdutos.some(
-        (item) =>
-          item.produto_id === produto
-      );
+    const produtoJaAdicionado = listaProdutos.some(
+      (item) => item.produto_id === produto,
+    );
 
     if (produtoJaAdicionado) {
-      toast.warning(
-        "Este produto já foi adicionado."
-      );
+      toast.warning("Este produto já foi adicionado.");
 
       return;
     }
 
-    const novoProduto:
-      ProdutoListaTable = {
-        id: Date.now(),
+    const novoProduto: ProdutoListaTable = {
+      id: Date.now(),
 
-        entrada_id:
-          entradaRegistrada.id,
+      entrada_id: entradaRegistrada.id,
 
-        produto_id:
-          produto,
+      produto_id: produto,
 
-        quantidade:
-          quantidade,
+      quantidade: quantidade,
 
-        valorUnitario:
-          valorUni,
+      valorUnitario: valorUni,
 
-        valorTotal:
-          valorTot,
-      };
+      valorTotal: valorTot,
+    };
 
-    setListaProdutos(
-      (listaAtual) => [
-        ...listaAtual,
-        novoProduto,
-      ]
-    );
+    setListaProdutos((listaAtual) => [...listaAtual, novoProduto]);
 
     setProduto(undefined);
     setQuantidade(undefined);
     setValorUni(undefined);
 
-    toast.success(
-      "Produto adicionado."
-    );
+    toast.success("Produto adicionado.");
   }
 
   /* =====================================================
@@ -452,16 +367,11 @@ export default function EntradaEstoque() {
   ===================================================== */
 
   function deletarProduto(id: number) {
-    setListaProdutos(
-      (listaAtual) =>
-        listaAtual.filter(
-          (item) => item.id !== id
-        )
+    setListaProdutos((listaAtual) =>
+      listaAtual.filter((item) => item.id !== id),
     );
 
-    toast.success(
-      "Produto removido da lista."
-    );
+    toast.success("Produto removido da lista.");
   }
 
   /* =====================================================
@@ -470,17 +380,13 @@ export default function EntradaEstoque() {
 
   async function salvarProdutos() {
     if (!entradaRegistrada) {
-      toast.warning(
-        "Nenhuma entrada foi criada."
-      );
+      toast.warning("Nenhuma entrada foi criada.");
 
       return;
     }
 
     if (listaProdutos.length === 0) {
-      toast.warning(
-        "Adicione pelo menos um produto."
-      );
+      toast.warning("Adicione pelo menos um produto.");
 
       return;
     }
@@ -491,26 +397,17 @@ export default function EntradaEstoque() {
        *
        * O backend não precisa desse id.
        */
-      const dadosParaEnviar:
-        ProdutoLista[] =
-        listaProdutos.map(
-          (item) => ({
-            entrada_id:
-              item.entrada_id,
+      const dadosParaEnviar: ProdutoLista[] = listaProdutos.map((item) => ({
+        entrada_id: item.entrada_id,
 
-            produto_id:
-              item.produto_id,
+        produto_id: item.produto_id,
 
-            quantidade:
-              item.quantidade,
+        quantidade: item.quantidade,
 
-            valorUnitario:
-              item.valorUnitario,
+        valorUnitario: item.valorUnitario,
 
-            valorTotal:
-              item.valorTotal,
-          })
-        );
+        valorTotal: item.valorTotal,
+      }));
 
       /*
        * NOVO ENDPOINT
@@ -518,25 +415,18 @@ export default function EntradaEstoque() {
        * POST
        * /api/entrada-produtos/lista
        */
-      await api.post(
-        `/${baseItens}/lista`,
-        dadosParaEnviar
-      );
+      await api.post(`/${baseItens}/lista`, dadosParaEnviar);
 
-      toast.success(
-        "Produtos adicionados com sucesso."
-      );
+      toast.success("Produtos adicionados com sucesso.");
 
       await getEntradas();
 
       fecharModal();
-
     } catch (e: any) {
       console.error(e);
 
       toast.error(
-        e.response?.data?.message ??
-          "Erro ao adicionar os produtos."
+        e.response?.data?.message ?? "Erro ao adicionar os produtos.",
       );
     }
   }
@@ -545,13 +435,9 @@ export default function EntradaEstoque() {
      VER ITENS DA ENTRADA
   ===================================================== */
 
-  async function verItensEntrada(
-    entrada: Entrada
-  ) {
+  async function verItensEntrada(entrada: Entrada) {
     try {
-      setEntradaSelecionada(
-        entrada
-      );
+      setEntradaSelecionada(entrada);
 
       setItensEntrada([]);
 
@@ -565,10 +451,7 @@ export default function EntradaEstoque() {
        * GET
        * /api/entrada-produtos/entrada/{entradaId}
        */
-      const resposta =
-        await api.get(
-          `/${baseItens}/entrada/${entrada.id}`
-        );
+      const resposta = await api.get(`/${baseItens}/entrada/${entrada.id}`);
 
       /*
        * O backend já retorna os itens
@@ -577,43 +460,29 @@ export default function EntradaEstoque() {
        * Criamos somente um ID auxiliar
        * para o componente Table.
        */
-      const itens:
-        ProdutoListaTable[] =
-        resposta.data.map(
-          (
-            item: ProdutoLista,
-            index: number
-          ) => ({
-            id:
-              index + 1,
+      const itens: ProdutoListaTable[] = resposta.data.map(
+        (item: ProdutoLista, index: number) => ({
+          id: index + 1,
 
-            entrada_id:
-              item.entrada_id,
+          entrada_id: item.entrada_id,
 
-            produto_id:
-              item.produto_id,
+          produto_id: item.produto_id,
 
-            quantidade:
-              item.quantidade,
+          quantidade: item.quantidade,
 
-            valorUnitario:
-              item.valorUnitario,
+          valorUnitario: item.valorUnitario,
 
-            valorTotal:
-              item.valorTotal,
-          })
-        );
+          valorTotal: item.valorTotal,
+        }),
+      );
 
       setItensEntrada(itens);
-
     } catch (e: any) {
       console.error(e);
 
       toast.error(
-        e.response?.data?.message ??
-          "Erro ao buscar os itens da entrada."
+        e.response?.data?.message ?? "Erro ao buscar os itens da entrada.",
       );
-
     } finally {
       setCarregandoItens(false);
     }
@@ -691,37 +560,29 @@ export default function EntradaEstoque() {
      TOTAL DOS PRODUTOS DO PREVIEW
   ===================================================== */
 
-  const valorTotalLista =
-    listaProdutos.reduce(
-      (total, item) =>
-        total + item.valorTotal,
-      0
-    );
+  const valorTotalLista = listaProdutos.reduce(
+    (total, item) => total + item.valorTotal,
+    0,
+  );
 
-  const quantidadeTotalLista =
-    listaProdutos.reduce(
-      (total, item) =>
-        total + item.quantidade,
-      0
-    );
+  const quantidadeTotalLista = listaProdutos.reduce(
+    (total, item) => total + item.quantidade,
+    0,
+  );
 
   /* =====================================================
      TOTAL DOS ITENS DA ENTRADA
   ===================================================== */
 
-  const valorTotalEntrada =
-    itensEntrada.reduce(
-      (total, item) =>
-        total + item.valorTotal,
-      0
-    );
+  const valorTotalEntrada = itensEntrada.reduce(
+    (total, item) => total + item.valorTotal,
+    0,
+  );
 
-  const quantidadeTotalItens =
-    itensEntrada.reduce(
-      (total, item) =>
-        total + item.quantidade,
-      0
-    );
+  const quantidadeTotalItens = itensEntrada.reduce(
+    (total, item) => total + item.quantidade,
+    0,
+  );
 
   /* =====================================================
      COLUNAS ENTRADAS
@@ -745,11 +606,7 @@ export default function EntradaEstoque() {
       title: "Fornecedor",
 
       render: (value) => {
-        const fornecedor =
-          fornecedores.find(
-            (item) =>
-              item.id === value
-          );
+        const fornecedor = fornecedores.find((item) => item.id === value);
 
         return fornecedor?.nome ?? "-";
       },
@@ -760,11 +617,7 @@ export default function EntradaEstoque() {
       title: "Tipo",
 
       render: (value) => {
-        const tipo =
-          tiposEntrada.find(
-            (item) =>
-              item.id === value
-          );
+        const tipo = tiposEntrada.find((item) => item.id === value);
 
         return tipo?.nome ?? "-";
       },
@@ -780,9 +633,7 @@ export default function EntradaEstoque() {
       title: "Data Criação",
 
       render: (value) => {
-        return value
-          ? covertData(value)
-          : "-";
+        return value ? covertData(value) : "-";
       },
     },
   ];
@@ -791,69 +642,50 @@ export default function EntradaEstoque() {
      COLUNAS PRODUTOS
   ===================================================== */
 
-  const colunasProdutos:
-    Column<ProdutoListaTable>[] =
-    [
-      {
-        key: "produto_id",
-        title: "Produto",
+  const colunasProdutos: Column<ProdutoListaTable>[] = [
+    {
+      key: "produto_id",
+      title: "Produto",
 
-        render: (value) => {
-          const produtoSelecionado =
-            produtos.find(
-              (item) =>
-                item.id === value
-            );
+      render: (value) => {
+        const produtoSelecionado = produtos.find((item) => item.id === value);
 
-          return (
-            produtoSelecionado?.nome ??
-            "-"
-          );
-        },
+        return produtoSelecionado?.nome ?? "-";
       },
+    },
 
-      {
-        key: "quantidade",
-        title: "Quantidade",
-        align: "center",
+    {
+      key: "quantidade",
+      title: "Quantidade",
+      align: "center",
+    },
+
+    {
+      key: "valorUnitario",
+      title: "Valor Unitário",
+      align: "right",
+
+      render: (value) => {
+        return Number(value).toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        });
       },
+    },
 
-      {
-        key: "valorUnitario",
-        title: "Valor Unitário",
-        align: "right",
+    {
+      key: "valorTotal",
+      title: "Valor Total",
+      align: "right",
 
-        render: (value) => {
-          return Number(
-            value
-          ).toLocaleString(
-            "pt-BR",
-            {
-              style: "currency",
-              currency: "BRL",
-            }
-          );
-        },
+      render: (value) => {
+        return Number(value).toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        });
       },
-
-      {
-        key: "valorTotal",
-        title: "Valor Total",
-        align: "right",
-
-        render: (value) => {
-          return Number(
-            value
-          ).toLocaleString(
-            "pt-BR",
-            {
-              style: "currency",
-              currency: "BRL",
-            }
-          );
-        },
-      },
-    ];
+    },
+  ];
 
   /* =====================================================
      EFFECT
@@ -872,9 +704,7 @@ export default function EntradaEstoque() {
 
   return (
     <Layout title="Entrada de Estoque">
-
       <section>
-
         {/* =================================================
             TABELA DE ENTRADAS
         ================================================= */}
@@ -882,32 +712,26 @@ export default function EntradaEstoque() {
         <HeaderTabela
           title="Entradas"
           onClick={abrirModal}
+          butonsPlus={
+            <button className="butto-header-table">
+              <Plus />
+              Com NF
+            </button>
+          }
         >
-
-          <Table
-            columns={colunas}
-            data={entradas}
-          >
-
+          <Table columns={colunas} data={entradas}>
             {(entrada) => (
               <button
                 type="button"
                 title="Ver itens"
                 className="action-button"
-                onClick={() =>
-                  verItensEntrada(
-                    entrada
-                  )
-                }
+                onClick={() => verItensEntrada(entrada)}
               >
                 <Eye size={18} />
               </button>
             )}
-
           </Table>
-
         </HeaderTabela>
-
 
         {/* =================================================
             MODAL DE CRIAÇÃO DA ENTRADA
@@ -919,65 +743,25 @@ export default function EntradaEstoque() {
           onClose={fecharModal}
           tamanho="max"
         >
-
           {/* =================================================
               ETAPAS
           ================================================= */}
 
           <div className="passo">
+            <div className={etapa === 1 ? "p n1 ativo" : "p n1 ativo"}>
+              <h2 className="nume ativo">1</h2>
 
-            <div
-              className={
-                etapa === 1
-                  ? "p n1 ativo"
-                  : "p n1 ativo"
-              }
-            >
-
-              <h2 className="nume ativo">
-                1
-              </h2>
-
-              <h2>
-                Criar Entrada
-              </h2>
-
+              <h2>Criar Entrada</h2>
             </div>
 
-            <hr
-              className={
-                etapa > 1
-                  ? "ativo"
-                  : ""
-              }
-            />
+            <hr className={etapa > 1 ? "ativo" : ""} />
 
-            <div
-              className={
-                etapa === 2
-                  ? "p n2 ativo"
-                  : "p n2"
-              }
-            >
+            <div className={etapa === 2 ? "p n2 ativo" : "p n2"}>
+              <h2 className={etapa === 2 ? "nume ativo" : "nume"}>2</h2>
 
-              <h2
-                className={
-                  etapa === 2
-                    ? "nume ativo"
-                    : "nume"
-                }
-              >
-                2
-              </h2>
-
-              <h2>
-                Adicionar Produtos
-              </h2>
-
+              <h2>Adicionar Produtos</h2>
             </div>
-
           </div>
-
 
           {/* =================================================
               DADOS DA ENTRADA
@@ -985,167 +769,93 @@ export default function EntradaEstoque() {
 
           {etapa >= 1 && (
             <div className="for">
-
-              <h3>
-                Definição da Entrada
-              </h3>
+              <h3>Definição da Entrada</h3>
 
               <div className="form-group entrada">
-
                 <div>
-
-                  <label htmlFor="nf">
-                    N° Nf
-                  </label>
+                  <label htmlFor="nf">N° Nf</label>
 
                   <input
                     id="nf"
                     type="number"
                     placeholder="Digite o numero da NF"
-                    value={
-                      notafiscal ?? ""
-                    }
+                    value={notafiscal ?? ""}
                     onChange={(e) => {
-
                       setNotaFiscal(
                         e.target.value === ""
                           ? undefined
-                          : Number(
-                              e.target.value
-                            )
+                          : Number(e.target.value),
                       );
-
                     }}
-                    disabled={
-                      !!entradaRegistrada
-                    }
+                    disabled={!!entradaRegistrada}
                   />
-
                 </div>
 
-
                 <div>
-
-                  <label htmlFor="fornecedor">
-                    Fornecedor
-                  </label>
+                  <label htmlFor="fornecedor">Fornecedor</label>
 
                   <select
                     id="fornecedor"
-                    value={
-                      fornecedor_id ?? ""
-                    }
+                    value={fornecedor_id ?? ""}
                     onChange={(e) => {
-
                       setFornecedor_id(
                         e.target.value === ""
                           ? undefined
-                          : Number(
-                              e.target.value
-                            )
+                          : Number(e.target.value),
                       );
-
                     }}
-                    disabled={
-                      !!entradaRegistrada
-                    }
+                    disabled={!!entradaRegistrada}
                   >
+                    <option value="">Selecione um Fornecedor</option>
 
-                    <option value="">
-                      Selecione um Fornecedor
-                    </option>
-
-                    {fornecedores.map(
-                      (f) => (
-                        <option
-                          key={f.id}
-                          value={f.id}
-                        >
-                          {f.nome}
-                        </option>
-                      )
-                    )}
-
+                    {fornecedores.map((f) => (
+                      <option key={f.id} value={f.id}>
+                        {f.nome}
+                      </option>
+                    ))}
                   </select>
-
                 </div>
 
-
                 <div>
-
-                  <label htmlFor="tipo-entrada">
-                    Tipo de Entrada
-                  </label>
+                  <label htmlFor="tipo-entrada">Tipo de Entrada</label>
 
                   <select
                     id="tipo-entrada"
-                    value={
-                      tipoEntrada_id ?? ""
-                    }
+                    value={tipoEntrada_id ?? ""}
                     onChange={(e) => {
-
                       setTipoEntrada_id(
                         e.target.value === ""
                           ? undefined
-                          : Number(
-                              e.target.value
-                            )
+                          : Number(e.target.value),
                       );
-
                     }}
-                    disabled={
-                      !!entradaRegistrada
-                    }
+                    disabled={!!entradaRegistrada}
                   >
+                    <option value="">Selecione um Tipo de Entrada</option>
 
-                    <option value="">
-                      Selecione um Tipo de Entrada
-                    </option>
-
-                    {tiposEntrada.map(
-                      (te) => (
-                        <option
-                          key={te.id}
-                          value={te.id}
-                        >
-                          {te.nome}
-                        </option>
-                      )
-                    )}
-
+                    {tiposEntrada.map((te) => (
+                      <option key={te.id} value={te.id}>
+                        {te.nome}
+                      </option>
+                    ))}
                   </select>
-
                 </div>
 
-
                 <div>
-
-                  <label htmlFor="obs">
-                    Observações
-                  </label>
+                  <label htmlFor="obs">Observações</label>
 
                   <input
                     id="obs"
                     type="text"
                     placeholder="Digite a Observação"
                     value={observacao}
-                    onChange={(e) =>
-                      setObservacao(
-                        e.target.value
-                      )
-                    }
-                    disabled={
-                      !!entradaRegistrada
-                    }
+                    onChange={(e) => setObservacao(e.target.value)}
+                    disabled={!!entradaRegistrada}
                   />
-
                 </div>
-
               </div>
-
             </div>
           )}
-
 
           {/* =================================================
               ETAPA 2
@@ -1153,116 +863,66 @@ export default function EntradaEstoque() {
 
           {etapa === 2 && (
             <>
-
               <hr />
 
               <div className="header-entrade-produtos">
-
-                <h3>
-                  Adicionar Produtos
-                </h3>
-
+                <h3>Adicionar Produtos</h3>
               </div>
-
 
               {/* =================================================
                   FORMULÁRIO DO PRODUTO
               ================================================= */}
 
               <div className="form-group add">
-
                 <div>
-
-                  <label htmlFor="produto">
-                    Produto
-                  </label>
+                  <label htmlFor="produto">Produto</label>
 
                   <select
                     id="produto"
-                    value={
-                      produto ?? ""
-                    }
+                    value={produto ?? ""}
                     onChange={(e) => {
+                      if (e.target.value === "") {
+                        setProduto(undefined);
 
-                      if (
-                        e.target.value === ""
-                      ) {
-
-                        setProduto(
-                          undefined
-                        );
-
-                        setValorUni(
-                          undefined
-                        );
+                        setValorUni(undefined);
 
                         return;
                       }
 
-                      selecionarProduto(
-                        Number(
-                          e.target.value
-                        )
-                      );
-
+                      selecionarProduto(Number(e.target.value));
                     }}
                   >
+                    <option value="">Selecione um produto</option>
 
-                    <option value="">
-                      Selecione um produto
-                    </option>
-
-                    {produtos.map(
-                      (p) => (
-                        <option
-                          key={p.id}
-                          value={p.id}
-                        >
-                          {p.nome}
-                        </option>
-                      )
-                    )}
-
+                    {produtos.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.nome}
+                      </option>
+                    ))}
                   </select>
-
                 </div>
 
-
                 <div>
-
-                  <label htmlFor="quantidade">
-                    Quant.
-                  </label>
+                  <label htmlFor="quantidade">Quant.</label>
 
                   <input
                     id="quantidade"
                     type="number"
                     min="1"
                     placeholder="Digite a quantidade"
-                    value={
-                      quantidade ?? ""
-                    }
+                    value={quantidade ?? ""}
                     onChange={(e) => {
-
                       setQuantidade(
                         e.target.value === ""
                           ? undefined
-                          : Number(
-                              e.target.value
-                            )
+                          : Number(e.target.value),
                       );
-
                     }}
                   />
-
                 </div>
 
-
                 <div>
-
-                  <label htmlFor="vUnitario">
-                    Val uni.
-                  </label>
+                  <label htmlFor="vUnitario">Val uni.</label>
 
                   <input
                     id="vUnitario"
@@ -1270,63 +930,40 @@ export default function EntradaEstoque() {
                     min="0"
                     step="0.01"
                     placeholder="Digite o valor"
-                    value={
-                      valorUni ?? ""
-                    }
+                    value={valorUni ?? ""}
                     onChange={(e) => {
-
                       setValorUni(
                         e.target.value === ""
                           ? undefined
-                          : Number(
-                              e.target.value
-                            )
+                          : Number(e.target.value),
                       );
-
                     }}
                   />
-
                 </div>
 
-
                 <div>
-
-                  <label htmlFor="vTotal">
-                    Val total
-                  </label>
+                  <label htmlFor="vTotal">Val total</label>
 
                   <input
                     id="vTotal"
                     type="text"
-                    value={valorTot.toLocaleString(
-                      "pt-BR",
-                      {
-                        style: "currency",
-                        currency: "BRL",
-                      }
-                    )}
+                    value={valorTot.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}
                     disabled
                   />
-
                 </div>
-
 
                 <button
                   type="button"
                   className="btn-primary"
-                  onClick={
-                    addProdutoNew
-                  }
+                  onClick={addProdutoNew}
                 >
-
                   <Plus size={18} />
-
                   Adicionar
-
                 </button>
-
               </div>
-
 
               {/* =================================================
                   PREVIEW DOS PRODUTOS
@@ -1334,117 +971,64 @@ export default function EntradaEstoque() {
 
               {listaProdutos.length > 0 && (
                 <>
-
-                  <Table
-                    columns={
-                      colunasProdutos
-                    }
-                    data={
-                      listaProdutos
-                    }
-                  >
-
+                  <Table columns={colunasProdutos} data={listaProdutos}>
                     {(item) => (
                       <button
                         type="button"
                         title="Excluir"
                         className="action-button"
-                        onClick={() =>
-                          deletarProduto(
-                            item.id
-                          )
-                        }
+                        onClick={() => deletarProduto(item.id)}
                       >
-
-                        <Trash2
-                          size={18}
-                        />
-
+                        <Trash2 size={18} />
                       </button>
                     )}
-
                   </Table>
-
 
                   {/* RESUMO DO PREVIEW */}
 
                   <div className="footer-info">
+                    <span>Produtos: {listaProdutos.length}</span>
 
-                    <span>
-                      Produtos:{" "}
-                      {
-                        listaProdutos.length
-                      }
-                    </span>
-
-                    <span>
-                      Quantidade:{" "}
-                      {
-                        quantidadeTotalLista
-                      }
-                    </span>
+                    <span>Quantidade: {quantidadeTotalLista}</span>
 
                     <span>
                       Valor Total:{" "}
-                      {valorTotalLista.toLocaleString(
-                        "pt-BR",
-                        {
-                          style:
-                            "currency",
-                          currency:
-                            "BRL",
-                        }
-                      )}
+                      {valorTotalLista.toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
                     </span>
-
                   </div>
-
                 </>
               )}
-
             </>
           )}
-
 
           {/* =================================================
               BOTÕES
           ================================================= */}
 
           <div className="modal-actions">
-
-            <button
-              type="button"
-              className="btn-cancel"
-              onClick={
-                fecharModal
-              }
-            >
+            <button type="button" className="btn-cancel" onClick={fecharModal}>
               Cancelar
             </button>
-
 
             {etapa === 1 && (
               <button
                 type="button"
                 className="btn-primary"
-                onClick={
-                  PostEntrada
-                }
+                onClick={PostEntrada}
               >
                 Criar Entrada
               </button>
             )}
 
-
             {etapa === 2 && (
               <>
-
                 <button
                   type="button"
                   className="btn-cancel"
-                  onClick={() =>
-                    setEtapa(1)
-                  }
+                  onClick={() => setEtapa(1)}
                 >
                   Voltar
                 </button>
@@ -1452,147 +1036,68 @@ export default function EntradaEstoque() {
                 <button
                   type="button"
                   className="btn-primary"
-                  onClick={
-                    salvarProdutos
-                  }
-                  disabled={
-                    listaProdutos.length ===
-                    0
-                  }
+                  onClick={salvarProdutos}
+                  disabled={listaProdutos.length === 0}
                 >
                   Finalizar Entrada
                 </button>
-
               </>
             )}
-
           </div>
-
         </Modal>
-
 
         {/* =================================================
             MODAL PARA VISUALIZAR ITENS
         ================================================= */}
 
         <Modal
-          open={
-            modalItensOpen
-          }
+          open={modalItensOpen}
           title={
             entradaSelecionada
               ? `Itens da Entrada #${entradaSelecionada.id}`
               : "Itens da Entrada"
           }
-          onClose={
-            fecharModalItens
-          }
+          onClose={fecharModalItens}
           tamanho="max"
         >
-
           {entradaSelecionada && (
             <div className="entrada-info">
-
               <span>
-
-                <strong>
-                  Nota Fiscal:
-                </strong>{" "}
-
-                {
-                  entradaSelecionada.notaFiscal
-                }
-
+                <strong>Nota Fiscal:</strong> {entradaSelecionada.notaFiscal}
               </span>
 
-
               <span>
-
-                <strong>
-                  Observação:
-                </strong>{" "}
-
-                {
-                  entradaSelecionada.observacao ||
-                  "-"
-                }
-
+                <strong>Observação:</strong>{" "}
+                {entradaSelecionada.observacao || "-"}
               </span>
-
             </div>
           )}
-
 
           {carregandoItens ? (
-
-            <div>
-              Carregando itens...
-            </div>
-
+            <div>Carregando itens...</div>
           ) : itensEntrada.length === 0 ? (
-
             <div className="preview-vazio">
-
-              <span>
-                Nenhum item encontrado
-                para esta entrada.
-              </span>
-
+              <span>Nenhum item encontrado para esta entrada.</span>
             </div>
-
           ) : (
-
-            <Table
-              columns={
-                colunasProdutos
-              }
-              data={
-                itensEntrada
-              }
-            />
-
+            <Table columns={colunasProdutos} data={itensEntrada} />
           )}
 
+          {!carregandoItens && itensEntrada.length > 0 && (
+            <div className="footer-info">
+              <span>Total de itens: {quantidadeTotalItens}</span>
 
-          {!carregandoItens &&
-            itensEntrada.length >
-              0 && (
-
-              <div className="footer-info">
-
-                <span>
-                  Total de itens:{" "}
-                  {
-                    quantidadeTotalItens
-                  }
-                </span>
-
-                <span>
-
-                  Valor total:{" "}
-
-                  {
-                    valorTotalEntrada.toLocaleString(
-                      "pt-BR",
-                      {
-                        style:
-                          "currency",
-                        currency:
-                          "BRL",
-                      }
-                    )
-                  }
-
-                </span>
-
-              </div>
-
-            )}
-
+              <span>
+                Valor total:{" "}
+                {valorTotalEntrada.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+              </span>
+            </div>
+          )}
         </Modal>
-
       </section>
-
     </Layout>
   );
 }

@@ -86,3 +86,8 @@
     flex-shrink: 0;
 
 }
+.buttos{
+    display: flex;
+    gap: 5px;
+    flex-wrap: nowrap;
+}
