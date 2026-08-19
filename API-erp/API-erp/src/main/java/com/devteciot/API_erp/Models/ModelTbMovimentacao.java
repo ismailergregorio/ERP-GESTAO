@@ -6,6 +6,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.devteciot.API_erp.Models.ModelEntrada.ModelTbEntradaProduto;
+import com.devteciot.API_erp.Models.ModelProdutos.ModelTbProdutos;
 import com.devteciot.API_erp.Models.ModelSaida.ModelTbSaida;
 
 import jakarta.persistence.*;

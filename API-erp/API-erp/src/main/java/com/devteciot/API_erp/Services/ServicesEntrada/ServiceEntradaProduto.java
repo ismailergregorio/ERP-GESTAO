@@ -7,13 +7,13 @@ import org.springframework.stereotype.Service;
 
 import com.devteciot.API_erp.Models.ModelEntrada.ModelTbEntrada;
 import com.devteciot.API_erp.Models.ModelEntrada.ModelTbEntradaProduto;
+import com.devteciot.API_erp.Models.ModelProdutos.ModelTbProdutos;
 import com.devteciot.API_erp.Repository.RepositoryEntrada;
 import com.devteciot.API_erp.Repository.RepositoryEntradaProduto;
 import com.devteciot.API_erp.Repository.RepositoryProduto;
 import com.devteciot.API_erp.DTO.DTOEntrada.DTOEntradaProduto.DTOEntrdaProdutoGet;
 import com.devteciot.API_erp.DTO.DTOEntrada.DTOEntradaProduto.DTOEntrdaProdutoPost;
 import com.devteciot.API_erp.Mapper.MapperEntrada.MapperEntradaProduto;
-import com.devteciot.API_erp.Models.ModelTbProdutos;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package com.devteciot.API_erp.Mapper;
 
 import com.devteciot.API_erp.DTO.DTOProdutos.DTOProdutosGet;
-import com.devteciot.API_erp.Models.ModelTbProdutos;
+import com.devteciot.API_erp.Models.ModelProdutos.ModelTbProdutos;
 
 public class MapperProdutos {
  public static DTOProdutosGet toDTOProdutos(ModelTbProdutos dto) {

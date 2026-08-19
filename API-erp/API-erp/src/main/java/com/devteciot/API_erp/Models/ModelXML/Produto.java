@@ -2,12 +2,15 @@ package com.devteciot.API_erp.Models.ModelXML;
 
 import java.math.BigDecimal;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import lombok.Data;
 
 @Data
+@MappedSuperclass
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Produto {
 
@@ -17,6 +20,7 @@ public class Produto {
  @XmlElement(name = "xProd", namespace = "http://www.portalfiscal.inf.br/nfe")
  private String descricao;
 
+ @Column(name="codigo_ean")
  @XmlElement(name = "cEAN", namespace = "http://www.portalfiscal.inf.br/nfe")
  private String codigoEAN;
 

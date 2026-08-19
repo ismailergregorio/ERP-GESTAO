@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.devteciot.API_erp.Models.ModelProdutos.ModelTbProdutos;
 import com.devteciot.API_erp.Models.ModelSaida.ModelTbSaida;
 import com.devteciot.API_erp.Models.ModelSaida.ModelTbSaidaProduto;
 import com.devteciot.API_erp.Repository.RepositoryProduto;
@@ -13,8 +14,6 @@ import com.devteciot.API_erp.Repository.RepositorySaidaProduto;
 import com.devteciot.API_erp.DTO.DTOSaida.DTOSaidaProduto.DTOSaidaProdutoGet;
 import com.devteciot.API_erp.DTO.DTOSaida.DTOSaidaProduto.DTOSaidaProdutoPost;
 import com.devteciot.API_erp.Mapper.MapperSaida.MapperProdutoSaida;
-import com.devteciot.API_erp.Models.ModelTbProdutos;
-
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
