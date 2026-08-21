@@ -3,15 +3,15 @@ import { Pencil, Trash2 } from "lucide-react";
 
 import { toast } from "react-toastify";
 
-import Layout from "../Layout/LayoutPages";
-import HeaderTabela from "../Componete/HeaderTabela/HeaderTabela";
-import Table from "../Componete/Table/Table";
-import Modal from "../Componete/Modal/Modal";
+import Layout from "../../Layout/LayoutPages";
+import HeaderTabela from "../../Componete/HeaderTabela/HeaderTabela";
+import Table from "../../Componete/Table/Table";
+import Modal from "../../Componete/Modal/Modal";
 
-import type { Column } from "../Componete/Table/Table.types";
+import type { Column } from "../../Componete/Table/Table.types";
 
-import api from "../Services/Api";
-import covertData from "../Utils/ConverteDate";
+import api from "../../Services/Api";
+import covertData from "../../Utils/ConverteDate";
 
 // import "./Fornecedores.css";
 
@@ -22,7 +22,11 @@ import covertData from "../Utils/ConverteDate";
 interface Fornecedor {
   id: number;
 
-  nome: string;
+  razaoSocial: string;
+
+  nomeFantasia: string;
+
+  inscricaoEstadual: string;
 
   cnpj: string;
 
@@ -38,7 +42,11 @@ interface Fornecedor {
 ===================================================== */
 
 interface FornecedorForm {
-  nome: string;
+  razaoSocial: string;
+
+  nomeFantasia: string;
+
+  inscricaoEstadual: string;
 
   cnpj: string;
 
@@ -47,22 +55,29 @@ interface FornecedorForm {
   email: string;
 }
 
+/* =====================================================
+   FORMULÁRIO INICIAL
+===================================================== */
+
 const formularioInicial: FornecedorForm = {
-  nome: "",
-
+  razaoSocial: "",
+  nomeFantasia: "",
+  inscricaoEstadual: "",
   cnpj: "",
-
   telefone: "",
-
   email: "",
 };
+
+/* =====================================================
+   COMPONENTE
+===================================================== */
 
 export default function Fornecedores() {
   const base = "fornecedores";
 
   /* =====================================================
        ESTADOS
-    ===================================================== */
+  ===================================================== */
 
   const [fornecedores, setFornecedores] = useState<Fornecedor[]>([]);
 
@@ -77,7 +92,7 @@ export default function Fornecedores() {
 
   /* =====================================================
        ABRIR MODAL - NOVO
-    ===================================================== */
+  ===================================================== */
 
   function abrirModal() {
     setFormulario(formularioInicial);
@@ -89,7 +104,7 @@ export default function Fornecedores() {
 
   /* =====================================================
        FECHAR MODAL
-    ===================================================== */
+  ===================================================== */
 
   function fecharModal() {
     setModalOpen(false);
@@ -101,7 +116,7 @@ export default function Fornecedores() {
 
   /* =====================================================
        BUSCAR FORNECEDORES
-    ===================================================== */
+  ===================================================== */
 
   async function getFornecedores() {
     try {
@@ -117,7 +132,7 @@ export default function Fornecedores() {
 
   /* =====================================================
        ALTERAR FORMULÁRIO
-    ===================================================== */
+  ===================================================== */
 
   function alterarCampo(campo: keyof FornecedorForm, valor: string) {
     setFormulario((prev) => ({
@@ -129,7 +144,7 @@ export default function Fornecedores() {
 
   /* =====================================================
        MÁSCARA CNPJ
-    ===================================================== */
+  ===================================================== */
 
   function formatarCnpj(valor: string) {
     valor = valor.replace(/\D/g, "").slice(0, 14);
@@ -147,7 +162,7 @@ export default function Fornecedores() {
 
   /* =====================================================
        MÁSCARA TELEFONE
-    ===================================================== */
+  ===================================================== */
 
   function formatarTelefone(valor: string) {
     valor = valor.replace(/\D/g, "").slice(0, 11);
@@ -167,11 +182,23 @@ export default function Fornecedores() {
 
   /* =====================================================
        ADICIONAR FORNECEDOR
-    ===================================================== */
+  ===================================================== */
 
   async function adicionarFornecedor() {
-    if (!formulario.nome.trim()) {
-      toast.warning("Informe o nome do fornecedor.");
+    if (!formulario.razaoSocial.trim()) {
+      toast.warning("Informe a razão social.");
+
+      return;
+    }
+
+    if (!formulario.nomeFantasia.trim()) {
+      toast.warning("Informe o nome fantasia.");
+
+      return;
+    }
+
+    if (!formulario.inscricaoEstadual.trim()) {
+      toast.warning("Informe a inscrição estadual.");
 
       return;
     }
@@ -196,7 +223,11 @@ export default function Fornecedores() {
 
     try {
       await api.post(`/${base}`, {
-        nome: formulario.nome,
+        razaoSocial: formulario.razaoSocial,
+
+        nomeFantasia: formulario.nomeFantasia,
+
+        inscricaoEstadual: formulario.inscricaoEstadual,
 
         cnpj: formulario.cnpj,
 
@@ -219,13 +250,17 @@ export default function Fornecedores() {
 
   /* =====================================================
        ABRIR EDIÇÃO
-    ===================================================== */
+  ===================================================== */
 
   function abrirEditar(fornecedor: Fornecedor) {
     setFornecedorEditando(fornecedor.id);
 
     setFormulario({
-      nome: fornecedor.nome,
+      razaoSocial: fornecedor.razaoSocial,
+
+      nomeFantasia: fornecedor.nomeFantasia,
+
+      inscricaoEstadual: fornecedor.inscricaoEstadual,
 
       cnpj: fornecedor.cnpj,
 
@@ -239,22 +274,56 @@ export default function Fornecedores() {
 
   /* =====================================================
        EDITAR
-    ===================================================== */
+  ===================================================== */
 
   async function editarFornecedor() {
     if (fornecedorEditando === null) {
       return;
     }
 
-    if (!formulario.nome.trim()) {
-      toast.warning("Informe o nome do fornecedor.");
+    if (!formulario.razaoSocial.trim()) {
+      toast.warning("Informe a razão social.");
+
+      return;
+    }
+
+    if (!formulario.nomeFantasia.trim()) {
+      toast.warning("Informe o nome fantasia.");
+
+      return;
+    }
+
+    if (!formulario.inscricaoEstadual.trim()) {
+      toast.warning("Informe a inscrição estadual.");
+
+      return;
+    }
+
+    if (!formulario.cnpj.trim()) {
+      toast.warning("Informe o CNPJ.");
+
+      return;
+    }
+
+    if (!formulario.telefone.trim()) {
+      toast.warning("Informe o telefone.");
+
+      return;
+    }
+
+    if (!formulario.email.trim()) {
+      toast.warning("Informe o e-mail.");
 
       return;
     }
 
     try {
       await api.put(`/${base}/${fornecedorEditando}`, {
-        nome: formulario.nome,
+        razaoSocial: formulario.razaoSocial,
+
+        nomeFantasia: formulario.nomeFantasia,
+
+        inscricaoEstadual: formulario.inscricaoEstadual,
 
         cnpj: formulario.cnpj,
 
@@ -277,7 +346,7 @@ export default function Fornecedores() {
 
   /* =====================================================
        SALVAR
-    ===================================================== */
+  ===================================================== */
 
   function salvarFornecedor() {
     if (fornecedorEditando !== null) {
@@ -289,11 +358,11 @@ export default function Fornecedores() {
 
   /* =====================================================
        EXCLUIR
-    ===================================================== */
+  ===================================================== */
 
   async function excluirFornecedor(fornecedor: Fornecedor) {
     const confirmar = window.confirm(
-      `Deseja realmente excluir o fornecedor "${fornecedor.nome}"?`,
+      `Deseja realmente excluir o fornecedor "${fornecedor.razaoSocial}"?`,
     );
 
     if (!confirmar) {
@@ -315,7 +384,7 @@ export default function Fornecedores() {
 
   /* =====================================================
        COLUNAS
-    ===================================================== */
+  ===================================================== */
 
   const colunas: Column<Fornecedor>[] = [
     {
@@ -329,9 +398,21 @@ export default function Fornecedores() {
     },
 
     {
-      key: "nome",
+      key: "razaoSocial",
 
-      title: "Nome",
+      title: "Razão Social",
+    },
+
+    {
+      key: "nomeFantasia",
+
+      title: "Nome Fantasia",
+    },
+
+    {
+      key: "inscricaoEstadual",
+
+      title: "Inscrição Estadual",
     },
 
     {
@@ -369,7 +450,7 @@ export default function Fornecedores() {
 
   /* =====================================================
        USE EFFECT
-    ===================================================== */
+  ===================================================== */
 
   useEffect(() => {
     getFornecedores();
@@ -377,7 +458,7 @@ export default function Fornecedores() {
 
   /* =====================================================
        JSX
-    ===================================================== */
+  ===================================================== */
 
   return (
     <Layout title="Fornecedores">
@@ -413,8 +494,8 @@ export default function Fornecedores() {
         </HeaderTabela>
 
         {/* =================================================
-                    MODAL
-                ================================================= */}
+            MODAL
+        ================================================= */}
 
         <Modal
           open={modalOpen}
@@ -426,17 +507,47 @@ export default function Fornecedores() {
           onClose={fecharModal}
         >
           <div className="form-modal">
-            {/* NOME */}
+            {/* RAZÃO SOCIAL */}
 
             <div className="form-group">
-              <label htmlFor="nome">Nome</label>
+              <label htmlFor="razaoSocial">Razão Social</label>
 
               <input
-                id="nome"
+                id="razaoSocial"
                 type="text"
-                value={formulario.nome}
-                placeholder="Nome do fornecedor"
-                onChange={(e) => alterarCampo("nome", e.target.value)}
+                value={formulario.razaoSocial}
+                placeholder="Razão social do fornecedor"
+                onChange={(e) => alterarCampo("razaoSocial", e.target.value)}
+              />
+            </div>
+
+            {/* NOME FANTASIA */}
+
+            <div className="form-group">
+              <label htmlFor="nomeFantasia">Nome Fantasia</label>
+
+              <input
+                id="nomeFantasia"
+                type="text"
+                value={formulario.nomeFantasia}
+                placeholder="Nome fantasia do fornecedor"
+                onChange={(e) => alterarCampo("nomeFantasia", e.target.value)}
+              />
+            </div>
+
+            {/* INSCRIÇÃO ESTADUAL */}
+
+            <div className="form-group">
+              <label htmlFor="inscricaoEstadual">Inscrição Estadual</label>
+
+              <input
+                id="inscricaoEstadual"
+                type="text"
+                value={formulario.inscricaoEstadual}
+                placeholder="Inscrição estadual"
+                onChange={(e) =>
+                  alterarCampo("inscricaoEstadual", e.target.value)
+                }
               />
             </div>
 

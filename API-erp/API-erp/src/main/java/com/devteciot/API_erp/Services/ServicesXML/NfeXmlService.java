@@ -71,7 +71,7 @@ public class NfeXmlService {
 
                 // Converte Det -> Produto
                 List<Produto> produtos = itens.stream()
-                                .map(Det::getProduto)
+                                .map(item -> item.getProduto())
                                 .filter(Objects::nonNull)
                                 .toList();
 

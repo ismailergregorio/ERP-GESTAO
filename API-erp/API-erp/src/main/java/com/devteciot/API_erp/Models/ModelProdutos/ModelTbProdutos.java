@@ -10,7 +10,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.devteciot.API_erp.Models.ModelTbCategoria;
 import com.devteciot.API_erp.Models.ModelTbUnidadeMedida;
-import com.devteciot.API_erp.Models.ModelXML.Produto;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -49,7 +48,7 @@ public class ModelTbProdutos {
  private BigDecimal valorUnitario = BigDecimal.ZERO;
 
  @OneToMany(mappedBy = "produtoRelacionado")
- private List<Produto> linkProdutos;
+ private List<ModelTbProdutosNf> linkProdutos;
 
  @Column(name = "estoque")
  private Integer estoque = 0;

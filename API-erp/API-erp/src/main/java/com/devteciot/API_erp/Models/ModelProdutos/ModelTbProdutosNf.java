@@ -1,8 +1,6 @@
 package com.devteciot.API_erp.Models.ModelProdutos;
 
 import java.time.LocalDateTime;
-import java.util.List;
-
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -33,9 +31,9 @@ public class ModelTbProdutosNf extends Produto {
  @JoinColumn(name = "nf_id")
  private ModelNF nf;
 
- @ManyToOne()
+ @ManyToOne
  @JoinColumn(name = "produto_link_id")
- private List<ModelTbProdutos> produtoRealacionado;
+ private ModelTbProdutos produtoRelacionado;
 
  @CreatedDate
  @Column(name = "data_criacao", updatable = false)

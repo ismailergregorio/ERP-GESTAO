@@ -24,8 +24,14 @@ public class ModelTbFornecedores {
  @GeneratedValue(strategy = GenerationType.IDENTITY)
  private Long id;
 
- @Column(name = "nome", nullable = false, unique = true, length = 150)
- private String nome;
+ @Column(name = "razao_social",  length = 150)
+ private String razaoSocial;
+
+ @Column(name = "nome_fantasia", length = 150)
+ private String nomeFantasia;
+
+ @Column(name = "incricao_estadual", unique = true, length = 150)
+ private String inscricaoEstadual;
 
  @Column(name = "cnpj", nullable = false, unique = true, length = 18)
  private String cnpj;

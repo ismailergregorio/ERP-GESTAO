@@ -32,7 +32,9 @@ public class ServiceFornecedor {
 
     ModelTbFornecedores novoFornecedor = new ModelTbFornecedores();
 
-    novoFornecedor.setNome(dto.nome());
+    novoFornecedor.setRazaoSocial(dto.razaoSocial());
+    novoFornecedor.setInscricaoEstadual(dto.inscricaoEstadual());
+    novoFornecedor.setNomeFantasia(dto.nomeFantasia());
     novoFornecedor.setCnpj(dto.cnpj());
     novoFornecedor.setTelefone(dto.telefone());
     novoFornecedor.setEmail(dto.email());
@@ -66,9 +68,9 @@ public class ServiceFornecedor {
     return MapperFornecedores.toDTOFornecedores(fornecedor);
   }
 
-  public DTOFornecedoresGet getFornecedorNome(String nome) {
+  public DTOFornecedoresGet getFornecedorNome(String rasaoSocial) {
 
-    ModelTbFornecedores fornecedor = repositoryFornecedor.findByNome(nome)
+    ModelTbFornecedores fornecedor = repositoryFornecedor.findByRazaoSocial(rasaoSocial)
         .orElseThrow(() -> new ResourceNotFoundException("Fornecedor não encontrado."));
 
     return MapperFornecedores.toDTOFornecedores(fornecedor);
@@ -88,7 +90,9 @@ public class ServiceFornecedor {
       throw new ResourceAlreadyExistsException("Já existe um fornecedor com este CNPJ.");
     }
 
-    fornecedor.setNome(dto.nome());
+    fornecedor.setRazaoSocial(dto.razaoSocial());
+    fornecedor.setInscricaoEstadual(dto.inscricaoEstadual());
+    fornecedor.setNomeFantasia(dto.nomeFantasia());
     fornecedor.setCnpj(dto.cnpj());
     fornecedor.setTelefone(dto.telefone());
     fornecedor.setEmail(dto.email());
