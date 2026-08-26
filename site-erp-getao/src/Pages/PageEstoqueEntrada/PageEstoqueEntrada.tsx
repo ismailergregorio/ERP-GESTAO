@@ -1,7 +1,16 @@
 import Layout from "../../Layout/LayoutPages";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { Upload } from "lucide-react";
+import {
+  ClipboardList,
+  Eye,
+  History,
+  HistoryIcon,
+  List,
+  Pencil,
+  Trash2,
+  Upload,
+} from "lucide-react";
 
 import HeaderTabela from "../../Componete/HeaderTabela/HeaderTabela";
 import Table from "../../Componete/Table/Table";
@@ -14,63 +23,10 @@ import covertData from "../../Utils/ConverteDate";
 
 import "./PegeEstoqueEntrada-css.css";
 import "./ModelInportNF-css.css";
-
-interface Entrada {
-  id: number;
-  notaFiscal: number;
-  fornecedor_id: number;
-  tipoEntrada_id: number;
-  observacao: string;
-  dataCriacao: string;
-}
-
-interface Fornecedor {
-  id: number;
-  nome: string;
-}
-
-interface TipoEntrada {
-  id: number;
-  nome: string;
-}
-
-export interface FornecedorNf {
-  cnpj: string;
-  crt: string;
-  inscricaoEstadual: string;
-  nomeFantasia: string;
-  razaoSocial: string;
-}
-
-export interface ProdutoNfe {
-  id: number;
-  cest: string;
-  cfop: string;
-  codigo: string;
-  codigoEAN: string;
-  descricao: string;
-  ncm: string;
-
-  quantidade: number;
-  quantidadeTributaria: number;
-
-  unidadeComercial: string;
-  unidadeTributaria: string;
-
-  valorTotal: number;
-  valorUnitario: number;
-  valorUnitarioTributario: number;
-}
-
-export interface Nf {
-  notaFiscal: number;
-  chaveAcesso: string;
-  dataEmissao: string;
-  valorTotal: number;
-
-  fornecedor: FornecedorNf;
-  produto: ProdutoNfe[];
-}
+import ModalFornecedor from "../PageFornecedor/ModalFornecedor";
+import ModalEntradaManual from "./ModalEntradaManual";
+import ModalViewEntrada from "./ModalVisualizarEntrada";
+import type { Entrada, FornecedorNf, Nf, ProdutoNfe, TipoEntrada } from "./Interfaces";
 
 export default function EntradaEstoque() {
   const base = "entradas";
@@ -94,20 +50,8 @@ export default function EntradaEstoque() {
   */
 
   const [entradas, setEntradas] = useState<Entrada[]>([]);
-  const [fornecedores, setFornecedores] = useState<Fornecedor[]>([]);
+  const [fornecedores, setFornecedores] = useState<FornecedorNf[]>([]);
   const [tiposEntrada, setTiposEntrada] = useState<TipoEntrada[]>([]);
-
-  /*
-  =====================================================
-  FORMULÁRIO MANUAL
-  =====================================================
-  */
-
-  const [notafiscal, setNotaFiscal] = useState<number | undefined>();
-  const [fornecedor_id, setFornecedor_id] = useState<number | undefined>();
-  const [tipoEntrada_id, setTipoEntrada_id] = useState<number | undefined>();
-  const [observacao, setObservacao] = useState("");
-
   /*
   =====================================================
   XML
@@ -121,24 +65,6 @@ export default function EntradaEstoque() {
   /*
   =====================================================
   ENTRADA REGISTRADA
-  =====================================================
-  */
-
-  const [entradaRegistrada, setEntradaRegistrada] = useState<Entrada | null>(
-    null,
-  );
-
-  /*
-  =====================================================
-  ETAPA DA ENTRADA MANUAL
-  =====================================================
-  */
-
-  const [etapa, setEtapa] = useState(1);
-
-  /*
-  =====================================================
-  BUSCAR ENTRADAS
   =====================================================
   */
 
@@ -202,37 +128,8 @@ export default function EntradaEstoque() {
     // Garante que o modal da NF esteja fechado
     setModalNfOpen(false);
 
-    // Limpa os dados da entrada anterior
-    setEntradaRegistrada(null);
-
-    setEtapa(1);
-
-    setNotaFiscal(undefined);
-    setFornecedor_id(undefined);
-    setTipoEntrada_id(undefined);
-    setObservacao("");
-
     // Abre modal manual
     setModalManualOpen(true);
-  }
-
-  /*
-  =====================================================
-  FECHAR MODAL MANUAL
-  =====================================================
-  */
-
-  function fecharModalManual() {
-    setModalManualOpen(false);
-
-    setEntradaRegistrada(null);
-
-    setEtapa(1);
-
-    setNotaFiscal(undefined);
-    setFornecedor_id(undefined);
-    setTipoEntrada_id(undefined);
-    setObservacao("");
   }
 
   /*
@@ -264,54 +161,6 @@ export default function EntradaEstoque() {
     setContadorImport(1);
     setModalNfOpen(false);
     setArquivoXml(null);
-  }
-
-  /*
-  =====================================================
-  CRIAR ENTRADA MANUAL
-  =====================================================
-  */
-
-  async function PostEntrada() {
-    if (!notafiscal) {
-      toast.warning("Informe o número da nota fiscal.");
-      return;
-    }
-
-    if (!fornecedor_id) {
-      toast.warning("Selecione o fornecedor.");
-      return;
-    }
-
-    if (!tipoEntrada_id) {
-      toast.warning("Selecione o tipo de entrada.");
-      return;
-    }
-
-    try {
-      const resposta = await api.post(`/${base}`, {
-        notaFiscal: notafiscal,
-        fornecedor_id: fornecedor_id,
-        tipoEntrada_id: tipoEntrada_id,
-        observacao: observacao,
-      });
-
-      setEntradaRegistrada(resposta.data);
-
-      /*
-       * A entrada foi criada.
-       * Agora passa para a etapa de produtos.
-       */
-      setEtapa(2);
-
-      toast.success("Entrada criada com sucesso.");
-
-      await getEntradas();
-    } catch (e: any) {
-      console.error(e);
-
-      toast.error(e.response?.data?.message ?? "Erro ao criar entrada.");
-    }
   }
 
   /*
@@ -385,11 +234,16 @@ export default function EntradaEstoque() {
     } catch (e: any) {
       console.error("Erro ao importar XML:", e);
 
-      toast.error(
-        e.response?.data?.message ??
-          e.response?.data ??
-          "Erro ao importar NF-e.",
+      const mensagem = String(
+        e.response?.data?.message ?? e.response?.data ?? e.message ?? "",
       );
+
+      if (mensagem.toLowerCase().includes("fornecedor não cadastrado")) {
+        window.alert("Fornecedor não cadastrado");
+        return ModalFornecedor;
+      }
+
+      toast.error(mensagem || "Erro ao importar NF-e.");
     } finally {
       setCarregandoXml(false);
     }
@@ -421,7 +275,7 @@ export default function EntradaEstoque() {
       render: (value) => {
         const fornecedor = fornecedores.find((item) => item.id === value);
 
-        return fornecedor?.nome ?? "-";
+        return fornecedor?.razaoSocial ?? "-";
       },
     },
 
@@ -519,6 +373,19 @@ export default function EntradaEstoque() {
     getTiposEntrada();
   }, []);
 
+  const [itenSelecinado, setItenSelecinado] = useState<Entrada|null>(null);
+  const [abrirMadolHistorico, setAbrirMadolHistorico] =
+    useState<boolean>(false);
+  function visualizarItensModal(entradas: Entrada) {
+    setAbrirMadolHistorico(true);
+    setItenSelecinado(entradas);
+  }
+
+  function fecharvisualizarItensModal() {
+    setAbrirMadolHistorico(false);
+    setItenSelecinado(null);
+  }
+
   /*
   =====================================================
   RETURN
@@ -546,162 +413,38 @@ export default function EntradaEstoque() {
             </button>
           }
         >
-          <Table columns={colunas} data={entradas} />
+          <Table columns={colunas} data={entradas}>
+            {(entradas) => (
+              <>
+                {/* EDITAR */}
+
+                <button
+                  type="button"
+                  title="Editar"
+                  className="action-button"
+                  onClick={() => visualizarItensModal(entradas)}
+                >
+                  <Eye size={18} />
+                </button>
+              </>
+            )}
+          </Table>
         </HeaderTabela>
 
         {/* =================================================
             MODAL ENTRADA MANUAL
         ================================================= */}
 
-        <Modal
-          open={modalManualOpen}
-          title="Nova Entrada"
-          onClose={fecharModalManual}
-        >
-          {/* ETAPAS */}
+        <ModalEntradaManual
+          stadoModal={modalManualOpen}
+          onClose={() => setModalManualOpen(false)}
+        />
 
-          <div className="passo">
-            <div className={etapa >= 1 ? "p n1 ativo" : "p n1"}>
-              <h2 className={etapa >= 1 ? "nume ativo" : "nume"}>1</h2>
-
-              <h2>Criar Entrada</h2>
-            </div>
-
-            <hr className={etapa >= 2 ? "ativo" : ""} />
-
-            <div className={etapa >= 2 ? "p n2 ativo" : "p n2"}>
-              <h2 className={etapa >= 2 ? "nume ativo" : "nume"}>2</h2>
-
-              <h2>Adicionar Produtos</h2>
-            </div>
-          </div>
-
-          {/* =================================================
-              ETAPA 1
-          ================================================= */}
-
-          {etapa === 1 && (
-            <div className="form-group">
-              <div>
-                <label htmlFor="nf">N° NF</label>
-
-                <input
-                  id="nf"
-                  type="number"
-                  placeholder="Digite o número da NF"
-                  value={notafiscal ?? ""}
-                  onChange={(e) =>
-                    setNotaFiscal(
-                      e.target.value ? Number(e.target.value) : undefined,
-                    )
-                  }
-                />
-              </div>
-
-              <div>
-                <label htmlFor="fornecedor">Fornecedor</label>
-
-                <select
-                  id="fornecedor"
-                  value={fornecedor_id ?? ""}
-                  onChange={(e) =>
-                    setFornecedor_id(
-                      e.target.value ? Number(e.target.value) : undefined,
-                    )
-                  }
-                >
-                  <option value="">Selecione um fornecedor</option>
-
-                  {fornecedores.map((fornecedor) => (
-                    <option key={fornecedor.id} value={fornecedor.id}>
-                      {fornecedor.nome}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="tipo-entrada">Tipo de Entrada</label>
-
-                <select
-                  id="tipo-entrada"
-                  value={tipoEntrada_id ?? ""}
-                  onChange={(e) =>
-                    setTipoEntrada_id(
-                      e.target.value ? Number(e.target.value) : undefined,
-                    )
-                  }
-                >
-                  <option value="">Selecione um tipo de entrada</option>
-
-                  {tiposEntrada.map((tipo) => (
-                    <option key={tipo.id} value={tipo.id}>
-                      {tipo.nome}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="obs">Observações</label>
-
-                <input
-                  id="obs"
-                  type="text"
-                  placeholder="Digite a observação"
-                  value={observacao}
-                  onChange={(e) => setObservacao(e.target.value)}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* =================================================
-              ETAPA 2
-          ================================================= */}
-
-          {etapa === 2 && (
-            <div>
-              <h3>Adicionar Produtos</h3>
-
-              {entradaRegistrada && (
-                <p>
-                  Entrada Nº <strong>{entradaRegistrada.id}</strong> criada com
-                  sucesso.
-                </p>
-              )}
-
-              {/*
-                Aqui permanece o seu componente
-                de inserção dos produtos.
-              */}
-            </div>
-          )}
-
-          {/* =================================================
-              BOTÕES
-          ================================================= */}
-
-          <div className="modal-actions">
-            <button
-              type="button"
-              className="btn-cancel"
-              onClick={fecharModalManual}
-            >
-              Cancelar
-            </button>
-
-            {etapa === 1 && (
-              <button
-                type="button"
-                className="btn-primary"
-                onClick={PostEntrada}
-              >
-                Criar Entrada
-              </button>
-            )}
-          </div>
-        </Modal>
+        <ModalViewEntrada
+          stadoModal={abrirMadolHistorico}
+          onClose={() => fecharvisualizarItensModal()}
+          entrada={itenSelecinado}
+        />
 
         {/* =================================================
             MODAL IMPORTAR NF

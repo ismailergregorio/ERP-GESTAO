@@ -12,6 +12,7 @@ import type { Column } from "../../Componete/Table/Table.types";
 
 import api from "../../Services/Api";
 import covertData from "../../Utils/ConverteDate";
+import ModalFornecedor from "./ModalFornecedor";
 
 // import "./Fornecedores.css";
 
@@ -497,129 +498,14 @@ export default function Fornecedores() {
             MODAL
         ================================================= */}
 
-        <Modal
+        <ModalFornecedor
           open={modalOpen}
-          title={
-            fornecedorEditando !== null
-              ? "Editar Fornecedor"
-              : "Novo Fornecedor"
-          }
+          editando={fornecedorEditando !== null}
+          formulario={formulario}
           onClose={fecharModal}
-        >
-          <div className="form-modal">
-            {/* RAZÃO SOCIAL */}
-
-            <div className="form-group">
-              <label htmlFor="razaoSocial">Razão Social</label>
-
-              <input
-                id="razaoSocial"
-                type="text"
-                value={formulario.razaoSocial}
-                placeholder="Razão social do fornecedor"
-                onChange={(e) => alterarCampo("razaoSocial", e.target.value)}
-              />
-            </div>
-
-            {/* NOME FANTASIA */}
-
-            <div className="form-group">
-              <label htmlFor="nomeFantasia">Nome Fantasia</label>
-
-              <input
-                id="nomeFantasia"
-                type="text"
-                value={formulario.nomeFantasia}
-                placeholder="Nome fantasia do fornecedor"
-                onChange={(e) => alterarCampo("nomeFantasia", e.target.value)}
-              />
-            </div>
-
-            {/* INSCRIÇÃO ESTADUAL */}
-
-            <div className="form-group">
-              <label htmlFor="inscricaoEstadual">Inscrição Estadual</label>
-
-              <input
-                id="inscricaoEstadual"
-                type="text"
-                value={formulario.inscricaoEstadual}
-                placeholder="Inscrição estadual"
-                onChange={(e) =>
-                  alterarCampo("inscricaoEstadual", e.target.value)
-                }
-              />
-            </div>
-
-            {/* CNPJ */}
-
-            <div className="form-group">
-              <label htmlFor="cnpj">CNPJ</label>
-
-              <input
-                id="cnpj"
-                type="text"
-                value={formulario.cnpj}
-                placeholder="00.000.000/0001-00"
-                onChange={(e) =>
-                  alterarCampo("cnpj", formatarCnpj(e.target.value))
-                }
-              />
-            </div>
-
-            {/* TELEFONE */}
-
-            <div className="form-group">
-              <label htmlFor="telefone">Telefone</label>
-
-              <input
-                id="telefone"
-                type="text"
-                value={formulario.telefone}
-                placeholder="(00) 00000-0000"
-                onChange={(e) =>
-                  alterarCampo("telefone", formatarTelefone(e.target.value))
-                }
-              />
-            </div>
-
-            {/* EMAIL */}
-
-            <div className="form-group">
-              <label htmlFor="email">E-mail</label>
-
-              <input
-                id="email"
-                type="email"
-                value={formulario.email}
-                placeholder="fornecedor@email.com"
-                onChange={(e) => alterarCampo("email", e.target.value)}
-              />
-            </div>
-
-            {/* BOTÕES */}
-
-            <div className="modal-actions">
-              <button
-                type="button"
-                className="btn-cancel"
-                onClick={fecharModal}
-              >
-                Cancelar
-              </button>
-
-              <button
-                type="button"
-                className="btn-primary"
-                onClick={salvarFornecedor}
-              >
-                {fornecedorEditando !== null
-                  ? "Salvar alterações"
-                  : "Adicionar"}
-              </button>
-            </div>
-          </div>
-        </Modal>
+          onChange={alterarCampo}
+          onSalvar={salvarFornecedor}
+        />
       </section>
     </Layout>
   );

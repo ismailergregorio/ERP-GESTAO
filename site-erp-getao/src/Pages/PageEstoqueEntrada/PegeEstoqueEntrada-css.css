@@ -91,13 +91,131 @@
   display: grid;
   grid-template-columns: 1fr 0.5fr 0.5fr 0.3fr;
   gap: 1rem;
-  align-items:end;
+  align-items: end;
 }
-.footer-info{
+.footer-info {
   display: flex;
   flex-direction: column;
   gap: 2px;
   padding-top: 10px;
 }
 
+.entrada-informacoes {
+  width: 100%;
 
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 12px;
+
+  margin-bottom: 24px;
+}
+
+/* =========================================================
+   CARD DE INFORMAÇÃO
+========================================================= */
+
+.entrada-info-item {
+  min-height: 70px;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+
+  padding: 12px 16px;
+
+  background: #f8f9fa;
+
+  border: 1px solid #e2e5e8;
+
+  border-radius: 8px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* =========================================================
+   HOVER
+========================================================= */
+
+.entrada-info-item:hover {
+  border-color: #cfd4da;
+
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* =========================================================
+   LABEL
+========================================================= */
+
+.entrada-info-item span {
+  font-size: 12px;
+
+  font-weight: 500;
+
+  color: #6c757d;
+
+  margin-bottom: 5px;
+}
+
+/* =========================================================
+   VALOR
+========================================================= */
+
+.entrada-info-item strong {
+  font-size: 14px;
+
+  font-weight: 600;
+
+  color: #212529;
+
+  line-height: 1.4;
+
+  word-break: break-word;
+}
+
+/* =========================================================
+   OBSERVAÇÃO
+========================================================= */
+
+.entrada-observacao {
+  grid-column: span 3;
+
+  min-height: 70px;
+}
+
+/* =========================================================
+   RESPONSIVIDADE
+========================================================= */
+
+@media (max-width: 1100px) {
+  .entrada-informacoes {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .entrada-observacao {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 800px) {
+  .entrada-informacoes {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .entrada-observacao {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 500px) {
+  .entrada-informacoes {
+    grid-template-columns: 1fr;
+  }
+
+  .entrada-observacao {
+    grid-column: span 1;
+  }
+}
