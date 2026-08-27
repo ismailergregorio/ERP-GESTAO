@@ -70,3 +70,607 @@
 .nf-total strong {
   font-size: 1.2rem;
 }
+
+/* =====================================================
+   MODAL - CONEXÃO DE PRODUTO
+===================================================== */
+
+.modal-conexao-produto {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  padding: 4px;
+}
+
+
+/* =====================================================
+   PRODUTO DA NF
+===================================================== */
+
+.produto-nf-card {
+  width: 100%;
+  padding: 18px 20px;
+  border: 1px solid #e2e5e9;
+  border-radius: 10px;
+  background: #f8f9fa;
+  box-sizing: border-box;
+}
+
+.produto-nf-titulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.produto-nf-titulo > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.produto-nf-titulo span:first-child {
+  font-size: 12px;
+  font-weight: 600;
+  color: #7a8088;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.produto-nf-titulo h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: #25282d;
+}
+
+.badge-nf {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: #e9eef5;
+  color: #4c5664;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.produto-nf-dados {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 14px;
+}
+
+.produto-nf-dados > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.produto-nf-dados span {
+  font-size: 12px;
+  color: #858b94;
+}
+
+.produto-nf-dados strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: #30343a;
+}
+
+
+/* =====================================================
+   TÍTULO DAS SEÇÕES
+===================================================== */
+
+.secao-titulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 14px;
+}
+
+.secao-titulo > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.secao-titulo span:first-child {
+  font-size: 11px;
+  font-weight: 700;
+  color: #737a84;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.secao-titulo h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #282c31;
+}
+
+.contador-produtos {
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: #f0f1f3;
+  color: #626872;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+
+/* =====================================================
+   ÁREA DE SELEÇÃO
+===================================================== */
+
+.estoque-selecao {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+
+/* =====================================================
+   CAMPO DE BUSCA
+===================================================== */
+
+.campo-busca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  margin-bottom: 14px;
+
+  border: 1px solid #dfe2e6;
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  box-sizing: border-box;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.campo-busca:focus-within {
+  border-color: #8b929b;
+  box-shadow: 0 0 0 3px rgba(100, 110, 120, 0.08);
+}
+
+.campo-busca svg {
+  flex-shrink: 0;
+  color: #858b94;
+}
+
+.campo-busca input {
+  width: 100%;
+  height: 40px;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  color: #292d32;
+  font-size: 14px;
+}
+
+.campo-busca input::placeholder {
+  color: #9ba0a7;
+}
+
+.campo-busca button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 28px;
+  height: 28px;
+
+  padding: 0;
+
+  border: none;
+  border-radius: 5px;
+
+  background: transparent;
+
+  color: #7d838b;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.campo-busca button:hover {
+  background: #f0f1f3;
+  color: #33373c;
+}
+
+
+/* =====================================================
+   ÁREA DA TABELA
+   Apenas o container, sem estilizar a tabela.
+===================================================== */
+
+.tabela-produtos {
+  width: 100%;
+  overflow-x: auto;
+}
+
+
+/* =====================================================
+   PRODUTO SELECIONADO
+===================================================== */
+
+.conversao-produto {
+  display: flex;
+  flex-direction: column;
+
+  padding: 18px 20px;
+
+  border: 1px solid #dfe3e7;
+  border-radius: 10px;
+
+  background: #ffffff;
+}
+
+.produto-escolhido {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 14px 16px;
+
+  margin-bottom: 18px;
+
+  border-radius: 8px;
+
+  background: #f6f7f8;
+}
+
+.produto-escolhido > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.produto-escolhido span:first-child {
+  font-size: 11px;
+  color: #858b94;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.produto-escolhido strong {
+  font-size: 14px;
+  color: #2d3136;
+  font-weight: 600;
+}
+
+.badge-selecionado {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  padding: 6px 10px;
+
+  border-radius: 6px;
+
+  background: #eef2ef;
+  color: #4d6254;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+
+/* =====================================================
+   CAMPOS DE CONVERSÃO
+===================================================== */
+
+.conversao-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr))
+    minmax(160px, 1.2fr);
+
+  gap: 14px;
+
+  width: 100%;
+}
+
+.campo-conversao {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.campo-conversao label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #626870;
+}
+
+.campo-conversao input,
+.valor-readonly {
+  width: 100%;
+  height: 42px;
+
+  padding: 0 12px;
+
+  border: 1px solid #dfe2e6;
+  border-radius: 7px;
+
+  background: #ffffff;
+
+  color: #292d32;
+
+  font-size: 14px;
+
+  outline: none;
+
+  box-sizing: border-box;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.campo-conversao input:focus {
+  border-color: #8a919a;
+
+  box-shadow:
+    0 0 0 3px rgba(100, 110, 120, 0.08);
+}
+
+.valor-readonly {
+  display: flex;
+  align-items: center;
+
+  background: #f5f6f7;
+
+  color: #565d66;
+
+  cursor: default;
+}
+
+
+/* =====================================================
+   RESULTADO DA CONVERSÃO
+===================================================== */
+
+.resultado-conversao {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  min-height: 42px;
+
+  padding: 10px 14px;
+
+  border-radius: 8px;
+
+  background: #f2f4f5;
+}
+
+.resultado-conversao span {
+  font-size: 11px;
+  color: #777e87;
+  font-weight: 600;
+}
+
+.resultado-conversao strong {
+  margin-top: 2px;
+
+  font-size: 20px;
+  line-height: 24px;
+
+  color: #292d32;
+}
+
+.resultado-conversao small {
+  font-size: 11px;
+  color: #7d838b;
+}
+
+
+/* =====================================================
+   INFORMAÇÃO DA CONVERSÃO
+===================================================== */
+
+.conversao-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  margin-top: 16px;
+  padding: 12px 14px;
+
+  border-radius: 7px;
+
+  background: #f7f8f9;
+
+  font-size: 13px;
+}
+
+.conversao-info strong {
+  color: #60666e;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.conversao-info span {
+  color: #5e646c;
+}
+
+.conversao-info b {
+  color: #292d32;
+}
+
+
+/* =====================================================
+   BOTÕES
+===================================================== */
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  gap: 10px;
+
+  width: 100%;
+
+  padding-top: 18px;
+
+  border-top: 1px solid #e7e9eb;
+}
+
+.btn-cancel,
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  min-height: 40px;
+
+  padding: 0 16px;
+
+  border-radius: 7px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.1s ease;
+}
+
+.btn-cancel {
+  border: 1px solid #dfe2e5;
+
+  background: #ffffff;
+
+  color: #626870;
+}
+
+.btn-cancel:hover {
+  background: #f5f6f7;
+  border-color: #d4d7da;
+}
+
+.btn-primary {
+  border: 1px solid #30343a;
+
+  background: #30343a;
+
+  color: #ffffff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #22262b;
+}
+
+.btn-primary:active:not(:disabled),
+.btn-cancel:active {
+  transform: translateY(1px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+
+/* =====================================================
+   RESPONSIVIDADE
+===================================================== */
+
+@media (max-width: 1000px) {
+
+  .conversao-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .resultado-conversao {
+    grid-column: span 2;
+  }
+
+  .produto-nf-dados {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+@media (max-width: 650px) {
+
+  .modal-conexao-produto {
+    gap: 14px;
+  }
+
+  .produto-nf-card,
+  .conversao-produto {
+    padding: 14px;
+  }
+
+  .produto-nf-titulo {
+    align-items: flex-start;
+  }
+
+  .produto-nf-dados {
+    grid-template-columns: 1fr;
+  }
+
+  .conversao-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .resultado-conversao {
+    grid-column: auto;
+  }
+
+  .produto-escolhido {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .conversao-info {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .btn-cancel,
+  .btn-primary {
+    width: 100%;
+  }
+
+}

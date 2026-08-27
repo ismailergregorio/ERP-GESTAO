@@ -1,15 +1,44 @@
 import { Upload } from "lucide-react";
-import { useState } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import { toast } from "react-toastify";
+
 import type { Nf } from "../Interfaces";
 import api from "../../../Services/Api";
 import ModalFornecedor from "../../PageFornecedor/ModalFornecedor";
+import { getFornecedores } from "../Functions";
 
-export default function ImportXml() {
-  const [arquivoXml, setArquivoXml] = useState<File | null>(null);
-  const [carregandoXml, setCarregandoXml] = useState(false);
+interface ConfigModalProps {
+  setDadosNf: Dispatch<SetStateAction<Nf | undefined>>;
+  setContadorNf: Dispatch<SetStateAction<number>>;
+  setClose: () => void;
+}
 
-  function selecionarXml(event: React.ChangeEvent<HTMLInputElement>) {
+export default function ImportXml({
+  setDadosNf,
+  setContadorNf,
+  setClose,
+}: ConfigModalProps) {
+
+  /* =====================================================
+     ESTADOS
+  ===================================================== */
+
+  const [arquivoXml, setArquivoXml] =
+    useState<File | null>(null);
+
+  const [carregandoXml, setCarregandoXml] =
+    useState(false);
+
+  const [modalOpen, setModalOpen] =
+    useState(false);
+
+  /* =====================================================
+     SELECIONAR XML
+  ===================================================== */
+
+  function selecionarXml(
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) {
     const arquivo = event.target.files?.[0];
 
     if (!arquivo) {
@@ -31,8 +60,12 @@ export default function ImportXml() {
     setArquivoXml(arquivo);
   }
 
-  const [nfe, setNfe] = useState<Nf | null>();
+  /* =====================================================
+     IMPORTAR XML
+  ===================================================== */
+
   async function importarXml() {
+
     if (!arquivoXml) {
       toast.warning("Selecione um arquivo XML.");
       return;
@@ -43,52 +76,145 @@ export default function ImportXml() {
 
       const formData = new FormData();
 
-      formData.append("arquivo", arquivoXml);
-
-      const resposta = await api.post("/nfe/importar", formData);
-
-      console.log("Resposta da NF-e:", resposta.data);
-
-      const produtos = resposta.data.produto.map(
-        (produto: any, index: number) => ({
-          ...produto,
-          id: index + 1,
-        }),
+      formData.append(
+        "arquivo",
+        arquivoXml,
       );
 
-      setNfe({
+      const resposta = await api.post(
+        "/nfe/importar",
+        formData,
+      );
+
+      console.log(
+        "Resposta da NF-e:",
+        resposta.data,
+      );
+
+      const produtos =
+        resposta.data.produto.map(
+          (produto: any, index: number) => ({
+            ...produto,
+            id: index + 1,
+          }),
+        );
+
+      setDadosNf({
         ...resposta.data,
         produto: produtos,
       });
 
-      toast.success("NF-e importada com sucesso.");
+      toast.success(
+        "NF-e importada com sucesso.",
+      );
 
       setArquivoXml(null);
 
-      // setContadorImport(2);
-    } catch (e: any) {
-      console.error("Erro ao importar XML:", e);
+      setContadorNf(2);
 
-      const mensagem = String(
-        e.response?.data?.message ?? e.response?.data ?? e.message ?? "",
+    } catch (e: any) {
+
+      console.error(
+        "Erro ao importar XML:",
+        e,
       );
 
-      if (mensagem.toLowerCase().includes("fornecedor não cadastrado")) {
-        window.alert("Fornecedor não cadastrado");
-        return ModalFornecedor;
+      const mensagem = String(
+        e.response?.data?.message ??
+        e.response?.data ??
+        e.message ??
+        "",
+      );
+
+      /*
+       * ==================================================
+       * FORNECEDOR NÃO CADASTRADO
+       * ==================================================
+       */
+
+      if (
+        mensagem
+          .toLowerCase()
+          .includes("fornecedor não cadastrado")
+      ) {
+
+        console.log(
+          "Fornecedor não cadastrado:",
+          mensagem,
+        );
+
+        /*
+         * Abre o ModalFornecedor
+         * em modo NOVO.
+         */
+        setModalOpen(true);
       }
 
-      toast.error(mensagem || "Erro ao importar NF-e.");
+      /*
+       * Só mostra erro se não for
+       * tratado pelo fluxo do fornecedor.
+       */
+
+      if (
+        !mensagem
+          .toLowerCase()
+          .includes("fornecedor não cadastrado")
+      ) {
+        toast.error(
+          mensagem ||
+          "Erro ao importar NF-e.",
+        );
+      }
+
     } finally {
       setCarregandoXml(false);
     }
   }
 
+  /* =====================================================
+     FECHAR MODAL FORNECEDOR
+  ===================================================== */
+
+  function fecharModalFornecedor() {
+    setModalOpen(false);
+  }
+
+  /* =====================================================
+     FORNECEDOR SALVO
+  ===================================================== */
+
+  async function fornecedorSalvo() {
+
+    /*
+     * Atualiza a lista de fornecedores
+     * depois que o modal salvar.
+     */
+    await getFornecedores();
+
+    /*
+     * Fecha o modal.
+     */
+    setModalOpen(false);
+  }
+
+  /* =====================================================
+     JSX
+  ===================================================== */
+
   return (
     <div className="form-modal">
+
+      {/* ================================================
+          XML
+      ================================================= */}
+
       <div className="form-group">
+
         <div>
-          <label htmlFor="xml">Arquivo XML da NF-e</label>
+
+          <label htmlFor="xml">
+            Arquivo XML da NF-e
+          </label>
 
           <input
             id="xml"
@@ -97,26 +223,47 @@ export default function ImportXml() {
             onChange={selecionarXml}
             disabled={carregandoXml}
           />
+
         </div>
 
+        {/* ==============================================
+            PREVIEW
+        =============================================== */}
+
         {arquivoXml && (
+
           <div className="xml-preview">
+
             <Upload size={20} />
 
             <div>
-              <strong>Arquivo selecionado</strong>
 
-              <span>{arquivoXml.name}</span>
+              <strong>
+                Arquivo selecionado
+              </strong>
+
+              <span>
+                {arquivoXml.name}
+              </span>
+
             </div>
+
           </div>
+
         )}
+
       </div>
 
+      {/* ================================================
+          AÇÕES
+      ================================================= */}
+
       <div className="modal-actions">
+
         <button
           type="button"
           className="btn-cancel"
-          // onClick={fecharModalNf}
+          onClick={setClose}
           disabled={carregandoXml}
         >
           Cancelar
@@ -126,11 +273,40 @@ export default function ImportXml() {
           type="button"
           className="btn-primary"
           onClick={importarXml}
-          disabled={!arquivoXml || carregandoXml}
+          disabled={
+            !arquivoXml ||
+            carregandoXml
+          }
         >
-          {carregandoXml ? "Enviando..." : "Importar XML"}
+          {carregandoXml
+            ? "Enviando..."
+            : "Importar XML"}
         </button>
+
       </div>
+
+      {/* ================================================
+          MODAL FORNECEDOR
+      ================================================= */}
+
+      <ModalFornecedor
+        open={modalOpen}
+
+        /*
+         * null = novo fornecedor
+         */
+        fornecedor={null}
+
+        onClose={
+          fecharModalFornecedor
+        }
+
+        onSuccess={
+          fornecedorSalvo
+        }
+      />
+
     </div>
   );
 }
+

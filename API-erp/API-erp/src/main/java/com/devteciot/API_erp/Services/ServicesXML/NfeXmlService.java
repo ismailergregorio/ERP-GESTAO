@@ -20,6 +20,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -69,12 +70,15 @@ public class NfeXmlService {
                 if (emitente == null) {
                         throw new RuntimeException("Fornecedor não encontrado no XML da NF-e.");
                 }
+                System.out.println(emitente.getCnpj());
 
-                ModelTbFornecedores fornecedor = repositoryFornecedor
-                                .findByCnpj(emitente.getCnpj())
-                                .orElseThrow(() -> new ResourceNotFoundException(
-                                                "Fornecedor não cadastrado. CNPJ: " + emitente.getCnpj()));
+                Optional<ModelTbFornecedores> fornecedor = repositoryFornecedor.findByCnpj(emitente.getCnpj());
 
+                if(!fornecedor.isPresent()){
+                        throw new ResourceNotFoundException("Fornecedor não cadastrado. CNPJ: " + emitente.getCnpj());
+                }
+                System.out.println(fornecedor.get().getCnpj());
+                
                 // =========================
                 // PRODUTOS
                 // =========================

@@ -46,6 +46,20 @@ export async function getProduto(id: number) {
   }
 }
 
+export async function getProdutos() {
+  try {
+    const resposta = await api.get(`/produtos`);
+
+    return resposta.data;
+  } catch (e: any) {
+    console.error(e);
+
+    toast.error(
+      e.response?.data?.message ?? "Erro ao buscar tipos de entrada.",
+    );
+  }
+}
+
 export async function getEntrada(id: number) {
   try {
     const resposta = await api.get(`/entradas/${id}`);

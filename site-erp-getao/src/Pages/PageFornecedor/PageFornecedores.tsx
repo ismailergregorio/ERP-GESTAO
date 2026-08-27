@@ -60,7 +60,7 @@ interface FornecedorForm {
    FORMULÁRIO INICIAL
 ===================================================== */
 
-const formularioInicial: FornecedorForm = {
+export const formularioInicial: FornecedorForm = {
   razaoSocial: "",
   nomeFantasia: "",
   inscricaoEstadual: "",
@@ -84,9 +84,8 @@ export default function Fornecedores() {
 
   const [modalOpen, setModalOpen] = useState(false);
 
-  const [fornecedorEditando, setFornecedorEditando] = useState<number | null>(
-    null,
-  );
+  const [fornecedorEditando, setFornecedorEditando] =
+    useState<Fornecedor | null>(null);
 
   const [formulario, setFormulario] =
     useState<FornecedorForm>(formularioInicial);
@@ -98,7 +97,7 @@ export default function Fornecedores() {
   function abrirModal() {
     setFormulario(formularioInicial);
 
-    setFornecedorEditando(null);
+    // setFornecedorEditando(null);
 
     setModalOpen(true);
   }
@@ -112,7 +111,7 @@ export default function Fornecedores() {
 
     setFormulario(formularioInicial);
 
-    setFornecedorEditando(null);
+    // setFornecedorEditando(null);
   }
 
   /* =====================================================
@@ -254,22 +253,7 @@ export default function Fornecedores() {
   ===================================================== */
 
   function abrirEditar(fornecedor: Fornecedor) {
-    setFornecedorEditando(fornecedor.id);
-
-    setFormulario({
-      razaoSocial: fornecedor.razaoSocial,
-
-      nomeFantasia: fornecedor.nomeFantasia,
-
-      inscricaoEstadual: fornecedor.inscricaoEstadual,
-
-      cnpj: fornecedor.cnpj,
-
-      telefone: fornecedor.telefone,
-
-      email: fornecedor.email,
-    });
-
+    setFornecedorEditando(fornecedor);
     setModalOpen(true);
   }
 
@@ -500,11 +484,9 @@ export default function Fornecedores() {
 
         <ModalFornecedor
           open={modalOpen}
-          editando={fornecedorEditando !== null}
-          formulario={formulario}
+          fornecedor={fornecedorEditando}
           onClose={fecharModal}
-          onChange={alterarCampo}
-          onSalvar={salvarFornecedor}
+          onSuccess={getFornecedores}
         />
       </section>
     </Layout>

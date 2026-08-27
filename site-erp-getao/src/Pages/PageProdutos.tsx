@@ -18,7 +18,7 @@ import Modal from "../Componete/Modal/Modal";
 
 // import "./Produtos.css";
 
-interface TabelaProdutos {
+export interface TabelaProdutos {
   id: number;
 
   nome: string;
