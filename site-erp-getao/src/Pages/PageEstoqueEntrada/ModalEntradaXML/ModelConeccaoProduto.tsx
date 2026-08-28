@@ -15,9 +15,10 @@ export interface DadosTableSelectProduto {
   id: number;
   codigo: string;
   descricao: string;
-  quantidade: number;
+  quantidadeNf: number;
   valorTotal: number;
   itenSelecionado: number | null;
+  quatidadeEstoque: number | null;
 }
 
 export default function ModelConeccaoProduto({ dadosNF }: ConfigProps) {
@@ -26,9 +27,10 @@ export default function ModelConeccaoProduto({ dadosNF }: ConfigProps) {
   const [controleModalProsdutos, setControleModalProsdutos] =
     useState<boolean>();
   const [idProdutoSelecionado, setIdProdutoSelecionado] = useState<number>();
+  const [dadosDaRelacao, setDadosDaRelacao] = useState();
 
-  function fecharModal(){
-   setControleModalProsdutos(false);
+  function fecharModal() {
+    setControleModalProsdutos(false);
   }
 
   async function BuscarProduto() {
@@ -41,9 +43,10 @@ export default function ModelConeccaoProduto({ dadosNF }: ConfigProps) {
       id: p.id,
       codigo: p.codigo,
       descricao: p.descricao,
-      quantidade: p.quantidade,
+      quantidadeNf: p.quantidade,
       valorTotal: p.valorTotal,
       itenSelecionado: null,
+      quatidadeEstoque: null,
     }));
 
     setDadosNota(dadosfomatados);
@@ -51,6 +54,27 @@ export default function ModelConeccaoProduto({ dadosNF }: ConfigProps) {
     BuscarProduto();
   }, [dadosNF]);
 
+  function selecionarProduto(produtoId: number, quantidadeUnidades: number) {
+    if (idProdutoSelecionado === null) {
+      return;
+    }
+
+    setDadosNota((lista) =>
+      lista.map((item) =>
+        item.id === idProdutoSelecionado
+          ? {
+              ...item,
+              itenSelecionado: produtoId,
+            }
+          : item,
+      ),
+    );
+
+    console.log("Produto estoque:", produtoId);
+    console.log("Quantidade em unidades:", quantidadeUnidades);
+
+    fecharModal();
+  }
   const colunasNf: Column<DadosTableSelectProduto>[] = [
     {
       key: "id",
@@ -69,8 +93,8 @@ export default function ModelConeccaoProduto({ dadosNF }: ConfigProps) {
     },
 
     {
-      key: "quantidade",
-      title: "Qtd.",
+      key: "quantidadeNf",
+      title: "Qtd.Nf",
       align: "center",
     },
     {
@@ -89,6 +113,18 @@ export default function ModelConeccaoProduto({ dadosNF }: ConfigProps) {
       key: "itenSelecionado",
       title: "Iten Selecinado",
       align: "center",
+      render: (value) => {
+        if (!value) return "Não Definido";
+        return produtos.find((p) => p.id == value)?.nome;
+      },
+    },
+    {
+      key: "quatidadeEstoque",
+      title: "Quan.Est",
+      align: "center",
+      render: (value) => {
+        if (!value) return 0;
+      },
     },
   ];
 
@@ -119,6 +155,7 @@ export default function ModelConeccaoProduto({ dadosNF }: ConfigProps) {
           produtosRelacao={dadosNota}
           idProduto={idProdutoSelecionado}
           onClose={fecharModal}
+          onSelecionar={selecionarProduto}
         />
       )}
     </div>

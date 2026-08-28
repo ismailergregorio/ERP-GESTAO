@@ -7,7 +7,6 @@ import type { Column } from "../../../Componete/Table/Table.types";
 
 import { getProdutos } from "../Functions";
 import type { DadosTableSelectProduto } from "./ModelConeccaoProduto";
-import type { Produto } from "../Interfaces";
 
 interface ConfigModal {
   opem: boolean;
@@ -153,6 +152,7 @@ export default function ProdutosListaEstoque({
     }
 
     onSelecionar?.(produtoEstoqueSelecionado, quantidadeUnidades);
+    console.log(produtoEstoqueSelecionado, quantidadeUnidades)
 
     fecharModal();
   }
@@ -244,7 +244,7 @@ export default function ProdutosListaEstoque({
               <div>
                 <span>Quantidade</span>
 
-                <strong>{produtoNf.quantidade}</strong>
+                <strong>{produtoNf.quantidadeNf}</strong>
               </div>
 
               <div>
@@ -363,7 +363,7 @@ export default function ProdutosListaEstoque({
                 <label>Quantidade da NF</label>
 
                 <div className="valor-readonly">
-                  {produtoNf?.quantidade ?? 0}
+                  {produtoNf?.quantidadeNf ?? 0}
                 </div>
               </div>
 
