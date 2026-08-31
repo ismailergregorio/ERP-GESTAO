@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 
 import Modal from "../../Componete/Modal/Modal";
 import api from "../../Services/Api";
+import type { FornecedorNf } from "../PageEstoqueEntrada/Interfaces";
 
 /* =====================================================
    INTERFACES
@@ -28,6 +29,13 @@ interface FornecedorForm {
   email: string;
 }
 
+interface FornecedorNew {
+  razaoSocial: string;
+  nomeFantasia: string;
+  inscricaoEstadual: string;
+  cnpj: string;
+}
+
 /* =====================================================
    FORMULÁRIO INICIAL
 ===================================================== */
@@ -41,6 +49,13 @@ const formularioInicial: FornecedorForm = {
   email: "",
 };
 
+const formularioNewInicial: FornecedorNew = {
+  razaoSocial: "",
+  nomeFantasia: "",
+  inscricaoEstadual: "",
+  cnpj: "",
+};
+
 /* =====================================================
    PROPS
 ===================================================== */
@@ -50,9 +65,11 @@ interface ModalFornecedorProps {
 
   /**
    * Fornecedor que será editado.
-   * null = novo fornecedor
+   * null ou undefined = novo fornecedor
    */
   fornecedor?: Fornecedor | null;
+
+  dadosFornecedor?: FornecedorNf;
 
   /**
    * Fecha o modal
@@ -61,7 +78,6 @@ interface ModalFornecedorProps {
 
   /**
    * Executado depois que salvar com sucesso.
-   * O pai pode usar para atualizar a tabela.
    */
   onSuccess: () => void;
 }
@@ -73,10 +89,10 @@ interface ModalFornecedorProps {
 export default function ModalFornecedor({
   open,
   fornecedor,
+  dadosFornecedor,
   onClose,
   onSuccess,
 }: ModalFornecedorProps) {
-
   /* =====================================================
      ESTADOS
   ===================================================== */
@@ -84,32 +100,78 @@ export default function ModalFornecedor({
   const [formulario, setFormulario] =
     useState<FornecedorForm>(formularioInicial);
 
+  const [formularioNew, setFormularioNew] =
+    useState<FornecedorNew>(formularioNewInicial);
+
   const [salvando, setSalvando] = useState(false);
 
   /* =====================================================
      MODO
   ===================================================== */
 
-  const editando = fornecedor !== null;
+  // null ou undefined = novo
+  const editando = !!fornecedor;
 
   /* =====================================================
-     CARREGAR FORMULÁRIO
+     CARREGAR FORNECEDOR PARA EDIÇÃO
   ===================================================== */
 
   useEffect(() => {
+    if (!open) {
+      return;
+    }
+
     if (fornecedor) {
       setFormulario({
-        razaoSocial: fornecedor.razaoSocial,
-        nomeFantasia: fornecedor.nomeFantasia,
-        inscricaoEstadual: fornecedor.inscricaoEstadual,
-        cnpj: fornecedor.cnpj,
-        telefone: fornecedor.telefone,
-        email: fornecedor.email,
+        razaoSocial: fornecedor.razaoSocial ?? "",
+        nomeFantasia: fornecedor.nomeFantasia ?? "",
+        inscricaoEstadual: fornecedor.inscricaoEstadual ?? "",
+        cnpj: fornecedor.cnpj ?? "",
+        telefone: fornecedor.telefone ?? "",
+        email: fornecedor.email ?? "",
       });
+
+      setFormularioNew(formularioNewInicial);
     } else {
       setFormulario(formularioInicial);
+
+      setFormularioNew({
+        razaoSocial: "",
+        nomeFantasia: "",
+        inscricaoEstadual: "",
+        cnpj: "",
+      });
     }
   }, [fornecedor, open]);
+
+  /* =====================================================
+     CARREGAR DADOS DO FORNECEDOR NOVO
+  ===================================================== */
+
+  useEffect(() => {
+    if (!open || !dadosFornecedor || fornecedor) {
+      return;
+    }
+
+    const novoFornecedor: FornecedorNew = {
+      razaoSocial: dadosFornecedor.razaoSocial ?? "",
+      nomeFantasia: dadosFornecedor.nomeFantasia ?? "",
+      inscricaoEstadual: dadosFornecedor.inscricaoEstadual ?? "",
+      cnpj: dadosFornecedor.cnpj ?? "",
+    };
+
+    setFormularioNew(novoFornecedor);
+
+    // Também coloca os dados no formulário principal,
+    // pois é ele que será enviado no POST.
+    setFormulario((prev) => ({
+      ...prev,
+      razaoSocial: novoFornecedor.razaoSocial,
+      nomeFantasia: novoFornecedor.nomeFantasia,
+      inscricaoEstadual: novoFornecedor.inscricaoEstadual,
+      cnpj: novoFornecedor.cnpj,
+    }));
+  }, [dadosFornecedor, open, fornecedor]);
 
   /* =====================================================
      ALTERAR CAMPO
@@ -117,12 +179,21 @@ export default function ModalFornecedor({
 
   function alterarCampo(
     campo: keyof FornecedorForm,
-    valor: string,
+    valor: string
   ) {
     setFormulario((prev) => ({
       ...prev,
       [campo]: valor,
     }));
+
+    // Mantém o formulárioNew sincronizado quando
+    // estiver no modo de novo fornecedor.
+    if (!editando && campo in formularioNew) {
+      setFormularioNew((prev) => ({
+        ...prev,
+        [campo]: valor,
+      }));
+    }
   }
 
   /* =====================================================
@@ -130,28 +201,23 @@ export default function ModalFornecedor({
   ===================================================== */
 
   function formatarCnpj(valor: string) {
-    valor = valor
-      .replace(/\D/g, "")
-      .slice(0, 14);
+    valor = valor.replace(/\D/g, "").slice(0, 14);
 
-    valor = valor.replace(
-      /^(\d{2})(\d)/,
-      "$1.$2",
-    );
+    valor = valor.replace(/^(\d{2})(\d)/, "$1.$2");
 
     valor = valor.replace(
       /^(\d{2})\.(\d{3})(\d)/,
-      "$1.$2.$3",
+      "$1.$2.$3"
     );
 
     valor = valor.replace(
       /\.(\d{3})(\d)/,
-      ".$1/$2",
+      ".$1/$2"
     );
 
     valor = valor.replace(
       /(\d{4})(\d)/,
-      "$1-$2",
+      "$1-$2"
     );
 
     return valor;
@@ -162,29 +228,27 @@ export default function ModalFornecedor({
   ===================================================== */
 
   function formatarTelefone(valor: string) {
-    valor = valor
-      .replace(/\D/g, "")
-      .slice(0, 11);
+    valor = valor.replace(/\D/g, "").slice(0, 11);
 
     if (valor.length <= 10) {
       valor = valor.replace(
         /^(\d{2})(\d)/,
-        "($1) $2",
+        "($1) $2"
       );
 
       valor = valor.replace(
         /(\d{4})(\d)/,
-        "$1-$2",
+        "$1-$2"
       );
     } else {
       valor = valor.replace(
         /^(\d{2})(\d)/,
-        "($1) $2",
+        "($1) $2"
       );
 
       valor = valor.replace(
         /(\d{5})(\d)/,
-        "$1-$2",
+        "$1-$2"
       );
     }
 
@@ -196,10 +260,7 @@ export default function ModalFornecedor({
   ===================================================== */
 
   function alterarCnpj(valor: string) {
-    alterarCampo(
-      "cnpj",
-      formatarCnpj(valor),
-    );
+    alterarCampo("cnpj", formatarCnpj(valor));
   }
 
   /* =====================================================
@@ -209,7 +270,7 @@ export default function ModalFornecedor({
   function alterarTelefone(valor: string) {
     alterarCampo(
       "telefone",
-      formatarTelefone(valor),
+      formatarTelefone(valor)
     );
   }
 
@@ -218,7 +279,6 @@ export default function ModalFornecedor({
   ===================================================== */
 
   function validarFormulario() {
-
     if (!formulario.razaoSocial.trim()) {
       toast.warning("Informe a razão social.");
       return false;
@@ -230,9 +290,7 @@ export default function ModalFornecedor({
     }
 
     if (!formulario.inscricaoEstadual.trim()) {
-      toast.warning(
-        "Informe a inscrição estadual.",
-      );
+      toast.warning("Informe a inscrição estadual.");
       return false;
     }
 
@@ -259,7 +317,6 @@ export default function ModalFornecedor({
   ===================================================== */
 
   async function adicionarFornecedor() {
-
     if (!validarFormulario()) {
       return;
     }
@@ -270,26 +327,24 @@ export default function ModalFornecedor({
       await api.post("/fornecedores", {
         razaoSocial: formulario.razaoSocial,
         nomeFantasia: formulario.nomeFantasia,
-        inscricaoEstadual:
-          formulario.inscricaoEstadual,
+        inscricaoEstadual: formulario.inscricaoEstadual,
         cnpj: formulario.cnpj.replace(/\D/g, ""),
         telefone: formulario.telefone,
         email: formulario.email,
       });
 
       toast.success(
-        "Fornecedor adicionado com sucesso!",
+        "Fornecedor adicionado com sucesso!"
       );
 
       onSuccess();
       fecharModal();
-
     } catch (e: any) {
       console.error(e);
 
       toast.error(
         e.response?.data?.message ??
-          "Erro ao cadastrar fornecedor.",
+          "Erro ao cadastrar fornecedor."
       );
     } finally {
       setSalvando(false);
@@ -301,7 +356,6 @@ export default function ModalFornecedor({
   ===================================================== */
 
   async function editarFornecedor() {
-
     if (!fornecedor) {
       return;
     }
@@ -323,22 +377,21 @@ export default function ModalFornecedor({
           cnpj: formulario.cnpj.replace(/\D/g, ""),
           telefone: formulario.telefone,
           email: formulario.email,
-        },
+        }
       );
 
       toast.success(
-        "Fornecedor atualizado com sucesso!",
+        "Fornecedor atualizado com sucesso!"
       );
 
       onSuccess();
       fecharModal();
-
     } catch (e: any) {
       console.error(e);
 
       toast.error(
         e.response?.data?.message ??
-          "Erro ao atualizar fornecedor.",
+          "Erro ao atualizar fornecedor."
       );
     } finally {
       setSalvando(false);
@@ -350,7 +403,6 @@ export default function ModalFornecedor({
   ===================================================== */
 
   async function salvarFornecedor() {
-
     if (editando) {
       await editarFornecedor();
     } else {
@@ -364,6 +416,8 @@ export default function ModalFornecedor({
 
   function fecharModal() {
     setFormulario(formularioInicial);
+    setFormularioNew(formularioNewInicial);
+
     onClose();
   }
 
@@ -382,7 +436,6 @@ export default function ModalFornecedor({
       onClose={fecharModal}
     >
       <div className="form-modal">
-
         {/* RAZÃO SOCIAL */}
 
         <div className="form-group">
@@ -394,7 +447,7 @@ export default function ModalFornecedor({
             onChange={(e) =>
               alterarCampo(
                 "razaoSocial",
-                e.target.value,
+                e.target.value
               )
             }
           />
@@ -411,7 +464,7 @@ export default function ModalFornecedor({
             onChange={(e) =>
               alterarCampo(
                 "nomeFantasia",
-                e.target.value,
+                e.target.value
               )
             }
           />
@@ -428,7 +481,7 @@ export default function ModalFornecedor({
             onChange={(e) =>
               alterarCampo(
                 "inscricaoEstadual",
-                e.target.value,
+                e.target.value
               )
             }
           />
@@ -473,7 +526,7 @@ export default function ModalFornecedor({
             onChange={(e) =>
               alterarCampo(
                 "email",
-                e.target.value,
+                e.target.value
               )
             }
           />
@@ -482,7 +535,6 @@ export default function ModalFornecedor({
         {/* AÇÕES */}
 
         <div className="modal-actions">
-
           <button
             type="button"
             className="btn-cancel"
@@ -504,9 +556,7 @@ export default function ModalFornecedor({
                 ? "Salvar alterações"
                 : "Adicionar"}
           </button>
-
         </div>
-
       </div>
     </Modal>
   );

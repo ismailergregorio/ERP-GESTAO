@@ -87,3 +87,17 @@ export async function getFornecedor(id: number) {
     );
   }
 }
+
+export async function getFornecedorCnpj(cnpj: string) {
+  try {
+    const resposta = await api.get(`/fornecedores/cnpj/${cnpj}`);
+
+    return resposta.data;
+  } catch (e: any) {
+    console.error(e);
+
+    toast.error(
+      e.response?.data?.message ?? "Erro ao buscar tipos de entrada.",
+    );
+  }
+}

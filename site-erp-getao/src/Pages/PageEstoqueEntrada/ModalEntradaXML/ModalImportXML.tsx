@@ -291,16 +291,10 @@ export default function ImportXml({
 
       <ModalFornecedor
         open={modalOpen}
-
-        /*
-         * null = novo fornecedor
-         */
         fornecedor={null}
-
         onClose={
           fecharModalFornecedor
         }
-
         onSuccess={
           fornecedorSalvo
         }

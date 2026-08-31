@@ -1,4 +1,4 @@
-package com.devteciot.API_erp.Services;
+package com.devteciot.API_erp.Services.SerivicesProduto;
 
 import java.util.List;
 import java.util.Optional;

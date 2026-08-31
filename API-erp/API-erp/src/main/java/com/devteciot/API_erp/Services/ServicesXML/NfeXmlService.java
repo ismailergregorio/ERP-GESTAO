@@ -72,13 +72,15 @@ public class NfeXmlService {
                 }
                 System.out.println(emitente.getCnpj());
 
-                Optional<ModelTbFornecedores> fornecedor = repositoryFornecedor.findByCnpj(emitente.getCnpj());
+                // Optional<ModelTbFornecedores> fornecedor =
+                // repositoryFornecedor.findByCnpj(emitente.getCnpj());
 
-                if(!fornecedor.isPresent()){
-                        throw new ResourceNotFoundException("Fornecedor não cadastrado. CNPJ: " + emitente.getCnpj());
-                }
-                System.out.println(fornecedor.get().getCnpj());
-                
+                // if(!fornecedor.isPresent()){
+                // throw new ResourceNotFoundException("Fornecedor não cadastrado. CNPJ: " +
+                // emitente.getCnpj());
+                // }
+                // System.out.println(fornecedor.get().getCnpj());
+
                 // =========================
                 // PRODUTOS
                 // =========================
@@ -121,9 +123,17 @@ public class NfeXmlService {
                 // FORNECEDOR
                 // =========================
 
-                Emitente fornecedor = nfe.getNfe()
+                Emitente emitente = nfe.getNfe()
                                 .getInfNFe()
                                 .getEmitente();
+
+                Optional<ModelTbFornecedores> fornecedor = repositoryFornecedor.findByCnpj(emitente.getCnpj());
+
+                if (!fornecedor.isPresent()) {
+                        throw new ResourceNotFoundException("Fornecedor não cadastrado. CNPJ: " +
+                                        emitente.getCnpj());
+                }
+                System.out.println(fornecedor.get().getCnpj());
 
                 // =========================
                 // PRODUTOS
@@ -149,7 +159,7 @@ public class NfeXmlService {
 
                 return new DTORespostaForcedorProduto(
                                 produtos,
-                                fornecedor);
+                                emitente);
         }
 
 }

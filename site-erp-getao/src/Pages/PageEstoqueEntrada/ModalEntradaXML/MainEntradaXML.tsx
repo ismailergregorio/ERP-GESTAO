@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import {useState } from "react";
 import Modal from "../../../Componete/Modal/Modal";
 import ImportXml from "./ModalImportXML";
-import type { Nf, ProdutoNfe } from "../Interfaces";
-import Table from "../../../Componete/Table/Table";
+import type { Nf} from "../Interfaces";
 import DetalhesNf from "./ModelDetalhesNF";
 import ModelConeccaoProduto from "./ModelConeccaoProduto";
 
@@ -20,6 +19,8 @@ export default function ModalEntradaNfXML({
   function openModal() {}
 
   function fecharModal() {
+    setContadorImport(1);
+    setNfe(undefined);
     onClose();
   }
   return (

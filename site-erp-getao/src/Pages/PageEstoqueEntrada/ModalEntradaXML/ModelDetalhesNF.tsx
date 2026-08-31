@@ -1,13 +1,51 @@
-import type { Dispatch, SetStateAction } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import Table from "../../../Componete/Table/Table";
 import type { Column } from "../../../Componete/Table/Table.types";
 import type { Nf, ProdutoNfe } from "../Interfaces";
+import ModalFornecedor from "../../PageFornecedor/ModalFornecedor";
+import { getFornecedorCnpj, getFornecedores } from "../Functions";
 
 interface ConfigProps {
   nfe: Nf;
   setContadorNf: Dispatch<SetStateAction<number>>;
 }
 export default function DetalhesNf({ nfe, setContadorNf }: ConfigProps) {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [fornecedor, setFornecedor] = useState(true);
+
+  async function proximaTela(cnpj: string) {
+    const reposta = await getFornecedorCnpj(cnpj);
+
+    if (!reposta) {
+      setFornecedor(false);
+      setModalOpen(true);
+      console.log(nfe)
+    }
+
+    if (reposta) {
+      setContadorNf(3);
+      setFornecedor(true);
+    }
+  }
+
+  async function VerificaFornecedorExste(cnpj: string) {
+    const reposta = await getFornecedorCnpj(cnpj);
+    console.log(reposta);
+    if (!reposta) {
+      setFornecedor(false);
+      setModalOpen(true);
+    }
+  }
+
+  function fecharModalFornecedor() {
+    setModalOpen(false);
+  }
+
+  async function fornecedorSalvo() {
+    await getFornecedores();
+    setModalOpen(false);
+  }
+
   const colunasNf: Column<ProdutoNfe>[] = [
     {
       key: "id",
@@ -65,10 +103,6 @@ export default function DetalhesNf({ nfe, setContadorNf }: ConfigProps) {
   ];
   return (
     <div className="nf-confirmacao">
-      {/* =========================================
-          FORNECEDOR
-      ========================================= */}
-
       <div className="nf-info">
         <div className="nf-section-title">
           <h3>Fornecedor</h3>
@@ -102,10 +136,6 @@ export default function DetalhesNf({ nfe, setContadorNf }: ConfigProps) {
         </div>
       </div>
 
-      {/* =========================================
-          PRODUTOS
-      ========================================= */}
-
       <div className="nf-produtos">
         <div className="nf-section-title">
           <h3>Produtos da Nota</h3>
@@ -132,33 +162,44 @@ export default function DetalhesNf({ nfe, setContadorNf }: ConfigProps) {
         </strong>
       </div>
 
-      {/* =========================================
-          AÇÕES
-      ========================================= */}
-
       <div className="modal-actions">
         <button
           type="button"
           className="btn-cancel"
-          onClick={() => {
-            // setNfe(null);
-            // setArquivoXml(null);
-            setContadorNf(2);
-          }}
+          onClick={() => VerificaFornecedorExste(nfe.fornecedor.cnpj)}
         >
-          Cancelar
+          Entrada sem conexão
         </button>
+        <div className="buntos-xml">
+          <button
+            type="button"
+            className="btn-cancel"
+            onClick={() => {
+              setContadorNf(2);
+            }}
+          >
+            Cancelar
+          </button>
 
-        <button
-          type="button"
-          className="btn-primary"
-          onClick={() => {
-            setContadorNf(3);
-          }}
-        >
-          Continuar
-        </button>
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => {
+              proximaTela(nfe.fornecedor.cnpj);
+            }}
+          >
+            Continuar
+          </button>
+        </div>
       </div>
+
+      <ModalFornecedor
+        open={modalOpen}
+        fornecedor={null}
+        dadosFornecedor={nfe.fornecedor}
+        onClose={fecharModalFornecedor}
+        onSuccess={fornecedorSalvo}
+      />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-package com.devteciot.API_erp.Controllers;
+package com.devteciot.API_erp.Controllers.ControllerProduto;
 
 import java.util.List;
 
@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.devteciot.API_erp.DTO.DTOProdutos.DTOProdutosGet;
 import com.devteciot.API_erp.DTO.DTOProdutos.DTOProdutosPost;
-import com.devteciot.API_erp.Services.ServiceProduto;
+import com.devteciot.API_erp.Services.SerivicesProduto.ServiceProduto;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

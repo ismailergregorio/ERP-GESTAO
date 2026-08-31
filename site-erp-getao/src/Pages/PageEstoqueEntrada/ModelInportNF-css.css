@@ -530,7 +530,7 @@
 
 .modal-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
 
   gap: 10px;
@@ -540,6 +540,10 @@
   padding-top: 18px;
 
   border-top: 1px solid #e7e9eb;
+}
+.buntos-xml{
+  display: flex;
+  gap: 10px;
 }
 
 .btn-cancel,
