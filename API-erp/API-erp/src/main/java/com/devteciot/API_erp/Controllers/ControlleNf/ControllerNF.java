@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.devteciot.API_erp.Models.ModelNf.ModelNF;
+import com.devteciot.API_erp.DTO.DTONf.DTONfGet;
+import com.devteciot.API_erp.DTO.DTONf.DTONfPost;
 import com.devteciot.API_erp.Services.ServicesNF.ServiceNF;
 
 import lombok.RequiredArgsConstructor;
@@ -23,93 +24,97 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ControllerNF {
 
- private final ServiceNF serviceNF;
+  private final ServiceNF serviceNF;
 
- /*
-  * =====================================================
-  * LISTAR TODAS AS NFs
-  * =====================================================
-  */
+  /*
+   * =====================================================
+   * LISTAR TODAS AS NFs
+   * =====================================================
+   */
 
- @GetMapping
- public ResponseEntity<List<ModelNF>> listar() {
+  @GetMapping
+  public ResponseEntity<List<DTONfGet>> listar() {
 
-  return ResponseEntity.ok(
-    serviceNF.listar());
- }
+    return ResponseEntity.ok(
+        serviceNF.listar());
+  }
 
- /*
-  * =====================================================
-  * BUSCAR NF POR ID
-  * =====================================================
-  */
+  /*
+   * =====================================================
+   * BUSCAR NF POR ID
+   * =====================================================
+   */
 
- @GetMapping("/{id}")
- public ResponseEntity<ModelNF> buscarPorId(
-   @PathVariable Long id) {
+  @GetMapping("/{id}")
+  public ResponseEntity<DTONfGet> buscarPorId(
+      @PathVariable Long id) {
 
-  return ResponseEntity.ok(
-    serviceNF.buscarPorId(id));
- }
+    return ResponseEntity.ok(
+        serviceNF.buscarPorId(id));
+  }
 
- /*
-  * =====================================================
-  * BUSCAR POR NÚMERO DA NF
-  * =====================================================
-  */
+  /*
+   * =====================================================
+   * BUSCAR POR NÚMERO DA NF
+   * =====================================================
+   */
 
- @GetMapping("/numero/{nNF}")
- public ResponseEntity<ModelNF> buscarPorNumero(
-   @PathVariable Integer nNF) {
+  @GetMapping("/numero/{nNF}")
+  public ResponseEntity<DTONfGet> buscarPorNumero(
+      @PathVariable Integer nNF) {
 
-  return ResponseEntity.ok(
-    serviceNF.buscarPorNumero(nNF));
- }
+    return ResponseEntity.ok(
+        serviceNF.buscarPorNumero(nNF));
+  }
 
- /*
-  * =====================================================
-  * SALVAR NF
-  * =====================================================
-  */
+  /*
+   * =====================================================
+   * SALVAR NF
+   * =====================================================
+   */
 
- @PostMapping
- public ResponseEntity<ModelNF> salvar(
-   @RequestBody ModelNF nf) {
+  @PostMapping
+  public ResponseEntity<DTONfGet> salvar(
+      @RequestBody DTONfPost dto) {
 
-  ModelNF novaNF = serviceNF.salvar(nf);
+    DTONfGet novaNF = serviceNF.salvar(dto);
 
-  return ResponseEntity
-    .status(HttpStatus.CREATED)
-    .body(novaNF);
- }
+    return ResponseEntity
+        .status(HttpStatus.CREATED)
+        .body(novaNF);
+  }
 
- /*
-  * =====================================================
-  * ATUALIZAR NF
-  * =====================================================
-  */
+  /*
+   * =====================================================
+   * ATUALIZAR NF
+   * =====================================================
+   */
 
- @PutMapping("/{id}")
- public ResponseEntity<ModelNF> atualizar(
-   @PathVariable Long id,
-   @RequestBody ModelNF nf) {
+  @PutMapping("/{id}")
+  public ResponseEntity<DTONfGet> atualizar(
+      @PathVariable Long id,
+      @RequestBody DTONfPost dto) {
 
-  return ResponseEntity.ok(
-    serviceNF.atualizar(id, nf));
- }
+    return ResponseEntity.ok(
+        serviceNF.atualizar(
+            id,
+            dto));
+  }
 
- /*
-  * =====================================================
-  * DELETAR NF
-  * =====================================================
-  */
+  /*
+   * =====================================================
+   * DELETAR NF
+   * =====================================================
+   */
 
- @DeleteMapping("/{id}")
- public ResponseEntity<Void> deletar(
-   @PathVariable Long id) {
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> deletar(
+      @PathVariable Long id) {
 
-  serviceNF.deletar(id);
+    serviceNF.deletar(id);
 
-  return ResponseEntity.noContent().build();
- }
+    return ResponseEntity
+        .noContent()
+        .build();
+  }
 }

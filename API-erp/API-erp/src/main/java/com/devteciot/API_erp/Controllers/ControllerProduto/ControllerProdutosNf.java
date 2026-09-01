@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.devteciot.API_erp.Models.ModelProdutos.ModelTbProdutosNf;
+import com.devteciot.API_erp.DTO.DTOProdutos.DTOProdutoNfGet;
+import com.devteciot.API_erp.DTO.DTOProdutos.DTOProdutoNfPost;
 import com.devteciot.API_erp.Services.SerivicesProduto.ServiceTbProdutosNf;
 
 import lombok.RequiredArgsConstructor;
@@ -23,104 +24,104 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ControllerProdutosNf {
 
- private final ServiceTbProdutosNf service;
+  private final ServiceTbProdutosNf service;
 
- /*
-  * =====================================================
-  * LISTAR PRODUTOS DE UMA NF
-  * =====================================================
-  */
+  /*
+   * =====================================================
+   * LISTAR PRODUTOS DE UMA NF
+   * =====================================================
+   */
 
- @GetMapping("/nf/{nfId}")
- public ResponseEntity<List<ModelTbProdutosNf>> buscarPorNf(
-   @PathVariable Long nfId) {
+  @GetMapping("/nf/{nfId}")
+  public ResponseEntity<List<DTOProdutoNfGet>> buscarPorNf(
+      @PathVariable Long nfId) {
 
-  return ResponseEntity.ok(
-    service.buscarPorNf(nfId));
- }
+    return ResponseEntity.ok(
+        service.buscarPorNf(nfId));
+  }
 
- /*
-  * =====================================================
-  * BUSCAR PRODUTO POR ID
-  * =====================================================
-  */
+  /*
+   * =====================================================
+   * BUSCAR PRODUTO POR ID
+   * =====================================================
+   */
 
- @GetMapping("/{id}")
- public ResponseEntity<ModelTbProdutosNf> buscarPorId(
-   @PathVariable Long id) {
+  @GetMapping("/{id}")
+  public ResponseEntity<DTOProdutoNfGet> buscarPorId(
+      @PathVariable Long id) {
 
-  return ResponseEntity.ok(
-    service.buscarPorId(id));
- }
+    return ResponseEntity.ok(
+        service.buscarPorId(id));
+  }
 
- /*
-  * =====================================================
-  * SALVAR LISTA DE PRODUTOS
-  * =====================================================
-  */
+  /*
+   * =====================================================
+   * SALVAR LISTA DE PRODUTOS
+   * =====================================================
+   */
 
- @PostMapping("/nf/{nfId}")
- public ResponseEntity<List<ModelTbProdutosNf>> salvarProdutos(
-   @PathVariable Long nfId,
-   @RequestBody List<ModelTbProdutosNf> produtos) {
+  @PostMapping("/nf/{nfId}")
+  public ResponseEntity<List<DTOProdutoNfGet>> salvarProdutos(
+      @PathVariable Long nfId,
+      @RequestBody List<DTOProdutoNfPost> produtos) {
 
-  List<ModelTbProdutosNf> produtosSalvos = service.salvarProdutos(
-    nfId,
-    produtos);
+    List<DTOProdutoNfGet> produtosSalvos = service.salvarProdutos(
+        nfId,
+        produtos);
 
-  return ResponseEntity
-    .status(HttpStatus.CREATED)
-    .body(produtosSalvos);
- }
+    return ResponseEntity
+        .status(HttpStatus.CREATED)
+        .body(produtosSalvos);
+  }
 
- /*
-  * =====================================================
-  * ATUALIZAR PRODUTO
-  * =====================================================
-  */
+  /*
+   * =====================================================
+   * ATUALIZAR PRODUTO
+   * =====================================================
+   */
 
- @PutMapping("/{id}")
- public ResponseEntity<ModelTbProdutosNf> atualizar(
-   @PathVariable Long id,
-   @RequestBody ModelTbProdutosNf produto) {
+  @PutMapping("/{id}")
+  public ResponseEntity<DTOProdutoNfGet> atualizar(
+      @PathVariable Long id,
+      @RequestBody DTOProdutoNfPost produto) {
 
-  return ResponseEntity.ok(
-    service.atualizar(
-      id,
-      produto));
- }
+    return ResponseEntity.ok(
+        service.atualizar(
+            id,
+            produto));
+  }
 
- /*
-  * =====================================================
-  * DELETAR PRODUTO
-  * =====================================================
-  */
+  /*
+   * =====================================================
+   * DELETAR PRODUTO
+   * =====================================================
+   */
 
- @DeleteMapping("/{id}")
- public ResponseEntity<Void> deletar(
-   @PathVariable Long id) {
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> deletar(
+      @PathVariable Long id) {
 
-  service.deletar(id);
+    service.deletar(id);
 
-  return ResponseEntity
-    .noContent()
-    .build();
- }
+    return ResponseEntity
+        .noContent()
+        .build();
+  }
 
- /*
-  * =====================================================
-  * DELETAR TODOS OS PRODUTOS DE UMA NF
-  * =====================================================
-  */
+  /*
+   * =====================================================
+   * DELETAR TODOS OS PRODUTOS DE UMA NF
+   * =====================================================
+   */
 
- @DeleteMapping("/nf/{nfId}")
- public ResponseEntity<Void> deletarPorNf(
-   @PathVariable Long nfId) {
+  @DeleteMapping("/nf/{nfId}")
+  public ResponseEntity<Void> deletarPorNf(
+      @PathVariable Long nfId) {
 
-  service.deletarPorNf(nfId);
+    service.deletarPorNf(nfId);
 
-  return ResponseEntity
-    .noContent()
-    .build();
- }
+    return ResponseEntity
+        .noContent()
+        .build();
+  }
 }

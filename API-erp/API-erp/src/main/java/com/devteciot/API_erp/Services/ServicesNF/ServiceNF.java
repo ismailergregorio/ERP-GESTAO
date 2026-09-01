@@ -6,8 +6,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.devteciot.API_erp.DTO.DTONf.DTONfGet;
+import com.devteciot.API_erp.DTO.DTONf.DTONfPost;
+import com.devteciot.API_erp.Mapper.MapperNf.MapperNf;
 import com.devteciot.API_erp.Models.ModelNf.ModelNF;
-import com.devteciot.API_erp.Models.ModelProdutos.ModelTbProdutosNf;
 import com.devteciot.API_erp.Repository.RepositoryNF;
 
 import lombok.RequiredArgsConstructor;
@@ -16,223 +18,226 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ServiceNF {
 
- private final RepositoryNF repositoryNF;
+    private final RepositoryNF repositoryNF;
+    private final MapperNf mapperNf;
 
- /*
-  * =====================================================
-  * SALVAR
-  * =====================================================
-  */
+    /*
+     * =====================================================
+     * SALVAR
+     * =====================================================
+     */
 
- @Transactional
- public ModelNF salvar(ModelNF nf) {
+    @Transactional
+    public DTONfGet salvar(DTONfPost dto) {
 
-  if (nf == null) {
-   throw new IllegalArgumentException(
-     "A nota fiscal não pode ser nula.");
-  }
+        if (dto == null) {
+            throw new IllegalArgumentException(
+                    "A nota fiscal não pode ser nula."
+            );
+        }
 
-  if (nf.getNNF() == null) {
-   throw new IllegalArgumentException(
-     "O número da NF é obrigatório.");
-  }
+        if (dto.nNF() == null) {
+            throw new IllegalArgumentException(
+                    "O número da NF é obrigatório."
+            );
+        }
 
-  /*
-   * Verifica se já existe uma NF com o mesmo número.
-   */
-  if (repositoryNF.existsByNNF(nf.getNNF())) {
-   throw new IllegalArgumentException(
-     "Já existe uma NF cadastrada com o número: "
-       + nf.getNNF());
-  }
+        /*
+         * Verifica se já existe uma NF com o mesmo número.
+         */
+        if (repositoryNF.existsByNNF(dto.nNF())) {
+            throw new IllegalArgumentException(
+                    "Já existe uma NF cadastrada com o número: "
+                            + dto.nNF()
+            );
+        }
 
-  LocalDateTime agora = LocalDateTime.now();
+        /*
+         * Converte DTO para entidade.
+         */
+        ModelNF nf = mapperNf.toEntity(dto);
 
-  nf.setDataCriacao(agora);
-  nf.setDataAtualizacao(agora);
+        /*
+         * Datas controladas pelo sistema.
+         */
+        LocalDateTime agora = LocalDateTime.now();
 
-  /*
-   * Vincula todos os produtos à NF.
-   */
-  if (nf.getProdutos() != null) {
+        nf.setDataCriacao(agora);
+        nf.setDataAtualizacao(agora);
 
-   for (ModelTbProdutosNf produto : nf.getProdutos()) {
+        /*
+         * Salva a NF.
+         */
+        ModelNF salva = repositoryNF.save(nf);
 
-    if (produto == null) {
-     continue;
+        /*
+         * Converte entidade para DTO de resposta.
+         */
+        return mapperNf.toResponseDTO(salva);
     }
 
-    produto.setNf(nf);
-   }
-  }
+    /*
+     * =====================================================
+     * BUSCAR POR ID
+     * =====================================================
+     */
 
-  return repositoryNF.save(nf);
- }
+    @Transactional(readOnly = true)
+    public DTONfGet buscarPorId(Long id) {
 
- /*
-  * =====================================================
-  * SALVAR COM LISTA DE PRODUTOS
-  * =====================================================
-  */
+        if (id == null) {
+            throw new IllegalArgumentException(
+                    "O ID da NF é obrigatório."
+            );
+        }
 
- @Transactional
- public ModelNF salvar(
-   Integer nNF,
-   List<ModelTbProdutosNf> produtos) {
+        ModelNF nf = repositoryNF.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "NF não encontrada: " + id
+                        )
+                );
 
-  if (nNF == null) {
-   throw new IllegalArgumentException(
-     "O número da NF é obrigatório.");
-  }
-
-  if (repositoryNF.existsByNNF(nNF)) {
-   throw new IllegalArgumentException(
-     "Já existe uma NF cadastrada com o número: "
-       + nNF);
-  }
-
-  ModelNF nf = new ModelNF();
-
-  nf.setNNF(nNF);
-  nf.setProdutos(produtos);
-
-  LocalDateTime agora = LocalDateTime.now();
-
-  nf.setDataCriacao(agora);
-  nf.setDataAtualizacao(agora);
-
-  /*
-   * Cria o relacionamento dos dois lados.
-   */
-  if (produtos != null) {
-
-   for (ModelTbProdutosNf produto : produtos) {
-
-    if (produto == null) {
-     continue;
+        return mapperNf.toResponseDTO(nf);
     }
 
-    produto.setNf(nf);
-   }
-  }
+    /*
+     * =====================================================
+     * BUSCAR POR NÚMERO DA NF
+     * =====================================================
+     */
 
-  return repositoryNF.save(nf);
- }
+    @Transactional(readOnly = true)
+    public DTONfGet buscarPorNumero(Integer nNF) {
 
- /*
-  * =====================================================
-  * BUSCAR POR ID
-  * =====================================================
-  */
+        if (nNF == null) {
+            throw new IllegalArgumentException(
+                    "O número da NF é obrigatório."
+            );
+        }
 
- @Transactional(readOnly = true)
- public ModelNF buscarPorId(Long id) {
+        ModelNF nf = repositoryNF.findByNNF(nNF)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "NF não encontrada: " + nNF
+                        )
+                );
 
-  return repositoryNF.findById(id)
-    .orElseThrow(() -> new RuntimeException(
-      "NF não encontrada: " + id));
- }
-
- /*
-  * =====================================================
-  * BUSCAR POR NÚMERO DA NF
-  * =====================================================
-  */
-
- @Transactional(readOnly = true)
- public ModelNF buscarPorNumero(Integer nNF) {
-
-  return repositoryNF.findByNNF(nNF)
-    .orElseThrow(() -> new RuntimeException(
-      "NF não encontrada: " + nNF));
- }
-
- /*
-  * =====================================================
-  * LISTAR TODAS
-  * =====================================================
-  */
-
- @Transactional(readOnly = true)
- public List<ModelNF> listar() {
-
-  return repositoryNF.findAll();
- }
-
- /*
-  * =====================================================
-  * ATUALIZAR
-  * =====================================================
-  */
-
- @Transactional
- public ModelNF atualizar(
-   Long id,
-   ModelNF nfAtualizada) {
-
-  ModelNF nf = repositoryNF.findById(id)
-    .orElseThrow(() -> new RuntimeException(
-      "NF não encontrada: " + id));
-
-  /*
-   * Atualiza número da NF.
-   */
-  if (nfAtualizada.getNNF() != null) {
-
-   /*
-    * Evita duplicidade.
-    */
-   if (!nf.getNNF().equals(
-     nfAtualizada.getNNF())
-     &&
-     repositoryNF.existsByNNF(
-       nfAtualizada.getNNF())) {
-    throw new IllegalArgumentException(
-      "Já existe uma NF cadastrada com o número: "
-        + nfAtualizada.getNNF());
-   }
-
-   nf.setNNF(nfAtualizada.getNNF());
-  }
-
-  /*
-   * Atualiza produtos.
-   */
-  if (nfAtualizada.getProdutos() != null) {
-
-   nf.getProdutos().clear();
-
-   for (ModelTbProdutosNf produto : nfAtualizada.getProdutos()) {
-
-    if (produto == null) {
-     continue;
+        return mapperNf.toResponseDTO(nf);
     }
 
-    produto.setNf(nf);
+    /*
+     * =====================================================
+     * LISTAR TODAS
+     * =====================================================
+     */
 
-    nf.getProdutos().add(produto);
-   }
-  }
+    @Transactional(readOnly = true)
+    public List<DTONfGet> listar() {
 
-  nf.setDataAtualizacao(
-    LocalDateTime.now());
+        return repositoryNF.findAll()
+                .stream()
+                .map(mapperNf::toResponseDTO)
+                .toList();
+    }
 
-  return repositoryNF.save(nf);
- }
+    /*
+     * =====================================================
+     * ATUALIZAR
+     * =====================================================
+     */
 
- /*
-  * =====================================================
-  * DELETAR
-  * =====================================================
-  */
+    @Transactional
+    public DTONfGet atualizar(
+            Long id,
+            DTONfPost dto) {
 
- @Transactional
- public void deletar(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException(
+                    "O ID da NF é obrigatório."
+            );
+        }
 
-  ModelNF nf = repositoryNF.findById(id)
-    .orElseThrow(() -> new RuntimeException(
-      "NF não encontrada: " + id));
+        if (dto == null) {
+            throw new IllegalArgumentException(
+                    "Os dados da NF são obrigatórios."
+            );
+        }
 
-  repositoryNF.delete(nf);
- }
+        if (dto.nNF() == null) {
+            throw new IllegalArgumentException(
+                    "O número da NF é obrigatório."
+            );
+        }
+
+        /*
+         * Busca a NF existente.
+         */
+        ModelNF nf = repositoryNF.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "NF não encontrada: " + id
+                        )
+                );
+
+        /*
+         * Verifica se o novo número já pertence
+         * a outra NF.
+         */
+        if (!nf.getNNF().equals(dto.nNF())
+                && repositoryNF.existsByNNF(dto.nNF())) {
+
+            throw new IllegalArgumentException(
+                    "Já existe uma NF cadastrada com o número: "
+                            + dto.nNF()
+            );
+        }
+
+        /*
+         * Atualiza somente os campos permitidos.
+         *
+         * O ID continua sendo o mesmo.
+         */
+        nf.setNNF(dto.nNF());
+
+        /*
+         * Atualiza a data.
+         */
+        nf.setDataAtualizacao(
+                LocalDateTime.now()
+        );
+
+        /*
+         * Salva.
+         */
+        ModelNF atualizado =
+                repositoryNF.save(nf);
+
+        return mapperNf.toResponseDTO(atualizado);
+    }
+
+    /*
+     * =====================================================
+     * DELETAR
+     * =====================================================
+     */
+
+    @Transactional
+    public void deletar(Long id) {
+
+        if (id == null) {
+            throw new IllegalArgumentException(
+                    "O ID da NF é obrigatório."
+            );
+        }
+
+        ModelNF nf = repositoryNF.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "NF não encontrada: " + id
+                        )
+                );
+
+        repositoryNF.delete(nf);
+    }
 }

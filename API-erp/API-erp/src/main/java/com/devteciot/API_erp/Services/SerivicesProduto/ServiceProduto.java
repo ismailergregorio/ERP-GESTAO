@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.devteciot.API_erp.DTO.DTOProdutos.DTOProdutosGet;
 import com.devteciot.API_erp.DTO.DTOProdutos.DTOProdutosPost;
-import com.devteciot.API_erp.Mapper.MapperProdutos;
+import com.devteciot.API_erp.Mapper.MapperProduto.MapperProdutos;
 import com.devteciot.API_erp.Models.ModelTbCategoria;
 import com.devteciot.API_erp.Models.ModelTbUnidadeMedida;
 import com.devteciot.API_erp.Models.ModelProdutos.ModelTbProdutos;
