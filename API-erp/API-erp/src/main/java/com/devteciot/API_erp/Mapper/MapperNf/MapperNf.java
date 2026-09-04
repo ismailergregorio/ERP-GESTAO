@@ -9,39 +9,52 @@ import com.devteciot.API_erp.DTO.DTONf.DTONfGet;
 import com.devteciot.API_erp.DTO.DTONf.DTONfPost;
 import com.devteciot.API_erp.Models.ModelNf.ModelNF;
 import com.devteciot.API_erp.Models.ModelProdutos.ModelTbProdutosNf;
+import com.devteciot.API_erp.Models.ModelTbFornecedores;
 
 @Component
 public class MapperNf {
- public ModelNF toEntity(DTONfPost dto) {
 
-  ModelNF entity = new ModelNF();
+  public ModelNF toEntity(
+      DTONfPost dto,
+      ModelTbFornecedores fornecedor) {
 
-  entity.setNNF(dto.nNF());
+    ModelNF entity = new ModelNF();
 
-  return entity;
- }
+    entity.setNNF(dto.nNF());
+    entity.setFornecedor(fornecedor);
 
- public DTONfGet toResponseDTO(ModelNF entity) {
-
-  List<Long> produtosIds;
-
-  if (entity.getProdutos() != null) {
-
-   produtosIds = entity.getProdutos()
-     .stream()
-     .filter(produto -> produto != null && produto.getId() != null)
-     .map(ModelTbProdutosNf::getId)
-     .toList();
-
-  } else {
-
-   produtosIds = Collections.emptyList();
+    return entity;
   }
 
-  return new DTONfGet(
-    entity.getId(),
-    entity.getNNF(),
-    produtosIds,
-    entity.getDataCriacao());
- }
+  public DTONfGet toResponseDTO(ModelNF entity) {
+
+    List<Long> produtosIds;
+
+    if (entity.getProdutos() != null) {
+
+      produtosIds = entity.getProdutos()
+          .stream()
+          .filter(produto -> produto != null &&
+              produto.getId() != null)
+          .map(ModelTbProdutosNf::getId)
+          .toList();
+
+    } else {
+
+      produtosIds = Collections.emptyList();
+    }
+
+    Long fornecedorId = null;
+
+    if (entity.getFornecedor() != null) {
+      fornecedorId = entity.getFornecedor().getId();
+    }
+
+    return new DTONfGet(
+        entity.getId(),
+        entity.getNNF(),
+        fornecedorId,
+        produtosIds,
+        entity.getDataCriacao());
+  }
 }

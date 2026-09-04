@@ -19,7 +19,7 @@ export default function DetalhesNf({ nfe, setContadorNf }: ConfigProps) {
     if (!reposta) {
       setFornecedor(false);
       setModalOpen(true);
-      console.log(nfe)
+      console.log(nfe);
     }
 
     if (reposta) {
@@ -44,6 +44,11 @@ export default function DetalhesNf({ nfe, setContadorNf }: ConfigProps) {
   async function fornecedorSalvo() {
     await getFornecedores();
     setModalOpen(false);
+  }
+
+  function postNf(cnpj: string) {
+    VerificaFornecedorExste(cnpj);
+    console.log(nfe);
   }
 
   const colunasNf: Column<ProdutoNfe>[] = [
@@ -166,7 +171,7 @@ export default function DetalhesNf({ nfe, setContadorNf }: ConfigProps) {
         <button
           type="button"
           className="btn-cancel"
-          onClick={() => VerificaFornecedorExste(nfe.fornecedor.cnpj)}
+          onClick={() => postNf(nfe.fornecedor.cnpj)}
         >
           Entrada sem conexão
         </button>

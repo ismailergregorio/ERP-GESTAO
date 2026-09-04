@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import com.devteciot.API_erp.Models.ModelTbFornecedores;
 import com.devteciot.API_erp.Models.ModelProdutos.ModelTbProdutosNf;
 
 import jakarta.persistence.CascadeType;
@@ -15,6 +16,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -31,6 +34,10 @@ public class ModelNF {
 
  @Column(name = "n_nf", nullable = false)
  private Integer nNF;
+
+ @ManyToOne
+ @JoinColumn(name = "fornecedor_id")
+ private ModelTbFornecedores fornecedor;
 
  @OneToMany(mappedBy = "nf", cascade = CascadeType.ALL, orphanRemoval = true)
  private List<ModelTbProdutosNf> produtos = new ArrayList<>();

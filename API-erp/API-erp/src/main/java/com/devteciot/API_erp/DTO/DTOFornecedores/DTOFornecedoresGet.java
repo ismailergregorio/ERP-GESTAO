@@ -1,6 +1,7 @@
 package com.devteciot.API_erp.DTO.DTOFornecedores;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record DTOFornecedoresGet(
         Long id,
@@ -10,6 +11,6 @@ public record DTOFornecedoresGet(
         String cnpj,
         String telefone,
         String email,
+        List<Integer> nfs,
         LocalDateTime dataCriacao) {
-
 }

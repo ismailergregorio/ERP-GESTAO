@@ -8,8 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.devteciot.API_erp.DTO.DTONf.DTONfGet;
 import com.devteciot.API_erp.DTO.DTONf.DTONfPost;
+import com.devteciot.API_erp.Exception.ResourceNotFoundException;
 import com.devteciot.API_erp.Mapper.MapperNf.MapperNf;
 import com.devteciot.API_erp.Models.ModelNf.ModelNF;
+import com.devteciot.API_erp.Models.ModelTbFornecedores;
+import com.devteciot.API_erp.Repository.RepositoryFornecedor;
 import com.devteciot.API_erp.Repository.RepositoryNF;
 
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class ServiceNF {
 
     private final RepositoryNF repositoryNF;
+    private final RepositoryFornecedor repositoryFornecedor;
     private final MapperNf mapperNf;
 
     /*
@@ -42,6 +46,12 @@ public class ServiceNF {
             );
         }
 
+        if (dto.fornecedorId() == null) {
+            throw new IllegalArgumentException(
+                    "O ID do fornecedor é obrigatório."
+            );
+        }
+
         /*
          * Verifica se já existe uma NF com o mesmo número.
          */
@@ -53,9 +63,21 @@ public class ServiceNF {
         }
 
         /*
+         * Busca o fornecedor pelo ID.
+         */
+        ModelTbFornecedores fornecedor =
+                repositoryFornecedor.findById(dto.fornecedorId())
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Fornecedor não encontrado: "
+                                                + dto.fornecedorId()
+                                )
+                        );
+
+        /*
          * Converte DTO para entidade.
          */
-        ModelNF nf = mapperNf.toEntity(dto);
+        ModelNF nf = mapperNf.toEntity(dto, fornecedor);
 
         /*
          * Datas controladas pelo sistema.
@@ -93,7 +115,7 @@ public class ServiceNF {
 
         ModelNF nf = repositoryNF.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "NF não encontrada: " + id
                         )
                 );
@@ -118,7 +140,7 @@ public class ServiceNF {
 
         ModelNF nf = repositoryNF.findByNNF(nNF)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "NF não encontrada: " + nNF
                         )
                 );
@@ -170,12 +192,18 @@ public class ServiceNF {
             );
         }
 
+        if (dto.fornecedorId() == null) {
+            throw new IllegalArgumentException(
+                    "O ID do fornecedor é obrigatório."
+            );
+        }
+
         /*
          * Busca a NF existente.
          */
         ModelNF nf = repositoryNF.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "NF não encontrada: " + id
                         )
                 );
@@ -194,11 +222,22 @@ public class ServiceNF {
         }
 
         /*
-         * Atualiza somente os campos permitidos.
-         *
-         * O ID continua sendo o mesmo.
+         * Busca o novo fornecedor.
+         */
+        ModelTbFornecedores fornecedor =
+                repositoryFornecedor.findById(dto.fornecedorId())
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Fornecedor não encontrado: "
+                                                + dto.fornecedorId()
+                                )
+                        );
+
+        /*
+         * Atualiza os dados.
          */
         nf.setNNF(dto.nNF());
+        nf.setFornecedor(fornecedor);
 
         /*
          * Atualiza a data.
@@ -233,7 +272,7 @@ public class ServiceNF {
 
         ModelNF nf = repositoryNF.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "NF não encontrada: " + id
                         )
                 );
