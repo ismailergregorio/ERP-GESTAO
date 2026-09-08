@@ -1,0 +1,272 @@
+.sidebar {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+
+  width: var(--sidebar-width);
+
+  height: 100vh;
+
+  background: var(--primary);
+
+  color: var(--text-white);
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  transition: var(--transition);
+
+  z-index: var(--z-sidebar);
+}
+
+/* =====================================================
+   SIDEBAR FECHADA
+   ===================================================== */
+
+.erp-layout.sidebar-closed .sidebar-logo h1,
+.erp-layout.sidebar-closed .sidebar-logo span,
+.erp-layout.sidebar-closed .menu-link span,
+.erp-layout.sidebar-closed .menu-title span,
+.erp-layout.sidebar-closed .submenu,
+.erp-layout.sidebar-closed .sidebar-footer {
+  display: none;
+}
+
+/* Centraliza os ícones */
+
+.erp-layout.sidebar-closed .menu-link,
+.erp-layout.sidebar-closed .menu-title {
+  justify-content: center;
+
+  padding: 0;
+
+  gap: 0;
+}
+
+/* Remove seta */
+
+.erp-layout.sidebar-closed .menu-link svg:last-child,
+.erp-layout.sidebar-closed .menu-title svg:last-child {
+  display: none;
+}
+
+/* Logo */
+
+.erp-layout.sidebar-closed .sidebar-logo {
+  justify-content: center;
+
+  padding: 22px 10px;
+}
+
+/* =====================================================
+   MENU
+   ===================================================== */
+
+.sidebar-menu {
+  flex: 1;
+
+  padding: 15px 18px;
+
+  overflow-y: auto;
+}
+
+.menu-link,
+.menu-title {
+  min-height: 48px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 14px;
+
+  padding: 0 14px;
+
+  margin-bottom: 5px;
+
+  border-radius: var(--radius);
+
+  color: #e5edf8;
+
+  text-decoration: none;
+
+  font-size: var(--font-md);
+
+  font-weight: var(--font-medium);
+
+  transition: var(--transition-fast);
+}
+
+.menu-link:hover,
+.menu-title:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.menu-link.active {
+  background: var(--secondary);
+
+  color: var(--text-white);
+
+  box-shadow: 0 5px 15px rgba(229, 31, 42, 0.25);
+}
+
+/* =====================================================
+   SUBMENU
+   ===================================================== */
+
+.submenu {
+  margin-left: 18px;
+
+  padding-left: 17px;
+
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.submenu a {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  min-height: 38px;
+
+  padding: 0 10px;
+
+  color: #c8d4e5;
+
+  text-decoration: none;
+
+  font-size: var(--font-sm);
+
+  transition: var(--transition-fast);
+
+  border-radius: var(--radius-sm);
+}
+
+.submenu a:hover {
+  color: var(--text-white);
+
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.submenu a.active {
+  color: var(--text-white);
+
+  background: rgba(229, 31, 42, 0.25);
+}
+
+.sidebar-menu {
+  flex: 1;
+
+  padding: 15px 18px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /*
+   * Firefox
+   */
+  scrollbar-width: none;
+
+  /*
+   * Chrome / Edge / Safari
+   */
+  -ms-overflow-style: none;
+}
+
+.sidebar-menu::-webkit-scrollbar {
+  display: none;
+}
+
+.menu-title {
+  width: 100%;
+
+  min-height: 48px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 14px;
+
+  padding: 0 14px;
+
+  margin-bottom: 5px;
+
+  border: none;
+
+  background: transparent;
+
+  border-radius: var(--radius);
+
+  color: #e5edf8;
+
+  font-family: var(--font-family);
+
+  font-size: var(--font-md);
+
+  font-weight: var(--font-medium);
+
+  text-align: left;
+
+  transition: var(--transition-fast);
+}
+
+.menu-title:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.menu-title svg:last-child {
+  margin-left: auto;
+}
+
+.menu-title svg:last-child {
+  transition: transform 0.25s ease;
+}
+
+.menu-title .arrow-open {
+  transform: rotate(180deg);
+}
+
+.submenu {
+  margin-left: 18px;
+
+  padding-left: 17px;
+
+  border-left:
+    1px solid rgba(255, 255, 255, 0.15);
+
+  animation: submenuOpen 0.2s ease;
+}
+
+@keyframes submenuOpen {
+
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+}
+
+.erp-layout.sidebar-closed .menu-title {
+  justify-content: center;
+
+  padding: 0;
+}
+
+.erp-layout.sidebar-closed .menu-title span {
+  display: none;
+}
+
+.erp-layout.sidebar-closed .menu-title svg:last-child {
+  display: none;
+}

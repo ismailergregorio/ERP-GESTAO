@@ -1,0 +1,58 @@
+.erp-layout {
+  min-height: 100vh;
+
+  background: var(--background);
+
+  transition: var(--transition);
+}
+
+
+/* =====================================================
+   SIDEBAR ABERTA
+   ===================================================== */
+
+.erp-layout.sidebar-open .sidebar {
+  width: var(--sidebar-width);
+}
+
+.erp-layout.sidebar-open .erp-content {
+  margin-left: var(--sidebar-width);
+}
+
+.erp-layout.sidebar-open .navbar {
+  left: var(--sidebar-width);
+}
+
+
+/* =====================================================
+   SIDEBAR FECHADA
+   ===================================================== */
+
+.erp-layout.sidebar-closed .sidebar {
+  width: var(--sidebar-collapsed-width);
+}
+
+.erp-layout.sidebar-closed .erp-content {
+  margin-left: var(--sidebar-collapsed-width);
+}
+
+.erp-layout.sidebar-closed .navbar {
+  left: var(--sidebar-collapsed-width);
+}
+
+
+/* =====================================================
+   CONTEÚDO
+   ===================================================== */
+
+.erp-content {
+  min-height: 100vh;
+
+  padding-top: var(--navbar-height);
+
+  transition: var(--transition);
+}
+
+.erp-content > * {
+  padding: 28px;
+}

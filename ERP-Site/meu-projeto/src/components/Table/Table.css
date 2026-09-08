@@ -1,0 +1,439 @@
+.table-container {
+  width: 100%;
+
+  background: var(--surface);
+
+  border: 1px solid var(--border-light);
+
+  border-radius: var(--radius-md);
+
+  box-shadow: var(--shadow-sm);
+
+  overflow: hidden;
+}
+
+
+/* =====================================================
+   SCROLL
+   ===================================================== */
+
+.table-scroll {
+  width: 100%;
+
+  overflow-x: auto;
+
+  scrollbar-width: none;
+
+  -ms-overflow-style: none;
+}
+
+.table-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+
+/* =====================================================
+   TABLE
+   ===================================================== */
+
+.erp-table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  font-size: var(--font-md);
+
+  color: var(--text-primary);
+}
+
+
+/* =====================================================
+   HEADER
+   ===================================================== */
+
+.erp-table thead {
+  background: #f7f9fc;
+}
+
+.erp-table th {
+  height: 48px;
+
+  padding: 0 16px;
+
+  color: var(--text-primary);
+
+  font-size: var(--font-sm);
+
+  font-weight: var(--font-semibold);
+
+  white-space: nowrap;
+
+  border-bottom:
+    1px solid var(--border);
+}
+
+
+/* =====================================================
+   BODY
+   ===================================================== */
+
+.erp-table td {
+  height: 56px;
+
+  padding: 0 16px;
+
+  color: var(--text-secondary);
+
+  font-size: var(--font-md);
+
+  border-bottom:
+    1px solid var(--border-light);
+
+  white-space: nowrap;
+}
+
+.erp-table tbody tr {
+  transition:
+    background var(--transition-fast);
+}
+
+.erp-table tbody tr:hover {
+  background: #f8faff;
+}
+
+.erp-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+
+/* =====================================================
+   SELEÇÃO
+   ===================================================== */
+
+.checkbox-column {
+  width: 45px;
+
+  text-align: center !important;
+}
+
+.checkbox-column input {
+  width: 16px;
+  height: 16px;
+
+  cursor: pointer;
+
+  accent-color: var(--primary);
+}
+
+.row-selected {
+  background: #eef4ff !important;
+}
+
+
+/* =====================================================
+   AÇÕES
+   ===================================================== */
+
+.actions-column {
+  width: 180px;
+
+  text-align: center !important;
+}
+
+.table-actions {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 8px;
+}
+
+.table-action {
+  min-width: 72px;
+
+  height: 34px;
+
+  padding: 0 12px;
+
+  border-radius: var(--radius-sm);
+
+  border: 1px solid transparent;
+
+  font-size: var(--font-sm);
+
+  font-weight: var(--font-semibold);
+
+  cursor: pointer;
+
+  transition: var(--transition-fast);
+}
+
+
+/* PRIMARY */
+
+.table-action.primary {
+  background: var(--primary);
+
+  color: var(--text-white);
+}
+
+.table-action.primary:hover {
+  background: var(--primary-light);
+}
+
+
+/* SECONDARY */
+
+.table-action.secondary {
+  background: #eef4fb;
+
+  color: var(--primary);
+
+  border-color: #dbe6f3;
+}
+
+.table-action.secondary:hover {
+  background: #e2ebf7;
+}
+
+
+/* DANGER */
+
+.table-action.danger {
+  background: var(--danger-light);
+
+  color: var(--danger);
+
+  border-color: #ffd5d5;
+}
+
+.table-action.danger:hover {
+  background: #fee2e2;
+}
+
+
+/* SUCCESS */
+
+.table-action.success {
+  background: var(--success-light);
+
+  color: var(--success);
+
+  border-color: #c8f2dc;
+}
+
+.table-action.success:hover {
+  background: #dff8ea;
+}
+
+
+/* DISABLED */
+
+.table-action:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+
+
+/* =====================================================
+   FOOTER
+   ===================================================== */
+
+.table-footer {
+  min-height: 64px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  padding: 12px 16px;
+
+  border-top:
+    1px solid var(--border-light);
+}
+
+.table-info {
+  color: var(--text-secondary);
+
+  font-size: var(--font-sm);
+}
+
+
+/* =====================================================
+   PAGINAÇÃO
+   ===================================================== */
+
+.table-pagination {
+  display: flex;
+
+  align-items: center;
+
+  gap: 5px;
+}
+
+.table-pagination button {
+  min-width: 34px;
+
+  height: 34px;
+
+  padding: 0 10px;
+
+  border: 1px solid var(--border);
+
+  border-radius: var(--radius-sm);
+
+  background: var(--surface);
+
+  color: var(--text-primary);
+
+  font-size: var(--font-sm);
+
+  cursor: pointer;
+
+  transition: var(--transition-fast);
+}
+
+.table-pagination button:hover:not(:disabled) {
+  background: var(--background);
+
+  border-color: var(--primary-light);
+}
+
+.table-pagination button.active {
+  background: var(--primary);
+
+  color: var(--text-white);
+
+  border-color: var(--primary);
+}
+
+.table-pagination button:disabled {
+  opacity: 0.4;
+
+  cursor: not-allowed;
+}
+
+
+/* =====================================================
+   EMPTY
+   ===================================================== */
+
+.table-empty {
+  min-height: 250px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
+  padding: 40px;
+}
+
+.empty-title {
+  color: var(--text-primary);
+
+  font-size: var(--font-lg);
+
+  font-weight: var(--font-semibold);
+}
+
+.empty-description {
+  margin-top: 6px;
+
+  color: var(--text-secondary);
+
+  font-size: var(--font-md);
+}
+
+
+/* =====================================================
+   LOADING
+   ===================================================== */
+
+.skeleton {
+  width: 80%;
+
+  height: 16px;
+
+  border-radius: 5px;
+
+  background: #edf1f6;
+
+  animation: skeleton-loading 1.3s infinite;
+}
+
+.skeleton-checkbox {
+  width: 16px;
+
+  height: 16px;
+}
+
+.loading-actions {
+  display: flex;
+
+  justify-content: center;
+
+  gap: 8px;
+}
+
+.loading-actions .skeleton {
+  width: 60px;
+
+  height: 32px;
+}
+
+
+@keyframes skeleton-loading {
+
+  0% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.5;
+  }
+
+}
+
+
+/* =====================================================
+   RESPONSIVO
+   ===================================================== */
+
+@media (max-width: 768px) {
+
+  .table-footer {
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 12px;
+  }
+
+  .table-pagination {
+    width: 100%;
+
+    overflow-x: auto;
+
+    scrollbar-width: none;
+  }
+
+  .table-pagination::-webkit-scrollbar {
+    display: none;
+  }
+
+}

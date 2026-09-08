@@ -1,0 +1,240 @@
+.categoria-page {
+  width: 100%;
+}
+
+
+/* =====================================================
+   CABEÇALHO
+   ===================================================== */
+
+.page-header {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 24px;
+}
+
+.page-header h2 {
+  margin: 0;
+
+  color: var(--text-primary);
+
+  font-size: var(--font-3xl);
+
+  font-weight: var(--font-bold);
+}
+
+.page-header p {
+  margin: 5px 0 0;
+
+  color: var(--text-secondary);
+
+  font-size: var(--font-md);
+}
+
+
+/* =====================================================
+   BOTÕES
+   ===================================================== */
+
+.button-primary,
+.button-secondary {
+  min-height: 40px;
+
+  padding: 0 18px;
+
+  border-radius: var(--radius);
+
+  font-family: var(--font-family);
+
+  font-size: var(--font-md);
+
+  font-weight: var(--font-semibold);
+
+  cursor: pointer;
+
+  transition: var(--transition-fast);
+}
+
+
+/* VERMELHO */
+
+.button-primary {
+  border: 1px solid var(--secondary);
+
+  background: var(--secondary);
+
+  color: var(--text-white);
+}
+
+.button-primary:hover {
+  background: var(--secondary-dark);
+
+  border-color: var(--secondary-dark);
+}
+
+
+/* SECUNDÁRIO */
+
+.button-secondary {
+  border: 1px solid var(--border);
+
+  background: var(--surface);
+
+  color: var(--text-primary);
+}
+
+.button-secondary:hover {
+  background: var(--background);
+
+  border-color: var(--border-dark);
+}
+
+
+/* =====================================================
+   FORMULÁRIO
+   ===================================================== */
+
+.categoria-form {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.form-group label {
+  color: var(--text-primary);
+
+  font-size: var(--font-md);
+
+  font-weight: var(--font-semibold);
+}
+
+.form-group label span {
+  margin-left: 4px;
+
+  color: var(--danger);
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+
+  padding: 11px 13px;
+
+  border: 1px solid var(--border);
+
+  border-radius: var(--radius);
+
+  outline: none;
+
+  background: var(--surface);
+
+  color: var(--text-primary);
+
+  font-family: var(--font-family);
+
+  font-size: var(--font-md);
+
+  transition: var(--transition-fast);
+}
+
+.form-group input {
+  height: 42px;
+}
+
+.form-group textarea {
+  min-height: 100px;
+
+  resize: vertical;
+}
+
+.form-group select {
+  height: 42px;
+
+  cursor: pointer;
+}
+
+
+/* =====================================================
+   FOCUS
+   ===================================================== */
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: var(--primary);
+
+  box-shadow:
+    0 0 0 3px rgba(11, 42, 85, 0.08);
+}
+
+
+/* =====================================================
+   STATUS DA TABELA
+   ===================================================== */
+
+.status-active,
+.status-inactive {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  min-width: 65px;
+
+  padding: 4px 10px;
+
+  border-radius: var(--radius-full);
+
+  font-size: var(--font-sm);
+
+  font-weight: var(--font-semibold);
+}
+
+.status-active {
+  background: var(--success-light);
+
+  color: var(--success);
+}
+
+.status-inactive {
+  background: var(--danger-light);
+
+  color: var(--danger);
+}
+
+
+/* =====================================================
+   RESPONSIVO
+   ===================================================== */
+
+@media (max-width: 768px) {
+
+  .page-header {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .button-primary {
+    width: 100%;
+  }
+
+}

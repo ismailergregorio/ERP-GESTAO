@@ -1,0 +1,148 @@
+.navbar {
+  position: fixed;
+
+  top: 0;
+  left: var(--sidebar-width);
+  right: 0;
+
+  height: var(--navbar-height);
+
+  background: white;
+
+  border-bottom: 1px solid var(--border);
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 28px;
+
+  z-index: 900;
+}
+
+.navbar-menu-button {
+  border: none;
+
+  background: transparent;
+
+  color: var(--primary);
+
+  cursor: pointer;
+
+  margin-right: 28px;
+}
+
+.search-box {
+  width: 480px;
+
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+
+  background: #f1f4f9;
+
+  border-radius: 10px;
+
+  padding: 0 14px;
+
+  color: #60708a;
+}
+
+.search-box input {
+  flex: 1;
+
+  border: none;
+
+  outline: none;
+
+  background: transparent;
+
+  font-size: 14px;
+}
+
+.navbar-actions {
+  margin-left: auto;
+
+  display: flex;
+  align-items: center;
+
+  gap: 25px;
+}
+
+.notification-button {
+  position: relative;
+
+  border: none;
+
+  background: transparent;
+
+  color: var(--primary);
+
+  cursor: pointer;
+}
+
+.notification-badge {
+  position: absolute;
+
+  top: -7px;
+  right: -7px;
+
+  width: 18px;
+  height: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: var(--secondary);
+
+  color: white;
+
+  font-size: 10px;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  cursor: pointer;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: var(--primary);
+
+  color: white;
+
+  font-weight: 600;
+}
+
+.user-info strong {
+  display: block;
+
+  color: var(--primary);
+
+  font-size: 14px;
+}
+
+.user-info span {
+  display: block;
+
+  margin-top: 2px;
+
+  color: var(--text-secondary);
+
+  font-size: 12px;
+}
