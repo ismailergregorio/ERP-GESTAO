@@ -1,0 +1,275 @@
+.unidade-page {
+  width: 100%;
+}
+
+/* =====================================================
+   CABEÇALHO
+   ===================================================== */
+
+.page-header {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 24px;
+}
+
+.page-header h2 {
+  margin: 0;
+
+  color: var(--text-primary);
+
+  font-size: var(--font-3xl);
+
+  font-weight: var(--font-bold);
+}
+
+.page-header p {
+  margin: 5px 0 0;
+
+  color: var(--text-secondary);
+
+  font-size: var(--font-md);
+}
+
+/* =====================================================
+   BOTÕES
+   ===================================================== */
+
+.button-primary,
+.button-secondary {
+  min-height: 40px;
+
+  padding: 0 18px;
+
+  border-radius: var(--radius);
+
+  font-family: var(--font-family);
+
+  font-size: var(--font-md);
+
+  font-weight: var(--font-semibold);
+
+  cursor: pointer;
+
+  transition: var(--transition-fast);
+}
+
+/* PRIMARY */
+
+.button-primary {
+  border: 1px solid var(--secondary);
+
+  background: var(--secondary);
+
+  color: var(--text-white);
+}
+
+.button-primary:hover {
+  background: var(--secondary-dark);
+
+  border-color: var(--secondary-dark);
+}
+
+.button-primary:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+}
+
+/* SECONDARY */
+
+.button-secondary {
+  border: 1px solid var(--border);
+
+  background: var(--surface);
+
+  color: var(--text-primary);
+}
+
+.button-secondary:hover {
+  background: var(--background);
+
+  border-color: var(--border-dark);
+}
+
+/* =====================================================
+   FORMULÁRIO
+   ===================================================== */
+
+.unidade-form {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.form-group label {
+  color: var(--text-primary);
+
+  font-size: var(--font-md);
+
+  font-weight: var(--font-semibold);
+}
+
+.form-group label span {
+  margin-left: 4px;
+
+  color: var(--danger);
+}
+
+/* =====================================================
+   INPUT
+   ===================================================== */
+
+.form-group input {
+  width: 100%;
+
+  height: 44px;
+
+  padding: 0 13px;
+
+  border: 1px solid var(--border);
+
+  border-radius: var(--radius);
+
+  outline: none;
+
+  background: var(--surface);
+
+  color: var(--text-primary);
+
+  font-family: var(--font-family);
+
+  font-size: var(--font-md);
+
+  transition: var(--transition-fast);
+}
+
+.form-group input::placeholder {
+  color: var(--text-light);
+}
+
+.form-group input:focus {
+  border-color: var(--primary);
+
+  box-shadow: 0 0 0 3px rgba(11, 42, 85, 0.08);
+}
+
+.form-group input:disabled {
+  background: var(--background);
+
+  color: var(--text-secondary);
+
+  cursor: not-allowed;
+}
+
+/* =====================================================
+   STATUS
+   ===================================================== */
+
+.status-active,
+.status-inactive {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  width: fit-content;
+
+  min-width: 65px;
+
+  padding: 4px 10px;
+
+  border-radius: var(--radius-full);
+
+  font-size: var(--font-sm);
+
+  font-weight: var(--font-semibold);
+}
+
+.status-active {
+  background: var(--success-light);
+
+  color: var(--success);
+}
+
+.status-inactive {
+  background: var(--danger-light);
+
+  color: var(--danger);
+}
+
+/* =====================================================
+   INFORMAÇÕES
+   ===================================================== */
+
+.unidade-info {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 12px;
+
+  margin-top: 4px;
+
+  padding-top: 20px;
+
+  border-top: 1px solid var(--border);
+}
+
+.unidade-info > div {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+.unidade-info span {
+  color: var(--text-secondary);
+
+  font-size: var(--font-sm);
+}
+
+.unidade-info strong {
+  color: var(--text-primary);
+
+  font-size: var(--font-md);
+
+  font-weight: var(--font-semibold);
+}
+
+/* =====================================================
+   RESPONSIVO
+   ===================================================== */
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+
+    align-items: flex-start;
+  }
+
+  .page-header .button-primary {
+    width: 100%;
+  }
+
+  .unidade-info {
+    grid-template-columns: 1fr;
+  }
+}

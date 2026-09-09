@@ -1,4 +1,4 @@
-package com.devteciot.dev_erp.DTO;
+package com.devteciot.dev_erp.DTO.DTOCategoria;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

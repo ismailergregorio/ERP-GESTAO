@@ -9,8 +9,8 @@ import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.devteciot.dev_erp.DTO.CategoriaGetDTO;
-import com.devteciot.dev_erp.DTO.CategoriaPostDTO;
+import com.devteciot.dev_erp.DTO.DTOCategoria.CategoriaGetDTO;
+import com.devteciot.dev_erp.DTO.DTOCategoria.CategoriaPostDTO;
 import com.devteciot.dev_erp.Service.CategoriaService;
 
 import java.util.List;

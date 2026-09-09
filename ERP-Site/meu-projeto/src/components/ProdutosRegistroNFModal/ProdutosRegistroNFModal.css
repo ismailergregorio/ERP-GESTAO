@@ -1,0 +1,56 @@
+.produto-nf-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.produto-nf-section {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  background: var(--surface);
+}
+
+.produto-nf-section h3 {
+  margin: 0 0 16px;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.produto-nf-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.produto-nf-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.produto-nf-info span {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.produto-nf-info strong {
+  color: var(--text-primary);
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.status-ativo {
+  color: var(--success) !important;
+}
+
+.status-inativo {
+  color: var(--danger) !important;
+}
+
+@media (max-width: 700px) {
+  .produto-nf-info-grid {
+    grid-template-columns: 1fr;
+  }
+}

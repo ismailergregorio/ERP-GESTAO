@@ -7,5 +7,18 @@ export interface CategoriaProdutoGet {
   nome: string;
   dataCriacao: Date;
   dataUpdate: Date;
-  ativo: boolean;
+  ativo: boolean | "Ativa" | "Inativa";
+  
+}
+
+export interface Categoria {
+  id: number;
+
+  nome: string;
+
+  descricao: string;
+
+  ativo?: boolean | "Ativa" | "Inativa";
+
+  dataCriacao?: string;
 }

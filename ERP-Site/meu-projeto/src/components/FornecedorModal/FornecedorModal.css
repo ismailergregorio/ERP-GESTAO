@@ -1,0 +1,221 @@
+.fornecedor-form {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 25px;
+}
+
+
+/* =====================================================
+   SEÇÃO
+   ===================================================== */
+
+.form-section {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 18px;
+}
+
+.form-section h3 {
+  margin: 0;
+
+  padding-bottom: 10px;
+
+  border-bottom:
+    1px solid var(--border);
+
+  color: var(--primary);
+
+  font-size: var(--font-lg);
+
+  font-weight: var(--font-semibold);
+}
+
+
+/* =====================================================
+   GRID
+   ===================================================== */
+
+.form-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 18px;
+}
+
+
+/* =====================================================
+   FORM GROUP
+   ===================================================== */
+
+.form-group {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.form-group label {
+  color: var(--text-primary);
+
+  font-size: var(--font-md);
+
+  font-weight: var(--font-semibold);
+}
+
+.form-group label span {
+  margin-left: 4px;
+
+  color: var(--danger);
+}
+
+
+/* =====================================================
+   INPUT
+   ===================================================== */
+
+.form-group input {
+  width: 100%;
+
+  height: 44px;
+
+  padding: 0 13px;
+
+  border: 1px solid var(--border);
+
+  border-radius: var(--radius);
+
+  outline: none;
+
+  background: var(--surface);
+
+  color: var(--text-primary);
+
+  font-family: var(--font-family);
+
+  font-size: var(--font-md);
+
+  transition: var(--transition-fast);
+}
+
+.form-group input::placeholder {
+  color: var(--text-light);
+}
+
+.form-group input:focus {
+  border-color: var(--primary);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(11, 42, 85, 0.08);
+}
+
+.form-group input:disabled {
+  background: var(--background);
+
+  color: var(--text-secondary);
+
+  cursor: not-allowed;
+}
+
+
+/* =====================================================
+   INFORMAÇÕES
+   ===================================================== */
+
+.fornecedor-info {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 15px;
+
+  padding-top: 20px;
+
+  border-top:
+    1px solid var(--border);
+}
+
+.fornecedor-info > div {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+.fornecedor-info span {
+  color: var(--text-secondary);
+
+  font-size: var(--font-sm);
+}
+
+.fornecedor-info strong {
+  color: var(--text-primary);
+
+  font-size: var(--font-md);
+
+  font-weight: var(--font-semibold);
+}
+
+
+/* =====================================================
+   STATUS
+   ===================================================== */
+
+.status-active,
+.status-inactive {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  width: fit-content;
+
+  min-width: 65px;
+
+  padding: 4px 10px;
+
+  border-radius: var(--radius-full);
+
+  font-size: var(--font-sm);
+
+  font-weight: var(--font-semibold);
+}
+
+.status-active {
+  background: var(--success-light);
+
+  color: var(--success);
+}
+
+.status-inactive {
+  background: var(--danger-light);
+
+  color: var(--danger);
+}
+
+
+/* =====================================================
+   RESPONSIVO
+   ===================================================== */
+
+@media (max-width: 700px) {
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fornecedor-info {
+    grid-template-columns: 1fr;
+  }
+
+}

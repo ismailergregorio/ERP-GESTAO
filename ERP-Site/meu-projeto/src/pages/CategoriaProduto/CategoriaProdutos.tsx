@@ -1,69 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Modal from "../../components/Modal/Modal";
 import Table from "../../components/Table/Table";
 
 import "./CategoriaProdutos.css";
 
-interface Categoria {
-  id: number;
-  nome: string;
-  descricao: string;
-  produtos: number;
-  status: "Ativa" | "Inativa";
-  dataCriacao: string;
-}
+import {
+  listarCategoriasProduto,
+  criarCategoriaProduto,
+  atualizarCategoriaProduto,
+  excluirCategoriaProduto,
+} from "../../services/categoriaProdutoServices";
 
-const categoriasIniciais: Categoria[] = [
-  {
-    id: 1,
-    nome: "Ferramentas",
-    descricao: "Ferramentas manuais e elétricas",
-    produtos: 124,
-    status: "Ativa",
-    dataCriacao: "10/08/2026 14:32",
-  },
-  {
-    id: 2,
-    nome: "Eletrônicos",
-    descricao: "Equipamentos e componentes eletrônicos",
-    produtos: 98,
-    status: "Ativa",
-    dataCriacao: "12/08/2026 09:15",
-  },
-  {
-    id: 3,
-    nome: "Construção",
-    descricao: "Materiais para construção civil",
-    produtos: 87,
-    status: "Ativa",
-    dataCriacao: "15/08/2026 11:20",
-  },
-  {
-    id: 4,
-    nome: "Móveis",
-    descricao: "Móveis para escritório e residencial",
-    produtos: 53,
-    status: "Ativa",
-    dataCriacao: "20/08/2026 16:45",
-  },
-  {
-    id: 5,
-    nome: "Automotivo",
-    descricao: "Peças e acessórios automotivos",
-    produtos: 76,
-    status: "Ativa",
-    dataCriacao: "22/08/2026 10:12",
-  },
-  {
-    id: 6,
-    nome: "Limpeza",
-    descricao: "Produtos de limpeza e higienização",
-    produtos: 41,
-    status: "Inativa",
-    dataCriacao: "25/08/2026 08:33",
-  },
-];
+import type {
+  CategoriaProdutoGet,
+  CategoriaProdutoPost,
+} from "../../types/categoriaType";
+
+import { toast } from "react-toastify";
 
 export default function CategoriaProdutos() {
 
@@ -73,23 +27,68 @@ export default function CategoriaProdutos() {
    * =====================================================
    */
 
-  const [categorias, setCategorias] =
-    useState<Categoria[]>(categoriasIniciais);
+  const [categorias, setCategorias] = useState<
+    CategoriaProdutoGet[]
+  >([]);
 
-  const [modalAberto, setModalAberto] =
-    useState(false);
+  const [modalAberto, setModalAberto] = useState(false);
 
   const [categoriaSelecionada, setCategoriaSelecionada] =
-    useState<Categoria | null>(null);
+    useState<CategoriaProdutoGet | null>(null);
 
-  const [nome, setNome] =
-    useState("");
+  const [nome, setNome] = useState("");
 
-  const [descricao, setDescricao] =
-    useState("");
+  const [carregando, setCarregando] = useState(false);
 
-  const [status, setStatus] =
-    useState<"Ativa" | "Inativa">("Ativa");
+  const [salvando, setSalvando] = useState(false);
+
+
+  /*
+   * =====================================================
+   * BUSCAR CATEGORIAS
+   * =====================================================
+   */
+
+  const getListaCategorias = async () => {
+
+    try {
+
+      setCarregando(true);
+
+      const dados = await listarCategoriasProduto();
+
+      setCategorias(dados);
+
+    } catch (error) {
+
+      console.error(
+        "Erro ao buscar categorias:",
+        error
+      );
+
+      toast.error(
+        "Não foi possível carregar as categorias."
+      );
+
+    } finally {
+
+      setCarregando(false);
+
+    }
+  };
+
+
+  /*
+   * =====================================================
+   * CARREGAR AO ABRIR A PÁGINA
+   * =====================================================
+   */
+
+  useEffect(() => {
+
+    getListaCategorias();
+
+  }, []);
 
 
   /*
@@ -103,10 +102,6 @@ export default function CategoriaProdutos() {
     setCategoriaSelecionada(null);
 
     setNome("");
-
-    setDescricao("");
-
-    setStatus("Ativa");
 
     setModalAberto(true);
   };
@@ -124,6 +119,7 @@ export default function CategoriaProdutos() {
 
     setCategoriaSelecionada(null);
 
+    setNome("");
   };
 
 
@@ -134,19 +130,14 @@ export default function CategoriaProdutos() {
    */
 
   const editarCategoria = (
-    categoria: Categoria
+    categoria: CategoriaProdutoGet
   ) => {
 
     setCategoriaSelecionada(categoria);
 
     setNome(categoria.nome);
 
-    setDescricao(categoria.descricao);
-
-    setStatus(categoria.status);
-
     setModalAberto(true);
-
   };
 
 
@@ -157,7 +148,7 @@ export default function CategoriaProdutos() {
    */
 
   const visualizarCategoria = (
-    categoria: Categoria
+    categoria: CategoriaProdutoGet
   ) => {
 
     console.log(
@@ -174,25 +165,42 @@ export default function CategoriaProdutos() {
    * =====================================================
    */
 
-  const excluirCategoria = (
-    categoria: Categoria
+  const excluirCategoria = async (
+    categoria: CategoriaProdutoGet
   ) => {
 
-    const confirmar =
-      window.confirm(
-        `Deseja excluir a categoria "${categoria.nome}"?`
-      );
+    const confirmar = window.confirm(
+      `Deseja excluir a categoria "${categoria.nome}"?`
+    );
 
     if (!confirmar) {
       return;
     }
 
-    setCategorias(
-      categorias.filter(
-        item => item.id !== categoria.id
-      )
-    );
+    try {
 
+      await excluirCategoriaProduto(
+        categoria.id
+      );
+
+      toast.success(
+        "Categoria excluída com sucesso!"
+      );
+
+      await getListaCategorias();
+
+    } catch (error) {
+
+      console.error(
+        "Erro ao excluir categoria:",
+        error
+      );
+
+      toast.error(
+        "Não foi possível excluir a categoria."
+      );
+
+    }
   };
 
 
@@ -202,88 +210,91 @@ export default function CategoriaProdutos() {
    * =====================================================
    */
 
-  const salvarCategoria = () => {
+  const salvarCategoria = async () => {
 
     if (!nome.trim()) {
 
-      alert(
+      toast.error(
         "Informe o nome da categoria."
       );
 
       return;
     }
 
+    try {
 
-    if (categoriaSelecionada) {
+      setSalvando(true);
 
-      /*
-       * EDITAR CATEGORIA
-       */
-
-      setCategorias(
-        categorias.map(categoria =>
-
-          categoria.id ===
-          categoriaSelecionada.id
-
-            ? {
-                ...categoria,
-
-                nome: nome.trim(),
-
-                descricao:
-                  descricao.trim(),
-
-                status,
-              }
-
-            : categoria
-        )
-      );
-
-    } else {
-
-      /*
-       * NOVA CATEGORIA
-       */
-
-      const novaCategoria: Categoria = {
-
-        id:
-          Math.max(
-            0,
-            ...categorias.map(
-              categoria => categoria.id
-            )
-          ) + 1,
-
+      const dados: CategoriaProdutoPost = {
         nome: nome.trim(),
-
-        descricao:
-          descricao.trim(),
-
-        produtos: 0,
-
-        status,
-
-        dataCriacao:
-          new Date().toLocaleString(
-            "pt-BR"
-          ),
-
       };
 
 
-      setCategorias([
-        ...categorias,
-        novaCategoria,
-      ]);
+      /*
+       * ================================================
+       * EDITAR
+       * ================================================
+       */
+
+      if (categoriaSelecionada) {
+
+        await atualizarCategoriaProduto(
+          categoriaSelecionada.id,
+          dados
+        );
+
+        toast.success(
+          "Categoria atualizada com sucesso!"
+        );
+
+      }
+
+
+      /*
+       * ================================================
+       * NOVA CATEGORIA
+       * ================================================
+       */
+
+      else {
+
+        await criarCategoriaProduto(
+          dados
+        );
+
+        toast.success(
+          "Categoria criada com sucesso!"
+        );
+
+      }
+
+
+      /*
+       * ================================================
+       * ATUALIZAR LISTA
+       * ================================================
+       */
+
+      await getListaCategorias();
+
+      fecharModal();
+
+    } catch (error) {
+
+      console.error(
+        "Erro ao salvar categoria:",
+        error
+      );
+
+      toast.error(
+        "Não foi possível salvar a categoria."
+      );
+
+    } finally {
+
+      setSalvando(false);
 
     }
-
-
-    fecharModal();
-
   };
 
 
@@ -308,40 +319,41 @@ export default function CategoriaProdutos() {
     },
 
     {
-      key: "descricao",
-      label: "Descrição",
-    },
-
-    {
-      key: "produtos",
-      label: "Produtos",
-      align: "center" as const,
-    },
-
-    {
-      key: "status",
+      key: "ativo",
       label: "Status",
 
-      render: (
-        value: unknown
-      ) => (
+      render: (value: unknown) => {
 
-        <span
-          className={
-            value === "Ativa"
-              ? "status-active"
-              : "status-inactive"
-          }
-        >
-          {String(value)}
-        </span>
+        const ativo = Boolean(value);
 
-      ),
+        return (
+          <span
+            className={
+              ativo
+                ? "status-active"
+                : "status-inactive"
+            }
+          >
+            {ativo ? "Ativa" : "Inativa"}
+          </span>
+        );
+      },
     },
 
     {
       key: "dataCriacao",
       label: "Data de Criação",
+
+      render: (value: unknown) => {
+
+        if (!value) {
+          return "-";
+        }
+
+        return new Date(
+          String(value)
+        ).toLocaleString("pt-BR");
+      },
     },
 
   ];
@@ -358,31 +370,25 @@ export default function CategoriaProdutos() {
     {
       label: "Visualizar",
 
-      variant:
-        "secondary" as const,
+      variant: "secondary" as const,
 
-      onClick:
-        visualizarCategoria,
+      onClick: visualizarCategoria,
     },
 
     {
       label: "Editar",
 
-      variant:
-        "primary" as const,
+      variant: "primary" as const,
 
-      onClick:
-        editarCategoria,
+      onClick: editarCategoria,
     },
 
     {
       label: "Excluir",
 
-      variant:
-        "danger" as const,
+      variant: "danger" as const,
 
-      onClick:
-        excluirCategoria,
+      onClick: excluirCategoria,
     },
 
   ];
@@ -398,7 +404,6 @@ export default function CategoriaProdutos() {
 
     <section className="categoria-page">
 
-
       {/* =================================================
           CABEÇALHO
          ================================================= */}
@@ -412,12 +417,10 @@ export default function CategoriaProdutos() {
           </h2>
 
           <p>
-            Gerencie as categorias dos
-            seus produtos.
+            Gerencie as categorias dos seus produtos.
           </p>
 
         </div>
-
 
         <button
           type="button"
@@ -447,19 +450,14 @@ export default function CategoriaProdutos() {
          ================================================= */}
 
       <Modal
-
         isOpen={modalAberto}
-
         onClose={fecharModal}
-
         onOpenChange={setModalAberto}
-
         title={
           categoriaSelecionada
             ? "Editar Categoria"
             : "Nova Categoria"
         }
-
         width="650px"
 
         footer={
@@ -470,108 +468,56 @@ export default function CategoriaProdutos() {
               type="button"
               className="button-secondary"
               onClick={fecharModal}
+              disabled={salvando}
             >
               Cancelar
             </button>
-
 
             <button
               type="button"
               className="button-primary"
               onClick={salvarCategoria}
+              disabled={salvando}
             >
-              {categoriaSelecionada
-                ? "Salvar Alterações"
-                : "Salvar Categoria"}
+              {salvando
+                ? "Salvando..."
+                : categoriaSelecionada
+                  ? "Salvar Alterações"
+                  : "Salvar Categoria"
+              }
             </button>
 
           </>
 
         }
-
       >
 
         <div className="categoria-form">
-
 
           {/* NOME */}
 
           <div className="form-group">
 
             <label htmlFor="nome">
+
               Nome da Categoria
+
               <span>*</span>
+
             </label>
 
             <input
               id="nome"
               type="text"
               value={nome}
-              onChange={event =>
+              onChange={(event) =>
                 setNome(event.target.value)
               }
               placeholder="Ex.: Ferramentas"
+              disabled={salvando}
             />
 
           </div>
-
-
-          {/* DESCRIÇÃO */}
-
-          <div className="form-group">
-
-            <label htmlFor="descricao">
-              Descrição
-            </label>
-
-            <textarea
-              id="descricao"
-              value={descricao}
-              onChange={event =>
-                setDescricao(
-                  event.target.value
-                )
-              }
-              placeholder="Descreva a categoria..."
-              rows={4}
-            />
-
-          </div>
-
-
-          {/* STATUS */}
-
-          <div className="form-group">
-
-            <label htmlFor="status">
-              Status
-              <span>*</span>
-            </label>
-
-            <select
-              id="status"
-              value={status}
-              onChange={event =>
-                setStatus(
-                  event.target.value as
-                    | "Ativa"
-                    | "Inativa"
-                )
-              }
-            >
-
-              <option value="Ativa">
-                Ativa
-              </option>
-
-              <option value="Inativa">
-                Inativa
-              </option>
-
-            </select>
-
-          </div>
-
 
         </div>
 

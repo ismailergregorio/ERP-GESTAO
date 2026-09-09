@@ -1,0 +1,55 @@
+.produtos-registro-nf-page {
+  width: 100%;
+}
+
+.produtos-registro-nf-card {
+  margin-top: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.page-header h1 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.page-header p {
+  margin: 6px 0 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 5px 10px;
+
+  border-radius: 20px;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.ativo {
+  color: var(--success);
+  background: rgba(18, 183, 106, 0.1);
+}
+
+.status-badge.inativo {
+  color: var(--danger);
+  background: rgba(229, 31, 42, 0.1);
+}

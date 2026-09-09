@@ -1,7 +1,7 @@
 package com.devteciot.dev_erp.Service;
 
-import com.devteciot.dev_erp.DTO.CategoriaGetDTO;
-import com.devteciot.dev_erp.DTO.CategoriaPostDTO;
+import com.devteciot.dev_erp.DTO.DTOCategoria.CategoriaGetDTO;
+import com.devteciot.dev_erp.DTO.DTOCategoria.CategoriaPostDTO;
 import com.devteciot.dev_erp.Exception.ResourceNotFoundException;
 import com.devteciot.dev_erp.Mapper.CategoriaMapper;
 import com.devteciot.dev_erp.Models.Categoria;
@@ -17,72 +17,74 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CategoriaService {
 
- private final CategoriaRepository repository;
+  private final CategoriaRepository repository;
 
- private final CategoriaMapper mapper;
+  private final CategoriaMapper mapper;
 
- public CategoriaGetDTO criar(CategoriaPostDTO dto) {
+  public CategoriaGetDTO criar(CategoriaPostDTO dto) {
 
-  if (repository.existsByNomeIgnoreCase(dto.nome())) {
+    if (repository.existsByNomeIgnoreCase(dto.nome())) {
 
-   throw new IllegalArgumentException(
-     "Já existe uma categoria com o nome: "
-       + dto.nome());
+      throw new IllegalArgumentException(
+          "Já existe uma categoria com o nome: "
+              + dto.nome());
+    }
+
+    Categoria categoria = mapper.toEntity(dto);
+
+    Categoria salva = repository.save(categoria);
+
+    return mapper.toGetDTO(salva);
   }
 
-  Categoria categoria = mapper.toEntity(dto);
+  public List<CategoriaGetDTO> listar() {
 
-  Categoria salva = repository.save(categoria);
+    return repository.findAll()
+        .stream()
+        .map(mapper::toGetDTO)
+        .toList();
+  }
 
-  return mapper.toGetDTO(salva);
- }
+  public CategoriaGetDTO buscarPorId(Long id) {
 
- public List<CategoriaGetDTO> listar() {
+    Categoria categoria = repository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException(
+            "Categoria não encontrada com o ID: " + id));
 
-  return repository.findAll()
-    .stream()
-    .map(mapper::toGetDTO)
-    .toList();
- }
+    return mapper.toGetDTO(categoria);
+  }
 
- public CategoriaGetDTO buscarPorId(Long id) {
+  public List<CategoriaGetDTO> listarAtivas() {
 
-  Categoria categoria = repository.findById(id)
-    .orElseThrow(() -> new ResourceNotFoundException(
-      "Categoria não encontrada com o ID: " + id));
+    return repository.findByAtivoTrue()
+        .stream()
+        .map(mapper::toGetDTO)
+        .toList();
+  }
 
-  return mapper.toGetDTO(categoria);
- }
+  public CategoriaGetDTO atualizar(
+      Long id,
+      CategoriaPostDTO dto) {
 
- public List<CategoriaGetDTO> listarAtivas() {
+    Categoria categoria = repository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException(
+            "Categoria não encontrada com o ID: " + id));
 
-  return repository.findByAtivoTrue()
-    .stream()
-    .map(mapper::toGetDTO)
-    .toList();
- }
+    mapper.updateEntity(categoria, dto);
 
- public CategoriaGetDTO atualizar(
-   Long id,
-   CategoriaPostDTO dto) {
+    Categoria atualizada = repository.save(categoria);
 
-  Categoria categoria = repository.findById(id)
-    .orElseThrow(() -> new ResourceNotFoundException(
-      "Categoria não encontrada com o ID: " + id));
+    return mapper.toGetDTO(atualizada);
+  }
 
-  mapper.updateEntity(categoria, dto);
+  public void excluir(Long id) {
 
-  Categoria atualizada = repository.save(categoria);
+    Categoria categoria = repository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException(
+            "Categoria não encontrada com o ID: " + id));
 
-  return mapper.toGetDTO(atualizada);
- }
+    categoria.setAtivo(false);
 
- public void excluir(Long id) {
-
-  Categoria categoria = repository.findById(id)
-    .orElseThrow(() -> new ResourceNotFoundException(
-      "Categoria não encontrada com o ID: " + id));
-
-  repository.delete(categoria);
- }
+    repository.save(categoria);
+  }
 }

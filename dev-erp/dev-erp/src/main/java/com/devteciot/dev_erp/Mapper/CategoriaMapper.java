@@ -1,7 +1,7 @@
 package com.devteciot.dev_erp.Mapper;
 
-import com.devteciot.dev_erp.DTO.CategoriaGetDTO;
-import com.devteciot.dev_erp.DTO.CategoriaPostDTO;
+import com.devteciot.dev_erp.DTO.DTOCategoria.CategoriaGetDTO;
+import com.devteciot.dev_erp.DTO.DTOCategoria.CategoriaPostDTO;
 import com.devteciot.dev_erp.Models.Categoria;
 
 import org.springframework.stereotype.Component;
