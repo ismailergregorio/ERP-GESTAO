@@ -14,6 +14,8 @@ export interface NotaFiscal {
   dataCriacao: string;
 
   dataUpdate: string | null;
+
+  nf_vinculada:boolean;
 }
 export interface NotaFiscalRequest {
   numero: string;

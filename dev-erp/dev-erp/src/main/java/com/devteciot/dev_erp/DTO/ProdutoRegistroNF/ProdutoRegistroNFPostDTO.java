@@ -19,9 +19,7 @@ public record ProdutoRegistroNFPostDTO(
 
   @NotNull(message = "O valor unitário é obrigatório") @DecimalMin(value = "0.00", message = "O valor unitário não pode ser negativo") BigDecimal valorUnitario,
 
-  @NotNull(message = "O valor total é obrigatório") @DecimalMin(value = "0.00", message = "O valor total não pode ser negativo") BigDecimal valorTotal,
-
-  @NotNull(message = "A nota fiscal é obrigatória") Long nfId
+  @NotNull(message = "O valor total é obrigatório") @DecimalMin(value = "0.00", message = "O valor total não pode ser negativo") BigDecimal valorTotal
 
 ) {
 }

@@ -186,10 +186,9 @@ export default function NotasFiscais() {
           notas.map((nota) => (nota.id === atualizada.id ? atualizada : nota)),
         );
       } else {
-
-      /*
-       * CRIAR
-       */
+        /*
+         * CRIAR
+         */
         const nova = await criarNotaFiscal(dados);
 
         setNotasFiscais((notas) => [...notas, nova]);
@@ -272,6 +271,14 @@ export default function NotasFiscais() {
       label: "Nome Fantasia",
 
       width: "190px",
+    },
+    {
+      key: "nf_vinculada",
+
+      label: "Vinculacão",
+
+      width: "190px",
+      render: (value) => value? "Vinculada":"Não Vinculada",
     },
 
     {

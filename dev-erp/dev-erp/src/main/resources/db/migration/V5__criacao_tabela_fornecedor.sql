@@ -15,6 +15,8 @@ CREATE TABLE nf (
 
     data_update TIMESTAMP,
 
+    nf_vinculada BOOLEAN NOT NULL DEFAULT FALSE,
+
     CONSTRAINT fk_nf_fornecedor
         FOREIGN KEY (fornecedor_id)
         REFERENCES fornecedores(id)

@@ -15,6 +15,13 @@ interface FornecedorModalProps {
 
   loading?: boolean;
 
+  dadosIniciais?: {
+    razaoSocial?: string;
+    nomeFantasia?: string;
+    inscricaoEstadual?: string;
+    cnpj?: string;
+  };
+
   onClose: () => void;
 
   onSave: (dados: {
@@ -29,15 +36,11 @@ interface FornecedorModalProps {
 
 export default function FornecedorModal({
   isOpen,
-
   fornecedor = null,
-
   modo = "criar",
-
   loading = false,
-
+  dadosIniciais,
   onClose,
-
   onSave,
 }: FornecedorModalProps) {
   /*
@@ -50,7 +53,8 @@ export default function FornecedorModal({
 
   const [nomeFantasia, setNomeFantasia] = useState("");
 
-  const [inscricaoEstadual, setInscricaoEstadual] = useState("");
+  const [inscricaoEstadual, setInscricaoEstadual] =
+    useState("");
 
   const [cnpj, setCnpj] = useState("");
 
@@ -65,32 +69,90 @@ export default function FornecedorModal({
    */
 
   useEffect(() => {
-    if (fornecedor && (modo === "editar" || modo === "visualizar")) {
-      setRazaoSocial(fornecedor.razaoSocial);
+    /*
+     * Quando vier um fornecedor existente,
+     * usamos os dados dele.
+     */
+    if (
+      fornecedor &&
+      (modo === "editar" || modo === "visualizar")
+    ) {
+      setRazaoSocial(
+        fornecedor.razaoSocial ?? ""
+      );
 
-      setNomeFantasia(fornecedor.nomeFantasia);
+      setNomeFantasia(
+        fornecedor.nomeFantasia ?? ""
+      );
 
-      setInscricaoEstadual(fornecedor.inscricaoEstadual);
+      setInscricaoEstadual(
+        fornecedor.inscricaoEstadual ?? ""
+      );
 
-      setCnpj(fornecedor.cnpj);
+      setCnpj(
+        fornecedor.cnpj ?? ""
+      );
 
-      setTelefone(fornecedor.telefone);
+      setTelefone(
+        fornecedor.telefone ?? ""
+      );
 
-      setEmail(fornecedor.email);
-    } else {
-      setRazaoSocial("");
+      setEmail(
+        fornecedor.email ?? ""
+      );
 
-      setNomeFantasia("");
+      return;
+    }
 
-      setInscricaoEstadual("");
+    /*
+     * Quando for criação através da importação
+     * da NF, usamos os dados vindos do XML/backend.
+     */
+    if (modo === "criar" && dadosIniciais) {
+      setRazaoSocial(
+        dadosIniciais.razaoSocial ?? ""
+      );
 
-      setCnpj("");
+      setNomeFantasia(
+        dadosIniciais.nomeFantasia ?? ""
+      );
+
+      setInscricaoEstadual(
+        dadosIniciais.inscricaoEstadual ?? ""
+      );
+
+      setCnpj(
+        dadosIniciais.cnpj ?? ""
+      );
 
       setTelefone("");
 
       setEmail("");
+
+      return;
     }
-  }, [fornecedor, modo, isOpen]);
+
+    /*
+     * Novo fornecedor sem dados iniciais.
+     */
+    setRazaoSocial("");
+
+    setNomeFantasia("");
+
+    setInscricaoEstadual("");
+
+    setCnpj("");
+
+    setTelefone("");
+
+    setEmail("");
+
+  }, [
+    fornecedor,
+    modo,
+    dadosIniciais,
+    isOpen,
+  ]);
 
   /*
    * =====================================================
@@ -98,7 +160,8 @@ export default function FornecedorModal({
    * =====================================================
    */
 
-  const somenteVisualizacao = modo === "visualizar";
+  const somenteVisualizacao =
+    modo === "visualizar";
 
   /*
    * =====================================================
@@ -109,25 +172,21 @@ export default function FornecedorModal({
   const handleSave = () => {
     if (!razaoSocial.trim()) {
       alert("Informe a razão social.");
-
       return;
     }
 
     if (!nomeFantasia.trim()) {
       alert("Informe o nome fantasia.");
-
       return;
     }
 
     if (!cnpj.trim()) {
       alert("Informe o CNPJ.");
-
       return;
     }
 
     if (!email.trim()) {
       alert("Informe o e-mail.");
-
       return;
     }
 
@@ -136,7 +195,8 @@ export default function FornecedorModal({
 
       nomeFantasia: nomeFantasia.trim(),
 
-      inscricaoEstadual: inscricaoEstadual.trim(),
+      inscricaoEstadual:
+        inscricaoEstadual.trim(),
 
       cnpj: cnpj.trim(),
 
@@ -178,7 +238,11 @@ export default function FornecedorModal({
       width="750px"
       footer={
         somenteVisualizacao ? (
-          <button type="button" className="button-secondary" onClick={onClose}>
+          <button
+            type="button"
+            className="button-secondary"
+            onClick={onClose}
+          >
             Fechar
           </button>
         ) : (
@@ -209,17 +273,23 @@ export default function FornecedorModal({
       }
     >
       <div className="fornecedor-form">
+
         {/* =================================================
             DADOS DA EMPRESA
            ================================================= */}
 
         <div className="form-section">
+
           <h3>Dados da Empresa</h3>
 
           <div className="form-group">
+
             <label htmlFor="razaoSocial">
               Razão Social
-              {!somenteVisualizacao && <span>*</span>}
+
+              {!somenteVisualizacao && (
+                <span>*</span>
+              )}
             </label>
 
             <input
@@ -227,15 +297,24 @@ export default function FornecedorModal({
               type="text"
               value={razaoSocial}
               disabled={somenteVisualizacao}
-              onChange={(event) => setRazaoSocial(event.target.value)}
+              onChange={(event) =>
+                setRazaoSocial(
+                  event.target.value
+                )
+              }
               placeholder="Ex.: Empresa LTDA"
             />
+
           </div>
 
           <div className="form-group">
+
             <label htmlFor="nomeFantasia">
               Nome Fantasia
-              {!somenteVisualizacao && <span>*</span>}
+
+              {!somenteVisualizacao && (
+                <span>*</span>
+              )}
             </label>
 
             <input
@@ -243,16 +322,26 @@ export default function FornecedorModal({
               type="text"
               value={nomeFantasia}
               disabled={somenteVisualizacao}
-              onChange={(event) => setNomeFantasia(event.target.value)}
+              onChange={(event) =>
+                setNomeFantasia(
+                  event.target.value
+                )
+              }
               placeholder="Ex.: Minha Empresa"
             />
+
           </div>
 
           <div className="form-grid">
+
             <div className="form-group">
+
               <label htmlFor="cnpj">
                 CNPJ
-                {!somenteVisualizacao && <span>*</span>}
+
+                {!somenteVisualizacao && (
+                  <span>*</span>
+                )}
               </label>
 
               <input
@@ -261,24 +350,41 @@ export default function FornecedorModal({
                 value={cnpj}
                 maxLength={18}
                 disabled={somenteVisualizacao}
-                onChange={(event) => setCnpj(formatarCnpj(event.target.value))}
+                onChange={(event) =>
+                  setCnpj(
+                    formatarCnpj(
+                      event.target.value
+                    )
+                  )
+                }
                 placeholder="00.000.000/0000-00"
               />
+
             </div>
 
             <div className="form-group">
-              <label htmlFor="inscricaoEstadual">Inscrição Estadual</label>
+
+              <label htmlFor="inscricaoEstadual">
+                Inscrição Estadual
+              </label>
 
               <input
                 id="inscricaoEstadual"
                 type="text"
                 value={inscricaoEstadual}
                 disabled={somenteVisualizacao}
-                onChange={(event) => setInscricaoEstadual(event.target.value)}
+                onChange={(event) =>
+                  setInscricaoEstadual(
+                    event.target.value
+                  )
+                }
                 placeholder="Ex.: 123456789"
               />
+
             </div>
+
           </div>
+
         </div>
 
         {/* =================================================
@@ -286,11 +392,16 @@ export default function FornecedorModal({
            ================================================= */}
 
         <div className="form-section">
+
           <h3>Informações de Contato</h3>
 
           <div className="form-grid">
+
             <div className="form-group">
-              <label htmlFor="telefone">Telefone</label>
+
+              <label htmlFor="telefone">
+                Telefone
+              </label>
 
               <input
                 id="telefone"
@@ -299,16 +410,27 @@ export default function FornecedorModal({
                 maxLength={15}
                 disabled={somenteVisualizacao}
                 onChange={(event) =>
-                  setTelefone(formatarTelefone(event.target.value))
+                  setTelefone(
+                    formatarTelefone(
+                      event.target.value
+                    )
+                  )
                 }
                 placeholder="(00) 00000-0000"
               />
+
             </div>
 
             <div className="form-group">
+
               <label htmlFor="email">
+
                 E-mail
-                {!somenteVisualizacao && <span>*</span>}
+
+                {!somenteVisualizacao && (
+                  <span>*</span>
+                )}
+
               </label>
 
               <input
@@ -316,11 +438,18 @@ export default function FornecedorModal({
                 type="email"
                 value={email}
                 disabled={somenteVisualizacao}
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={(event) =>
+                  setEmail(
+                    event.target.value
+                  )
+                }
                 placeholder="empresa@email.com"
               />
+
             </div>
+
           </div>
+
         </div>
 
         {/* =================================================
@@ -328,37 +457,61 @@ export default function FornecedorModal({
            ================================================= */}
 
         {somenteVisualizacao && fornecedor && (
+
           <div className="fornecedor-info">
+
             <div>
+
               <span>Status</span>
 
               <strong
                 className={
-                  fornecedor.ativo ? "status-active" : "status-inactive"
+                  fornecedor.ativo
+                    ? "status-active"
+                    : "status-inactive"
                 }
               >
-                {fornecedor.ativo ? "Ativo" : "Inativo"}
+                {fornecedor.ativo
+                  ? "Ativo"
+                  : "Inativo"}
               </strong>
+
             </div>
 
             <div>
+
               <span>Data de Criação</span>
 
-              <strong>{formatarData(fornecedor.dataCriacao)}</strong>
+              <strong>
+                {formatarData(
+                  fornecedor.dataCriacao
+                )}
+              </strong>
+
             </div>
 
             <div>
-              <span>Última Atualização</span>
+
+              <span>
+                Última Atualização
+              </span>
 
               <strong>
                 {fornecedor.dataUpdate
-                  ? formatarData(fornecedor.dataUpdate)
+                  ? formatarData(
+                      fornecedor.dataUpdate
+                    )
                   : "Nunca atualizado"}
               </strong>
+
             </div>
+
           </div>
+
         )}
+
       </div>
+
     </Modal>
   );
 }
@@ -369,8 +522,14 @@ export default function FornecedorModal({
  * =====================================================
  */
 
-function formatarCnpj(valor: string): string {
-  const numeros = valor.replace(/\D/g, "").slice(0, 14);
+function formatarCnpj(
+  valor: string
+): string {
+
+  const numeros =
+    valor
+      .replace(/\D/g, "")
+      .slice(0, 14);
 
   if (numeros.length <= 2) {
     return numeros;
@@ -397,8 +556,14 @@ function formatarCnpj(valor: string): string {
  * =====================================================
  */
 
-function formatarTelefone(valor: string): string {
-  const numeros = valor.replace(/\D/g, "").slice(0, 11);
+function formatarTelefone(
+  valor: string
+): string {
+
+  const numeros =
+    valor
+      .replace(/\D/g, "")
+      .slice(0, 11);
 
   if (numeros.length <= 2) {
     return numeros;
@@ -417,18 +582,24 @@ function formatarTelefone(valor: string): string {
  * =====================================================
  */
 
-function formatarData(data: string): string {
+function formatarData(
+  data: string
+): string {
+
   const date = new Date(data);
 
   if (Number.isNaN(date.getTime())) {
     return data;
   }
 
-  return date.toLocaleString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return date.toLocaleString(
+    "pt-BR",
+    {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }
+  );
 }

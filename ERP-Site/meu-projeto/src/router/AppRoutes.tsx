@@ -7,6 +7,8 @@ import Produtos from "../pages/Produtos/Produtos";
 import Fornecedores from "../pages/Fornecedores/Fornecedores";
 import NotasFiscais from "../pages/NotasFiscais/NotasFiscais";
 import ProdutosRegistroNF from "../pages/ProdutosRegistroNF/ProdutosRegistroNF";
+import TiposEntradas from "../pages/TiposEntradas/TiposEntradas";
+import Entradas from "../pages/Entradas/Entradas";
 
 export default function AppRoutes() {
   return (
@@ -18,6 +20,8 @@ export default function AppRoutes() {
       <Route path="/fornecedores" element={<Fornecedores />} />
       <Route path="/notas-fiscais" element={<NotasFiscais />} />
       <Route path="/produtos-notas-fiscais" element={<ProdutosRegistroNF />} />
+      <Route path="/tipo-entrada" element={<TiposEntradas />} />
+      <Route path="/entradas" element={<Entradas />} />
     </Routes>
   );
 }

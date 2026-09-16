@@ -1,6 +1,5 @@
 package com.devteciot.dev_erp.Service;
 
-
 import com.devteciot.dev_erp.DTO.DTOFornecedor.FornecedorGetDTO;
 import com.devteciot.dev_erp.DTO.DTOFornecedor.FornecedorPostDTO;
 import com.devteciot.dev_erp.Exception.ResourceNotFoundException;
@@ -18,124 +17,141 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FornecedorService {
 
- private final FornecedorRepository repository;
+  private final FornecedorRepository repository;
 
- private final FornecedorMapper mapper;
+  private final FornecedorMapper mapper;
 
- /*
-  * =====================================================
-  * CRIAR
-  * =====================================================
-  */
+  /*
+   * =====================================================
+   * CRIAR
+   * =====================================================
+   */
 
- public FornecedorGetDTO criar(
-   FornecedorPostDTO dto) {
+  public FornecedorGetDTO criar(
+      FornecedorPostDTO dto) {
 
-  if (repository.existsByCnpj(dto.cnpj())) {
+    if (repository.existsByCnpj(dto.cnpj())) {
 
-   throw new IllegalArgumentException(
-     "Já existe um fornecedor cadastrado "
-       + "com o CNPJ: "
-       + dto.cnpj());
+      throw new IllegalArgumentException(
+          "Já existe um fornecedor cadastrado "
+              + "com o CNPJ: "
+              + dto.cnpj());
+    }
+
+    Fornecedor fornecedor = mapper.toEntity(dto);
+    fornecedor.setCnpj(dto.cnpj().replaceAll("\\D", ""));
+    fornecedor.setAtivo(true);
+
+    Fornecedor salvo = repository.save(fornecedor);
+
+    return mapper.toGetDTO(salvo);
   }
 
-  Fornecedor fornecedor = mapper.toEntity(dto);
+  /*
+   * =====================================================
+   * BUSCAR POR CNPJ
+   * =====================================================
+   */
 
-  fornecedor.setAtivo(true);
+  public FornecedorGetDTO buscarPorCnpj(String cnpj) {
 
-  Fornecedor salvo = repository.save(fornecedor);
+    String cnpjLimpo = cnpj.replaceAll("\\D", "");
 
-  return mapper.toGetDTO(salvo);
- }
+    Fornecedor fornecedor = repository.findByCnpj(cnpjLimpo)
+        .orElseThrow(() -> new ResourceNotFoundException(
+            "Fornecedor não encontrado com o CNPJ: " + cnpj));
 
- /*
-  * =====================================================
-  * LISTAR TODOS
-  * =====================================================
-  */
+    return mapper.toGetDTO(fornecedor);
+  }
 
- public List<FornecedorGetDTO> listar() {
+  /*
+   * =====================================================
+   * LISTAR TODOS
+   * =====================================================
+   */
 
-  return repository.findAll()
-    .stream()
-    .map(mapper::toGetDTO)
-    .toList();
- }
+  public List<FornecedorGetDTO> listar() {
 
- /*
-  * =====================================================
-  * LISTAR ATIVOS
-  * =====================================================
-  */
+    return repository.findAll()
+        .stream()
+        .map(mapper::toGetDTO)
+        .toList();
+  }
 
- public List<FornecedorGetDTO> listarAtivos() {
+  /*
+   * =====================================================
+   * LISTAR ATIVOS
+   * =====================================================
+   */
 
-  return repository.findByAtivoTrue()
-    .stream()
-    .map(mapper::toGetDTO)
-    .toList();
- }
+  public List<FornecedorGetDTO> listarAtivos() {
 
- /*
-  * =====================================================
-  * BUSCAR POR ID
-  * =====================================================
-  */
+    return repository.findByAtivoTrue()
+        .stream()
+        .map(mapper::toGetDTO)
+        .toList();
+  }
 
- public FornecedorGetDTO buscarPorId(
-   Long id) {
+  /*
+   * =====================================================
+   * BUSCAR POR ID
+   * =====================================================
+   */
 
-  Fornecedor fornecedor = repository.findById(id)
-    .orElseThrow(() -> new ResourceNotFoundException(
-      "Fornecedor não encontrado "
-        + "com o ID: "
-        + id));
+  public FornecedorGetDTO buscarPorId(
+      Long id) {
 
-  return mapper.toGetDTO(fornecedor);
- }
+    Fornecedor fornecedor = repository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException(
+            "Fornecedor não encontrado "
+                + "com o ID: "
+                + id));
 
- /*
-  * =====================================================
-  * ATUALIZAR
-  * =====================================================
-  */
+    return mapper.toGetDTO(fornecedor);
+  }
 
- public FornecedorGetDTO atualizar(
-   Long id,
-   FornecedorPostDTO dto) {
+  /*
+   * =====================================================
+   * ATUALIZAR
+   * =====================================================
+   */
 
-  Fornecedor fornecedor = repository.findById(id)
-    .orElseThrow(() -> new ResourceNotFoundException(
-      "Fornecedor não encontrado "
-        + "com o ID: "
-        + id));
+  public FornecedorGetDTO atualizar(
+      Long id,
+      FornecedorPostDTO dto) {
 
-  mapper.updateEntity(
-    fornecedor,
-    dto);
+    Fornecedor fornecedor = repository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException(
+            "Fornecedor não encontrado "
+                + "com o ID: "
+                + id));
 
-  Fornecedor atualizado = repository.save(fornecedor);
+    mapper.updateEntity(
+        fornecedor,
+        dto);
 
-  return mapper.toGetDTO(atualizado);
- }
+    Fornecedor atualizado = repository.save(fornecedor);
 
- /*
-  * =====================================================
-  * EXCLUSÃO LÓGICA
-  * =====================================================
-  */
+    return mapper.toGetDTO(atualizado);
+  }
 
- public void excluir(
-   Long id) {
+  /*
+   * =====================================================
+   * EXCLUSÃO LÓGICA
+   * =====================================================
+   */
 
-  Fornecedor fornecedor = repository.findById(id)
-    .orElseThrow(() -> new ResourceNotFoundException(
-      "Fornecedor não encontrado "
-        + "com o ID: "
-        + id));
+  public void excluir(
+      Long id) {
 
-  fornecedor.setAtivo(false);
+    Fornecedor fornecedor = repository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException(
+            "Fornecedor não encontrado "
+                + "com o ID: "
+                + id));
 
-  repository.save(fornecedor);
- }
+    fornecedor.setAtivo(false);
+
+    repository.save(fornecedor);
+  }
 }

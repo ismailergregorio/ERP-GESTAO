@@ -16,8 +16,8 @@ import {
   Truck,
   User,
   ChevronDown,
-  Receipt,
   PackageCheck,
+  LogIn,
 } from "lucide-react";
 
 import "./Sidebar.css";
@@ -86,31 +86,33 @@ export default function Sidebar() {
                 <Package size={17} />
                 Produtos
               </NavLink>
-
               <NavLink to="/categorias">
                 <Tags size={17} />
                 Categorias
               </NavLink>
-
               <NavLink to="/unidades-medida">
                 <Ruler size={17} />
                 Unidades de Medida
               </NavLink>
-
               <NavLink to="/fornecedores">
                 <Truck size={17} />
                 Fornecedores
               </NavLink>
-
+ 
               <NavLink to="/notas-fiscais">
                 <FileText size={17} />
                 Nf
               </NavLink>
+
               <NavLink to="/produtos-notas-fiscais">
                 <PackageCheck size={17} />
                 Produtos-NF
               </NavLink>
 
+              <NavLink to="/tipo-entrada">
+                <LogIn size={17} />
+                Tipo de Entrada
+              </NavLink>
               <NavLink to="/clientes">
                 <User size={17} />
                 Clientes
@@ -145,7 +147,7 @@ export default function Sidebar() {
                 Estoque Atual
               </NavLink>
 
-              <NavLink to="/estoque/entradas">Entradas</NavLink>
+              <NavLink to="/entradas">Entradas</NavLink>
 
               <NavLink to="/estoque/saidas">Saídas</NavLink>
 

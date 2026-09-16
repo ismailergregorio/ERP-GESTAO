@@ -42,7 +42,9 @@ public class NotaFiscalMapper {
 
     nf.getDataCriacao(),
 
-    nf.getDataUpdate());
+    nf.getDataUpdate(),
+
+    nf.getNf_vinculada());
  }
 
  public void updateEntity(

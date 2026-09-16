@@ -5,7 +5,6 @@ import type {
   FornecedorRequest,
 } from "../types/Fornecedor";
 
-
 /*
  * =====================================================
  * LISTAR FORNECEDORES
@@ -15,7 +14,6 @@ import type {
 export async function listarFornecedores(): Promise<
   Fornecedor[]
 > {
-
   const response =
     await api.get<Fornecedor[]>(
       "/fornecedores"
@@ -23,7 +21,6 @@ export async function listarFornecedores(): Promise<
 
   return response.data;
 }
-
 
 /*
  * =====================================================
@@ -34,7 +31,6 @@ export async function listarFornecedores(): Promise<
 export async function buscarFornecedorPorId(
   id: number
 ): Promise<Fornecedor> {
-
   const response =
     await api.get<Fornecedor>(
       `/fornecedores/${id}`
@@ -42,7 +38,6 @@ export async function buscarFornecedorPorId(
 
   return response.data;
 }
-
 
 /*
  * =====================================================
@@ -53,7 +48,6 @@ export async function buscarFornecedorPorId(
 export async function listarFornecedoresAtivos(): Promise<
   Fornecedor[]
 > {
-
   const response =
     await api.get<Fornecedor[]>(
       "/fornecedores/ativos"
@@ -61,7 +55,6 @@ export async function listarFornecedoresAtivos(): Promise<
 
   return response.data;
 }
-
 
 /*
  * =====================================================
@@ -72,7 +65,6 @@ export async function listarFornecedoresAtivos(): Promise<
 export async function criarFornecedor(
   fornecedor: FornecedorRequest
 ): Promise<Fornecedor> {
-
   const response =
     await api.post<Fornecedor>(
       "/fornecedores",
@@ -81,7 +73,6 @@ export async function criarFornecedor(
 
   return response.data;
 }
-
 
 /*
  * =====================================================
@@ -93,7 +84,6 @@ export async function atualizarFornecedor(
   id: number,
   fornecedor: FornecedorRequest
 ): Promise<Fornecedor> {
-
   const response =
     await api.put<Fornecedor>(
       `/fornecedores/${id}`,
@@ -102,7 +92,6 @@ export async function atualizarFornecedor(
 
   return response.data;
 }
-
 
 /*
  * =====================================================
@@ -113,9 +102,7 @@ export async function atualizarFornecedor(
 export async function excluirFornecedor(
   id: number
 ): Promise<void> {
-
   await api.delete(
     `/fornecedores/${id}`
   );
-
 }

@@ -4,21 +4,23 @@ import java.time.LocalDateTime;
 
 public record NotaFiscalGetDTO(
 
-  Long id,
+    Long id,
 
-  String numero,
+    String numero,
 
-  Long fornecedorId,
+    Long fornecedorId,
 
-  String razaoSocialFornecedor,
+    String razaoSocialFornecedor,
 
-  String nomeFantasiaFornecedor,
+    String nomeFantasiaFornecedor,
 
-  String chaveAcesso,
+    String chaveAcesso,
 
-  LocalDateTime dataCriacao,
+    LocalDateTime dataCriacao,
 
-  LocalDateTime dataUpdate
+    LocalDateTime dataUpdate,
+
+    Boolean nf_vinculada
 
 ) {
 }

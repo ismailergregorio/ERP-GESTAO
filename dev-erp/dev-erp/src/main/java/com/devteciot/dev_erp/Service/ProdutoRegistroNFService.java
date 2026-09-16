@@ -4,7 +4,6 @@ import com.devteciot.dev_erp.DTO.ProdutoRegistroNF.ProdutoRegistroNFGetDTO;
 import com.devteciot.dev_erp.DTO.ProdutoRegistroNF.ProdutoRegistroNFPostDTO;
 import com.devteciot.dev_erp.Exception.ResourceNotFoundException;
 import com.devteciot.dev_erp.Mapper.ProdutoRegistroNFMapper;
-import com.devteciot.dev_erp.Models.NotaFiscal;
 import com.devteciot.dev_erp.Models.ProdutoRegistroNF;
 import com.devteciot.dev_erp.Repository.NotaFiscalRepository;
 import com.devteciot.dev_erp.Repository.ProdutoRegistroNFRepository;
@@ -19,200 +18,169 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProdutoRegistroNFService {
 
- private final ProdutoRegistroNFRepository repository;
+  private final ProdutoRegistroNFRepository repository;
 
- private final NotaFiscalRepository notaFiscalRepository;
+  private final NotaFiscalRepository notaFiscalRepository;
 
- private final ProdutoRegistroNFMapper mapper;
-
- /*
-  * =====================================================
-  * CRIAR
-  * =====================================================
-  */
-
- public ProdutoRegistroNFGetDTO criar(
-   ProdutoRegistroNFPostDTO dto) {
+  private final ProdutoRegistroNFMapper mapper;
 
   /*
-   * ================================================
-   * VERIFICAR NF
-   * ================================================
+   * =====================================================
+   * CRIAR
+   * =====================================================
    */
 
-  NotaFiscal nf = notaFiscalRepository.findById(
-    dto.nfId()).orElseThrow(
-      () -> new ResourceNotFoundException(
-        "Nota fiscal não encontrada "
-          + "com o ID: "
-          + dto.nfId()));
+  public ProdutoRegistroNFGetDTO criar(
+      ProdutoRegistroNFPostDTO dto) {
+    /*
+     * ================================================
+     * CRIAR PRODUTO
+     * ================================================
+     */
+
+    ProdutoRegistroNF produto = mapper.toEntity(dto);
+
+    /*
+     * ================================================
+     * RELACIONAR COM A NF
+     * ================================================
+     */
+
+    produto.setAtivo(true);
+
+    /*
+     * ================================================
+     * SALVAR
+     * ================================================
+     */
+
+    ProdutoRegistroNF salvo = repository.save(produto);
+
+    return mapper.toGetDTO(salvo);
+  }
 
   /*
-   * ================================================
-   * CRIAR PRODUTO
-   * ================================================
+   * =====================================================
+   * LISTAR
+   * =====================================================
    */
 
-  ProdutoRegistroNF produto = mapper.toEntity(dto);
+  public List<ProdutoRegistroNFGetDTO> listar() {
+
+    return repository.findAll()
+        .stream()
+        .map(mapper::toGetDTO)
+        .toList();
+  }
 
   /*
-   * ================================================
-   * RELACIONAR COM A NF
-   * ================================================
+   * =====================================================
+   * LISTAR ATIVOS
+   * =====================================================
    */
 
-  produto.setNf(nf);
+  public List<ProdutoRegistroNFGetDTO> listarAtivos() {
 
-  produto.setAtivo(true);
+    return repository.findByAtivoTrue()
+        .stream()
+        .map(mapper::toGetDTO)
+        .toList();
+  }
 
   /*
-   * ================================================
-   * SALVAR
-   * ================================================
+   * =====================================================
+   * BUSCAR POR ID
+   * =====================================================
    */
 
-  ProdutoRegistroNF salvo = repository.save(produto);
+  public ProdutoRegistroNFGetDTO buscarPorId(
+      Long id) {
 
-  return mapper.toGetDTO(salvo);
- }
+    ProdutoRegistroNF produto = repository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException(
+            "Produto da NF não encontrado "
+                + "com o ID: "
+                + id));
 
- /*
-  * =====================================================
-  * LISTAR
-  * =====================================================
-  */
-
- public List<ProdutoRegistroNFGetDTO> listar() {
-
-  return repository.findAll()
-    .stream()
-    .map(mapper::toGetDTO)
-    .toList();
- }
-
- /*
-  * =====================================================
-  * LISTAR ATIVOS
-  * =====================================================
-  */
-
- public List<ProdutoRegistroNFGetDTO> listarAtivos() {
-
-  return repository.findByAtivoTrue()
-    .stream()
-    .map(mapper::toGetDTO)
-    .toList();
- }
-
- /*
-  * =====================================================
-  * BUSCAR POR ID
-  * =====================================================
-  */
-
- public ProdutoRegistroNFGetDTO buscarPorId(
-   Long id) {
-
-  ProdutoRegistroNF produto = repository.findById(id)
-    .orElseThrow(() -> new ResourceNotFoundException(
-      "Produto da NF não encontrado "
-        + "com o ID: "
-        + id));
-
-  return mapper.toGetDTO(produto);
- }
-
- /*
-  * =====================================================
-  * LISTAR POR NF
-  * =====================================================
-  */
-
- public List<ProdutoRegistroNFGetDTO> listarPorNF(
-   Long nfId) {
+    return mapper.toGetDTO(produto);
+  }
 
   /*
-   * Verificar se NF existe
+   * =====================================================
+   * LISTAR POR NF
+   * =====================================================
    */
 
-  notaFiscalRepository.findById(
-    nfId).orElseThrow(
-      () -> new ResourceNotFoundException(
-        "Nota fiscal não encontrada "
-          + "com o ID: "
-          + nfId));
+  public List<ProdutoRegistroNFGetDTO> listarPorNF(
+      Long nfId) {
 
-  return repository
-    .findByNfId(nfId)
-    .stream()
-    .map(mapper::toGetDTO)
-    .toList();
- }
+    /*
+     * Verificar se NF existe
+     */
 
- /*
-  * =====================================================
-  * ATUALIZAR
-  * =====================================================
-  */
+    notaFiscalRepository.findById(
+        nfId).orElseThrow(
+            () -> new ResourceNotFoundException(
+                "Nota fiscal não encontrada "
+                    + "com o ID: "
+                    + nfId));
 
- public ProdutoRegistroNFGetDTO atualizar(
-   Long id,
-   ProdutoRegistroNFPostDTO dto) {
-
-  ProdutoRegistroNF produto = repository.findById(id)
-    .orElseThrow(() -> new ResourceNotFoundException(
-      "Produto da NF não encontrado "
-        + "com o ID: "
-        + id));
+    return repository
+        .findByNfId(nfId)
+        .stream()
+        .map(mapper::toGetDTO)
+        .toList();
+  }
 
   /*
-   * ================================================
-   * VERIFICAR NF
-   * ================================================
-   */
-
-  NotaFiscal nf = notaFiscalRepository.findById(
-    dto.nfId()).orElseThrow(
-      () -> new ResourceNotFoundException(
-        "Nota fiscal não encontrada "
-          + "com o ID: "
-          + dto.nfId()));
-
-  /*
-   * ================================================
+   * =====================================================
    * ATUALIZAR
-   * ================================================
+   * =====================================================
    */
 
-  mapper.updateEntity(
-    produto,
-    dto);
+  public ProdutoRegistroNFGetDTO atualizar(
+      Long id,
+      ProdutoRegistroNFPostDTO dto) {
 
-  produto.setNf(nf);
+    ProdutoRegistroNF produto = repository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException(
+            "Produto da NF não encontrado "
+                + "com o ID: "
+                + id));
 
-  ProdutoRegistroNF atualizado = repository.save(produto);
+    /*
+     * ================================================
+     * ATUALIZAR
+     * ================================================
+     */
 
-  return mapper.toGetDTO(
-    atualizado);
- }
+    mapper.updateEntity(
+        produto,
+        dto);
 
- /*
-  * =====================================================
-  * EXCLUSÃO LÓGICA
-  * =====================================================
-  */
+    ProdutoRegistroNF atualizado = repository.save(produto);
 
- public void excluir(
-   Long id) {
+    return mapper.toGetDTO(
+        atualizado);
+  }
 
-  ProdutoRegistroNF produto = repository.findById(id)
-    .orElseThrow(() -> new ResourceNotFoundException(
-      "Produto da NF não encontrado "
-        + "com o ID: "
-        + id));
+  /*
+   * =====================================================
+   * EXCLUSÃO LÓGICA
+   * =====================================================
+   */
 
-  produto.setAtivo(false);
+  public void excluir(
+      Long id) {
 
-  repository.save(produto);
- }
+    ProdutoRegistroNF produto = repository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException(
+            "Produto da NF não encontrado "
+                + "com o ID: "
+                + id));
+
+    produto.setAtivo(false);
+
+    repository.save(produto);
+  }
 }

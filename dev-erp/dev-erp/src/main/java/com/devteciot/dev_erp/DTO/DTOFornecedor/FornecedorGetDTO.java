@@ -23,6 +23,5 @@ public record FornecedorGetDTO(
   LocalDateTime dataUpdate,
 
   Boolean ativo
-
 ) {
 }
