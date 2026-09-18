@@ -1,2241 +1,1425 @@
-import { useEffect, useState } from "react";
-import type { ReactNode } from "react";
-import axios from "axios";
-
-import Table, {
-  type TableColumn,
-  type TableAction,
-} from "../../components/Table/Table";
+import { useRef, useState } from "react";
 
 import Modal from "../../components/Modal/Modal";
+import Table from "../../components/Table/Table";
 
-import EntradaComNFModal from "../../components/EntradaComNFModal/EntradaComNFModal";
+import type { TableColumn } from "../../components/Table/Table";
+
+import "./Entradas.css";
+import "./InportacaoNf.css";
+import "./ModalPrevilNF.css";
+import "./ModalRelacionamento.css";
+
+import { importarXMLNotaFiscal } from "../../services/importacaoNFService";
 
 import FornecedorModal from "../../components/FornecedorModal/FornecedorModal";
-
-import ConciliacaoProdutosModal, {
-  type ConciliacaoProduto,
-} from "../../components/ConciliacaoProdutosModal/ConciliacaoProdutosModal";
-
-import {
-  listarEntradas,
-  excluirEntrada,
-} from "../../services/entradaService";
 
 import {
   criarFornecedor,
   listarFornecedores,
 } from "../../services/fornecedorService";
 
-import {
-  criarNotaFiscalCompleta,
-} from "../../services/notaFiscalCompletaServices";
+import type { FornecedorRequest } from "../../types/Fornecedor";
 
-import {
-  listarProdutos,
-} from "../../services/produtoService";
-
-import api from "../../services/api";
-
-import type { Entrada } from "../../types/Entrada";
+import { toast } from "react-toastify";
 
 import type {
-  Fornecedor,
-  FornecedorRequest,
-} from "../../types/Fornecedor";
-
-import type {
-  Produto,
-} from "../../types/Produto";
-
-import type {
-  FornecedorImportadoNF,
   NotaFiscalImportada,
+  ProdutoImportadoNF,
 } from "../../types/ImportacaoNF";
 
+import { criarNotaFiscalCompleta } from "../../services/notaFiscalCompletaServices";
+
 import type {
-  NotaFiscalCompletaResponse,
-  ProdutoNFCompletaResponse,
+  NotaFiscalCompletaRequest,
+  ProdutoNFCompletaRequest,
 } from "../../types/NotaFiscalCompleta";
 
-import "./Entradas.css";
+import RelacionarProdutosModal from "../../components/Sidebar/RelacionarProdutosModal/RelacionarProdutosModal";
 
-/*
- * =====================================================
- * TIPO DAS NFS LISTADAS
- * =====================================================
- */
+import type { Produto } from "../../types/Produto";
 
-interface NotaFiscalLista {
-  id: number;
-  numero: string;
-  fornecedorId: number;
-  razaoSocialFornecedor: string;
-  nomeFantasiaFornecedor: string;
-  chaveAcesso: string;
-  dataCriacao: string;
-  dataUpdate: string | null;
-}
+import { listarProdutos } from "../../services/produtoService";
 
-/*
- * =====================================================
- * COMPONENTE
- * =====================================================
- */
+import type { ProdutosRelacionado } from "../../types/ProdutosRelacionado";
 
 export default function Entradas() {
+  // =========================================================
+  // MODAL - SELECIONAR TIPO DE ENTRADA
+  // =========================================================
 
-  /*
-   * =====================================================
-   * ENTRADAS
-   * =====================================================
-   */
+  const [openModalSelecionarTipoEntrada, setOpenModalSelecionarTipoEntrada] =
+    useState<boolean>(false);
 
-  const [
-    entradas,
-    setEntradas,
-  ] = useState<Entrada[]>([]);
+  function abriModalTipoEntrada() {
+    setOpenModalSelecionarTipoEntrada(true);
+  }
 
-  const [
-    entradaSelecionada,
-    setEntradaSelecionada,
-  ] = useState<Entrada | null>(null);
+  function fecharModalTipoEntrada() {
+    setOpenModalSelecionarTipoEntrada(false);
+  }
 
-  /*
-   * =====================================================
-   * NOTAS FISCAIS
-   * =====================================================
-   */
+  // =========================================================
+  // MODAL - IMPORTAÇÃO DA NF
+  // =========================================================
 
-  const [
-    notasFiscais,
-    setNotasFiscais,
-  ] = useState<NotaFiscalLista[]>([]);
+  const [openModalInportacaoNf, setOpenModalInportacaoNf] =
+    useState<boolean>(false);
 
-  /*
-   * =====================================================
-   * NF ATUAL DA CONCILIAÇÃO
-   *
-   * Essa variável será usada tanto para:
-   *
-   * - NF recém-importada
-   * - NF antiga
-   * =====================================================
-   */
+  function abriModalInportacaoNf() {
+    setOpenModalInportacaoNf(true);
+    fecharModalTipoEntrada();
+  }
 
-  const [
-    notaFiscalParaConciliacao,
-    setNotaFiscalParaConciliacao,
-  ] = useState<NotaFiscalCompletaResponse | null>(
-    null,
-  );
+  function fecharModalInportacaoNf() {
+    setArquivoNF(null);
+    setOpenModalInportacaoNf(false);
+  }
 
-  /*
-   * =====================================================
-   * PRODUTOS PADRÃO
-   * =====================================================
-   */
+  // =========================================================
+  // ARQUIVO XML
+  // =========================================================
 
-  const [
-    produtosPadrao,
-    setProdutosPadrao,
-  ] = useState<Produto[]>([]);
+  const [arquivoNF, setArquivoNF] = useState<File | null>(null);
 
-  /*
-   * =====================================================
-   * MODAIS
-   * =====================================================
-   */
+  const inputArquivoRef = useRef<HTMLInputElement>(null);
 
-  const [
-    modalVisualizacaoAberto,
-    setModalVisualizacaoAberto,
-  ] = useState(false);
-
-  const [
-    modalNovaEntradaAberto,
-    setModalNovaEntradaAberto,
-  ] = useState(false);
-
-  const [
-    modalEntradaNFAberto,
-    setModalEntradaNFAberto,
-  ] = useState(false);
-
-  const [
-    modalFornecedorAberto,
-    setModalFornecedorAberto,
-  ] = useState(false);
-
-  const [
-    modalConciliacaoAberto,
-    setModalConciliacaoAberto,
-  ] = useState(false);
-
-  const [
-    modalNFsAberto,
-    setModalNFsAberto,
-  ] = useState(false);
-
-  const [
-    modalSucessoImportacao,
-    setModalSucessoImportacao,
-  ] = useState(false);
-
-  /*
-   * =====================================================
-   * DADOS TEMPORÁRIOS DA IMPORTAÇÃO
-   * =====================================================
-   */
-
-  const [
-    fornecedorImportado,
-    setFornecedorImportado,
-  ] = useState<FornecedorImportadoNF | null>(null);
-
-  const [
-    dadosNFImportada,
-    setDadosNFImportada,
-  ] = useState<NotaFiscalImportada | null>(null);
-
-  const [
-    arquivoXML,
-    setArquivoXML,
-  ] = useState<File | null>(null);
-
-  /*
-   * =====================================================
-   * NF RECÉM-IMPORTADA
-   * =====================================================
-   */
-
-  const [
-    notaFiscalImportada,
-    setNotaFiscalImportada,
-  ] = useState<NotaFiscalCompletaResponse | null>(
-    null,
-  );
-
-  /*
-   * =====================================================
-   * FORNECEDOR
-   * =====================================================
-   */
-
-  const [
-    fornecedorIdImportacao,
-    setFornecedorIdImportacao,
-  ] = useState<number | null>(null);
-
-  /*
-   * =====================================================
-   * LOADING
-   * =====================================================
-   */
-
-  const [
-    loadingDados,
-    setLoadingDados,
-  ] = useState(false);
-
-  const [
-    loadingFornecedor,
-    setLoadingFornecedor,
-  ] = useState(false);
-
-  const [
-    loadingNFs,
-    setLoadingNFs,
-  ] = useState(false);
-
-  const [
-    loadingProdutosNF,
-    setLoadingProdutosNF,
-  ] = useState(false);
-
-  /*
-   * =====================================================
-   * CARREGAR ENTRADAS
-   * =====================================================
-   */
-
-  useEffect(() => {
-
-    carregarEntradas();
-
-  }, []);
-
-  const carregarEntradas = async () => {
-
-    try {
-
-      setLoadingDados(true);
-
-      const dados =
-        await listarEntradas();
-
-      setEntradas(
-        dados,
-      );
-
-    } catch (error) {
-
-      console.error(
-        "Erro ao carregar entradas:",
-        error,
-      );
-
-    } finally {
-
-      setLoadingDados(false);
-
-    }
-
-  };
-
-  /*
-   * =====================================================
-   * LIMPAR DADOS DA IMPORTAÇÃO
-   * =====================================================
-   */
-
-  const limparDadosImportacao = () => {
-
-    setFornecedorImportado(
-      null,
-    );
-
-    setDadosNFImportada(
-      null,
-    );
-
-    setArquivoXML(
-      null,
-    );
-
-    setFornecedorIdImportacao(
-      null,
-    );
-
-  };
-
-  /*
-   * =====================================================
-   * LIMPAR FLUXO
-   * =====================================================
-   */
-
-  const limparFluxoNF = () => {
-
-    limparDadosImportacao();
-
-    setNotaFiscalImportada(
-      null,
-    );
-
-    setNotaFiscalParaConciliacao(
-      null,
-    );
-
-    setProdutosPadrao(
-      [],
-    );
-
-  };
-
-  /*
-   * =====================================================
-   * NOVA ENTRADA
-   * =====================================================
-   */
-
-  const abrirNovaEntrada = () => {
-
-    setModalNovaEntradaAberto(
-      true,
-    );
-
-  };
-
-  const fecharNovaEntrada = () => {
-
-    setModalNovaEntradaAberto(
-      false,
-    );
-
-  };
-
-  /*
-   * =====================================================
-   * ENTRADA COM NF
-   * =====================================================
-   */
-
-  const abrirEntradaComNF = () => {
-
-    fecharNovaEntrada();
-
-    limparFluxoNF();
-
-    setModalEntradaNFAberto(
-      true,
-    );
-
-  };
-
-  const fecharEntradaComNF = () => {
-
-    setModalEntradaNFAberto(
-      false,
-    );
-
-    limparFluxoNF();
-
-  };
-
-  /*
-   * =====================================================
-   * SALVAR NF COMPLETA
-   * =====================================================
-   */
-
-  const finalizarImportacaoNF = async (
-    fornecedorId: number,
-    dadosNF: NotaFiscalImportada,
+  const handleArquivoSelecionado = (
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
+    const arquivo = event.target.files?.[0];
 
-    try {
-
-      setLoadingDados(true);
-
-      /*
-       * =================================================
-       * PAYLOAD
-       * =================================================
-       */
-
-      const payload = {
-
-        numero:
-          dadosNF.numero,
-
-        fornecedorId:
-          fornecedorId,
-
-        chaveAcesso:
-          dadosNF.chaveAcesso,
-
-        produtos:
-          dadosNF.produtos.map(
-            (produto) => ({
-
-              codigo:
-                produto.codigo,
-
-              descricao:
-                produto.descricao,
-
-              unidade:
-                produto.unidade,
-
-              quantidade:
-                produto.quantidade,
-
-              valorUnitario:
-                produto.valorUnitario,
-
-              valorTotal:
-                produto.valorTotal,
-
-            }),
-          ),
-
-      };
-
-      console.log(
-        "=================================",
-      );
-
-      console.log(
-        "SALVANDO NF COMPLETA",
-      );
-
-      console.log(
-        payload,
-      );
-
-      console.log(
-        "=================================",
-      );
-
-      /*
-       * =================================================
-       * SALVA NF
-       * =================================================
-       */
-
-      const resposta =
-        await criarNotaFiscalCompleta(
-          payload,
-        );
-
-      console.log(
-        "NF salva:",
-        resposta,
-      );
-
-      /*
-       * Guarda NF recém-importada.
-       */
-
-      setNotaFiscalImportada(
-        resposta,
-      );
-
-      /*
-       * Guarda também como NF para conciliação.
-       */
-
-      setNotaFiscalParaConciliacao(
-        resposta,
-      );
-
-      /*
-       * Fecha modal de importação.
-       */
-
-      setModalEntradaNFAberto(
-        false,
-      );
-
-      /*
-       * Abre modal de sucesso.
-       */
-
-      setModalSucessoImportacao(
-        true,
-      );
-
-      /*
-       * Não abrimos a conciliação automaticamente.
-       */
-
-      /*
-       * =================================================
-       * CARREGAR PRODUTOS PADRÃO
-       * =================================================
-       */
-
-      try {
-
-        const produtos =
-          await listarProdutos();
-
-        setProdutosPadrao(
-          produtos,
-        );
-
-      } catch (error) {
-
-        console.error(
-          "Erro ao carregar produtos padrão:",
-          error,
-        );
-
-      }
-
-    } catch (error: unknown) {
-
-      console.error(
-        "Erro ao salvar NF:",
-        error,
-      );
-
-      if (
-        axios.isAxiosError(error)
-      ) {
-
-        const mensagem =
-          error.response?.data?.message ??
-          error.response?.data?.erro ??
-          error.response?.data?.mensagem;
-
-        alert(
-          mensagem ??
-          "Erro ao salvar a Nota Fiscal.",
-        );
-
-      } else {
-
-        alert(
-          "Erro inesperado ao salvar a Nota Fiscal.",
-        );
-
-      }
-
-    } finally {
-
-      setLoadingDados(false);
-
-    }
-
-  };
-
-  /*
-   * =====================================================
-   * FORNECEDOR NÃO ENCONTRADO
-   * =====================================================
-   */
-
-  const tratarFornecedorNaoEncontrado = (
-    fornecedor: FornecedorImportadoNF,
-    dadosNF: NotaFiscalImportada,
-    arquivo: File,
-  ) => {
-
-    console.log(
-      "Fornecedor não encontrado.",
-    );
-
-    setFornecedorImportado(
-      fornecedor,
-    );
-
-    setDadosNFImportada(
-      dadosNF,
-    );
-
-    setArquivoXML(
-      arquivo,
-    );
-
-    setFornecedorIdImportacao(
-      null,
-    );
-
-    setModalEntradaNFAberto(
-      false,
-    );
-
-    setModalFornecedorAberto(
-      true,
-    );
-
-  };
-
-  /*
-   * =====================================================
-   * FECHAR FORNECEDOR
-   * =====================================================
-   */
-
-  const fecharFornecedor = () => {
-
-    if (
-      loadingFornecedor
-    ) {
+    if (!arquivo) {
       return;
     }
 
-    setModalFornecedorAberto(
-      false,
-    );
+    if (!arquivo.name.toLowerCase().endsWith(".xml")) {
+      toast.error("Selecione um arquivo XML.");
 
-    limparFluxoNF();
+      event.target.value = "";
 
+      return;
+    }
+
+    setArquivoNF(arquivo);
   };
 
-  /*
-   * =====================================================
-   * CADASTRAR FORNECEDOR
-   * =====================================================
-   */
+  // =========================================================
+  // DADOS DO FORNECEDOR
+  // =========================================================
 
-  const handleSalvarFornecedor = async (
-    dados: FornecedorRequest,
-  ) => {
+  const [fornecedor, setFornecedor] = useState<FornecedorRequest | null>(null);
+
+  // =========================================================
+  // DADOS DA NF IMPORTADA
+  // =========================================================
+
+  const [dadosNF, setDadosNF] = useState<NotaFiscalImportada | null>(null);
+
+  // =========================================================
+  // IMPORTAR NF
+  // =========================================================
+
+  async function impotortarNf(arquivo: File | null) {
+    if (!arquivo) {
+      toast.error("Selecione um arquivo XML.");
+
+      return;
+    }
 
     try {
+      const dados = await importarXMLNotaFiscal(arquivo);
 
+      // =====================================================
+      // FORNECEDOR NÃO CADASTRADO
+      // =====================================================
+
+      if ("erro" in dados) {
+        const confirmar = window.confirm(
+          "Fornecedor não cadastrado. Deseja cadastrar?",
+        );
+
+        if (!confirmar) {
+          toast.error(dados.erro);
+
+          return;
+        }
+
+        setFornecedor({
+          razaoSocial: dados.dados.fornecedor.razaoSocial,
+
+          nomeFantasia: dados.dados.fornecedor.nomeFantasia,
+
+          inscricaoEstadual: dados.dados.fornecedor.inscricaoEstadual,
+
+          cnpj: dados.dados.fornecedor.cnpj,
+
+          telefone: "",
+
+          email: "",
+        });
+
+        fecharModalInportacaoNf();
+
+        openModalCadastroDeFornecedor();
+
+        return;
+      }
+
+      // =====================================================
+      // NF IMPORTADA COM SUCESSO
+      // =====================================================
+
+      setDadosNF(dados.dados);
+
+      toast.success(`NF importada: ${dados.dados.numero}`);
+
+      openModalConfimacaoInportacao();
+    } catch (error) {
+      console.error("Erro ao importar NF:", error);
+
+      toast.error("Erro ao importar a Nota Fiscal.");
+    }
+  }
+
+  // =========================================================
+  // MODAL - CADASTRO DE FORNECEDOR
+  // =========================================================
+
+  const [abrirModalCadastroDeFornecedor, setAbrirModalCadastroDeFornecedor] =
+    useState(false);
+
+  function openModalCadastroDeFornecedor() {
+    setAbrirModalCadastroDeFornecedor(true);
+  }
+
+  function fecharModalCadastroDeFornecedor() {
+    setAbrirModalCadastroDeFornecedor(false);
+  }
+
+  const [loadingFornecedor, setLoadingFornecedor] = useState(false);
+
+  // =========================================================
+  // SALVAR FORNECEDOR
+  // =========================================================
+
+  async function salvarFornecedor(dados: {
+    razaoSocial: string;
+    nomeFantasia: string;
+    inscricaoEstadual: string;
+    cnpj: string;
+    telefone: string;
+    email: string;
+  }) {
+    try {
       setLoadingFornecedor(true);
 
-      const fornecedor =
-        await criarFornecedor(
-          dados,
-        );
+      const fornecedorCriado = await criarFornecedor({
+        razaoSocial: dados.razaoSocial,
 
-      console.log(
-        "Fornecedor cadastrado:",
-        fornecedor,
-      );
+        nomeFantasia: dados.nomeFantasia,
 
-      setFornecedorIdImportacao(
-        fornecedor.id,
-      );
+        inscricaoEstadual: dados.inscricaoEstadual,
 
-      if (
-        !dadosNFImportada
-      ) {
+        cnpj: dados.cnpj,
 
-        alert(
-          "Fornecedor cadastrado, mas os dados da NF não estão disponíveis.",
-        );
+        telefone: dados.telefone,
 
-        setModalFornecedorAberto(
-          false,
-        );
+        email: dados.email,
+      });
 
-        limparFluxoNF();
+      console.log("Fornecedor criado:", fornecedorCriado);
 
-        return;
+      toast.success("Fornecedor cadastrado com sucesso!");
 
-      }
+      fecharModalCadastroDeFornecedor();
+    } catch (error: any) {
+      console.error("Erro ao criar fornecedor:", error);
 
-      /*
-       * Salva NF + produtos.
-       */
-
-      await finalizarImportacaoNF(
-        fornecedor.id,
-        dadosNFImportada,
-      );
-
-      setModalFornecedorAberto(
-        false,
-      );
-
-    } catch (error: unknown) {
-
-      console.error(
-        "Erro ao cadastrar fornecedor:",
-        error,
-      );
-
-      if (
-        axios.isAxiosError(error)
-      ) {
-
-        const mensagem =
-          error.response?.data?.message ??
-          error.response?.data?.erro ??
-          error.response?.data?.mensagem;
-
-        alert(
-          mensagem ??
-          "Erro ao cadastrar fornecedor.",
-        );
-
-      } else {
-
-        alert(
-          "Erro inesperado ao cadastrar fornecedor.",
-        );
-
-      }
-
+      toast.error(error.response?.data?.message || "Erro ao criar fornecedor.");
     } finally {
-
       setLoadingFornecedor(false);
-
     }
+  }
 
-  };
+  // =========================================================
+  // MODAL - CONFIRMAÇÃO DA IMPORTAÇÃO
+  // =========================================================
 
-  /*
-   * =====================================================
-   * IMPORTAÇÃO CONCLUÍDA
-   * =====================================================
-   */
+  const [modalConfimacaoInportacao, setModalConfimacaoInportacao] =
+    useState(false);
 
-  const handleImportacaoConcluida = async (
-    dados: NotaFiscalImportada,
-  ) => {
+  function openModalConfimacaoInportacao() {
+    setOpenModalInportacaoNf(false);
 
+    setModalConfimacaoInportacao(true);
+  }
+
+  function fecharModalConfimacaoInportacao() {
+    setArquivoNF(null);
+
+    setDadosNF(null);
+
+    setModalConfimacaoInportacao(false);
+  }
+
+  // =========================================================
+  // COLUNAS - PRODUTOS DA NF
+  // =========================================================
+
+  const colunasProdutosNF: TableColumn<ProdutoImportadoNF>[] = [
+    {
+      key: "codigo",
+
+      label: "Código",
+
+      width: "100px",
+    },
+
+    {
+      key: "descricao",
+
+      label: "Descrição",
+    },
+
+    {
+      key: "unidade",
+
+      label: "UN",
+
+      width: "70px",
+
+      align: "center",
+    },
+
+    {
+      key: "quantidade",
+
+      label: "Quantidade",
+
+      width: "110px",
+
+      align: "right",
+
+      render: (value) =>
+        Number(value).toLocaleString("pt-BR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 3,
+        }),
+    },
+
+    {
+      key: "valorUnitario",
+
+      label: "Valor Unit.",
+
+      width: "120px",
+
+      align: "right",
+
+      render: (value) =>
+        Number(value).toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }),
+    },
+
+    {
+      key: "valorTotal",
+
+      label: "Valor Total",
+
+      width: "120px",
+
+      align: "right",
+
+      render: (value) =>
+        Number(value).toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }),
+    },
+  ];
+
+  // =========================================================
+  // PRODUTOS RELACIONADOS
+  // =========================================================
+
+  const [listaProdutosRelacionados, setListaProdutosRelacionados] = useState<
+    ProdutosRelacionado[]
+  >([]);
+
+  // =========================================================
+  // CADASTRAR NF
+  // =========================================================
+
+  async function cadastraNF(dadosNf: NotaFiscalImportada) {
     try {
+      // =====================================================
+      // 1. BUSCAR FORNECEDORES
+      // =====================================================
 
-      setLoadingDados(true);
+      const fornecedores = await listarFornecedores();
 
-      setDadosNFImportada(
-        dados,
+      // =====================================================
+      // 2. LOCALIZAR FORNECEDOR PELO CNPJ
+      // =====================================================
+
+      const cnpjNF = dadosNf.fornecedor.cnpj.replace(/\D/g, "");
+
+      const fornecedorEncontrado = fornecedores.find(
+        (fornecedor) => fornecedor.cnpj.replace(/\D/g, "") === cnpjNF,
       );
 
-      /*
-       * CNPJ
-       */
-
-      const cnpj =
-        dados.fornecedor?.cnpj;
-
-      if (!cnpj) {
-
-        alert(
-          "O CNPJ do fornecedor não foi encontrado.",
+      if (!fornecedorEncontrado) {
+        toast.error(
+          `Fornecedor não encontrado para o CNPJ ${dadosNf.fornecedor.cnpj}`,
         );
 
         return;
-
       }
 
-      /*
-       * Busca fornecedores.
-       */
+      // =====================================================
+      // 3. MONTAR PRODUTOS
+      // =====================================================
 
-      const fornecedores =
-        await listarFornecedores();
+      const produtos: ProdutoNFCompletaRequest[] = dadosNf.produtos.map(
+        (produto: ProdutoImportadoNF) => ({
+          codigo: produto.codigo,
 
-      const cnpjImportado =
-        cnpj.replace(
-          /\D/g,
-          "",
-        );
+          descricao: produto.descricao,
 
-      /*
-       * Procura fornecedor.
-       */
+          unidade: produto.unidade,
 
-      const fornecedorEncontrado =
-        fornecedores.find(
-          (fornecedor: Fornecedor) =>
-            fornecedor.cnpj?.replace(
-              /\D/g,
-              "",
-            ) === cnpjImportado,
-        );
+          quantidade: produto.quantidade,
 
-      if (
-        !fornecedorEncontrado
-      ) {
+          valorUnitario: produto.valorUnitario,
 
-        alert(
-          "O fornecedor informado na NF não foi encontrado no cadastro.",
-        );
-
-        return;
-
-      }
-
-      setFornecedorIdImportacao(
-        fornecedorEncontrado.id,
+          valorTotal: produto.valorTotal,
+        }),
       );
 
-      /*
-       * Salva NF.
-       */
+      // =====================================================
+      // 4. MONTAR NF
+      // =====================================================
 
-      await finalizarImportacaoNF(
-        fornecedorEncontrado.id,
-        dados,
-      );
+      const dados: NotaFiscalCompletaRequest = {
+        numero: dadosNf.numero,
 
-    } catch (error: unknown) {
+        fornecedorId: fornecedorEncontrado.id,
 
-      console.error(
-        "Erro ao processar importação:",
-        error,
-      );
+        chaveAcesso: dadosNf.chaveAcesso,
 
-      if (
-        axios.isAxiosError(error)
-      ) {
-
-        const mensagem =
-          error.response?.data?.message ??
-          error.response?.data?.erro ??
-          error.response?.data?.mensagem;
-
-        alert(
-          mensagem ??
-          "Erro ao processar a importação.",
-        );
-
-      } else {
-
-        alert(
-          "Erro inesperado ao processar a importação.",
-        );
-
-      }
-
-    } finally {
-
-      setLoadingDados(false);
-
-    }
-
-  };
-
-  /*
-   * =====================================================
-   * SEGUIR PARA CONCILIAÇÃO
-   * =====================================================
-   */
-
-  const seguirParaConciliacao = async () => {
-
-    if (
-      !notaFiscalImportada
-    ) {
-
-      alert(
-        "Nenhuma NF importada foi encontrada.",
-      );
-
-      return;
-
-    }
-
-    try {
-
-      /*
-       * Fecha modal de sucesso.
-       */
-
-      setModalSucessoImportacao(
-        false,
-      );
-
-      /*
-       * Define a NF.
-       */
-
-      setNotaFiscalParaConciliacao(
-        notaFiscalImportada,
-      );
-
-      /*
-       * Carrega produtos padrão.
-       */
-
-      setLoadingProdutosNF(
-        true,
-      );
-
-      const produtos =
-        await listarProdutos();
-
-      setProdutosPadrao(
         produtos,
-      );
-
-      /*
-       * Abre conciliação.
-       */
-
-      setModalConciliacaoAberto(
-        true,
-      );
-
-    } catch (error) {
-
-      console.error(
-        "Erro ao abrir conciliação:",
-        error,
-      );
-
-      alert(
-        "Não foi possível carregar os produtos para conciliação.",
-      );
-
-    } finally {
-
-      setLoadingProdutosNF(
-        false,
-      );
-
-    }
-
-  };
-
-  /*
-   * =====================================================
-   * LISTAR NFS EXISTENTES
-   * =====================================================
-   */
-
-  const abrirNFsExistentes = async () => {
-
-    try {
-
-      setLoadingNFs(
-        true,
-      );
-
-      const response =
-        await api.get<NotaFiscalLista[]>(
-          "/nf",
-        );
-
-      setNotasFiscais(
-        response.data,
-      );
-
-      setModalNFsAberto(
-        true,
-      );
-
-    } catch (error) {
-
-      console.error(
-        "Erro ao carregar notas fiscais:",
-        error,
-      );
-
-      alert(
-        "Não foi possível carregar as notas fiscais.",
-      );
-
-    } finally {
-
-      setLoadingNFs(
-        false,
-      );
-
-    }
-
-  };
-
-  /*
-   * =====================================================
-   * ABRIR NF EXISTENTE PARA CONCILIAÇÃO
-   * =====================================================
-   */
-
-  const abrirNFParaConciliacao = async (
-    nf: NotaFiscalLista,
-  ) => {
-
-    try {
-
-      setLoadingProdutosNF(
-        true,
-      );
-
-      /*
-       * Busca produtos da NF.
-       */
-
-      const response =
-        await api.get<
-          ProdutoNFCompletaResponse[]
-        >(
-          `/produtos-registro-nf/nf/${nf.id}`,
-        );
-
-      /*
-       * Busca produtos padrão.
-       */
-
-      const produtos =
-        await listarProdutos();
-
-      setProdutosPadrao(
-        produtos,
-      );
-
-      /*
-       * Monta NF completa.
-       */
-
-      const nota: NotaFiscalCompletaResponse = {
-
-        id:
-          nf.id,
-
-        numero:
-          nf.numero,
-
-        fornecedorId:
-          nf.fornecedorId,
-
-        razaoSocialFornecedor:
-          nf.razaoSocialFornecedor,
-
-        nomeFantasiaFornecedor:
-          nf.nomeFantasiaFornecedor,
-
-        chaveAcesso:
-          nf.chaveAcesso,
-
-        dataCriacao:
-          nf.dataCriacao,
-
-        dataUpdate:
-          nf.dataUpdate,
-
-        produtos:
-          response.data,
-
       };
 
-      /*
-       * Guarda NF para conciliação.
-       */
+      console.log("Dados enviados para NF:", dados);
 
-      setNotaFiscalParaConciliacao(
-        nota,
+      // =====================================================
+      // 5. CADASTRAR NF
+      // =====================================================
+
+      const resp = await criarNotaFiscalCompleta(dados);
+
+      console.log("NF cadastrada:", resp);
+
+      // =====================================================
+      // 6. CRIAR LISTA PARA RELACIONAMENTO
+      // =====================================================
+
+      const lista: ProdutosRelacionado[] = resp.produtos.map((p) => ({
+        id: p.id,
+
+        codigo: p.codigo,
+
+        descricao: p.descricao,
+
+        quantidade: p.quantidade,
+
+        unidade: p.unidade,
+
+        produtoSistemaId: null,
+
+        tipoCalculo: "MULTIPLICAR",
+
+        fatorCalculo: 1,
+
+        quantidadeCalculada: p.quantidade,
+
+        possuiValidade: false,
+
+        dataValidade: null,
+      }));
+
+      setListaProdutosRelacionados(lista);
+
+      toast.success(`Nota fiscal ${dadosNf.numero} cadastrada com sucesso!`);
+
+      // =====================================================
+      // 7. FECHAR MODAL DE CONFIRMAÇÃO
+      // =====================================================
+
+      fecharModalConfimacaoInportacao();
+
+      // =====================================================
+      // 8. ABRIR MODAL SIM/NÃO
+      // =====================================================
+
+      abrirModalRelacionarProdutos();
+
+      return resp;
+    } catch (error: any) {
+      console.error("Erro ao cadastrar NF:", error);
+
+      toast.error(
+        error.response?.data?.message || "Erro ao cadastrar a nota fiscal.",
       );
-
-      /*
-       * Fecha lista.
-       */
-
-      setModalNFsAberto(
-        false,
-      );
-
-      /*
-       * Abre conciliação.
-       */
-
-      setModalConciliacaoAberto(
-        true,
-      );
-
-    } catch (error) {
-
-      console.error(
-        "Erro ao carregar NF:",
-        error,
-      );
-
-      alert(
-        "Não foi possível carregar os produtos desta NF.",
-      );
-
-    } finally {
-
-      setLoadingProdutosNF(
-        false,
-      );
-
     }
+  }
 
-  };
+  // =========================================================
+  // MODAL - PERGUNTAR SE DESEJA RELACIONAR
+  // =========================================================
 
-  /*
-   * =====================================================
-   * CONFIRMAR CONCILIAÇÃO
-   * =====================================================
-   */
+  const [openModalRelacionarProdutos, setOpenModalRelacionarProdutos] =
+    useState(false);
 
-  const confirmarConciliacao = (
-    conciliacoes: ConciliacaoProduto[],
-  ) => {
+  function abrirModalRelacionarProdutos() {
+    setOpenModalRelacionarProdutos(true);
+  }
 
-    console.log(
-      "=================================",
-    );
+  function fecharModalRelacionarProdutos() {
+    setOpenModalRelacionarProdutos(false);
+  }
 
-    console.log(
-      "CONCILIAÇÃO",
-    );
+  // =========================================================
+  // MODAL - RELACIONAMENTO
+  // =========================================================
 
-    console.log(
-      "NF:",
-      notaFiscalParaConciliacao,
-    );
+  const [openModalRelacionaMento, setOpenModalRelacionaMento] =
+    useState<boolean>(false);
 
-    console.log(
-      "PRODUTOS:",
-      conciliacoes,
-    );
+  function abrirModalRelacionaMento() {
+    setOpenModalRelacionaMento(true);
+  }
 
-    console.log(
-      "=================================",
-    );
+  function fecharModalRelacionaMento() {
+    setOpenModalRelacionaMento(false);
+  }
 
-    /*
-     * Exemplo de dados recebidos:
-     *
-     * produtoNFId
-     * produtoPadraoId
-     * quantidadeOriginal
-     * tipoConversao
-     * fatorConversao
-     * quantidadeConvertida
-     */
+  // =========================================================
+  // PRODUTOS DO SISTEMA
+  // =========================================================
 
-    conciliacoes.forEach(
-      (item) => {
+  const [listaProdutos, setListaProdutos] = useState<Produto[]>([]);
 
-        console.log(
-          "Produto NF:",
-          item.produtoNFId,
-        );
+  const [loadingProdutos, setLoadingProdutos] = useState(false);
 
-        console.log(
-          "Produto padrão:",
-          item.produtoPadraoId,
-        );
-
-        console.log(
-          "Quantidade original:",
-          item.quantidadeOriginal,
-        );
-
-        console.log(
-          "Tipo conversão:",
-          item.tipoConversao,
-        );
-
-        console.log(
-          "Fator:",
-          item.fatorConversao,
-        );
-
-        console.log(
-          "Quantidade convertida:",
-          item.quantidadeConvertida,
-        );
-
-      },
-    );
-
-    alert(
-      "Conciliação preparada com sucesso.",
-    );
-
-    fecharConciliacao();
-
-  };
-
-  /*
-   * =====================================================
-   * FECHAR CONCILIAÇÃO
-   * =====================================================
-   */
-
-  const fecharConciliacao = () => {
-
-    setModalConciliacaoAberto(
-      false,
-    );
-
-    setNotaFiscalParaConciliacao(
-      null,
-    );
-
-    setProdutosPadrao(
-      [],
-    );
-
-    carregarEntradas();
-
-  };
-
-  /*
-   * =====================================================
-   * FECHAR MODAL DE SUCESSO
-   * =====================================================
-   */
-
-  const fecharSucessoImportacao = () => {
-
-    setModalSucessoImportacao(
-      false,
-    );
-
-    limparFluxoNF();
-
-    carregarEntradas();
-
-  };
-
-  /*
-   * =====================================================
-   * VISUALIZAR ENTRADA
-   * =====================================================
-   */
-
-  const visualizarEntrada = (
-    entrada: Entrada,
-  ) => {
-
-    setEntradaSelecionada(
-      entrada,
-    );
-
-    setModalVisualizacaoAberto(
-      true,
-    );
-
-  };
-
-  const fecharVisualizacao = () => {
-
-    setModalVisualizacaoAberto(
-      false,
-    );
-
-    setEntradaSelecionada(
-      null,
-    );
-
-  };
-
-  /*
-   * =====================================================
-   * EXCLUIR
-   * =====================================================
-   */
-
-  const excluir = async (
-    entrada: Entrada,
-  ) => {
-
-    const confirmar =
-      window.confirm(
-        `Deseja realmente excluir a entrada #${entrada.id}?`,
-      );
-
-    if (!confirmar) {
-      return;
-    }
-
+  async function buscarListaProdutos() {
     try {
+      setLoadingProdutos(true);
 
-      setLoadingDados(
-        true,
-      );
+      const resp = await listarProdutos();
 
-      await excluirEntrada(
-        entrada.id,
-      );
+      setListaProdutos(resp);
+    } catch (error: any) {
+      console.error("Erro ao buscar produtos:", error);
 
-      setEntradas(
-        (lista) =>
-          lista.filter(
-            (item) =>
-              item.id !==
-              entrada.id,
-          ),
-      );
-
-    } catch (error) {
-
-      console.error(
-        "Erro ao excluir entrada:",
-        error,
-      );
-
-      alert(
-        "Não foi possível excluir a entrada.",
-      );
-
+      toast.error(error.response?.data?.message || "Erro ao buscar produtos.");
     } finally {
-
-      setLoadingDados(
-        false,
-      );
-
+      setLoadingProdutos(false);
     }
+  }
 
-  };
+  // =========================================================
+  // SIM - RELACIONAR PRODUTOS
+  // =========================================================
 
-  /*
-   * =====================================================
-   * FORMATAÇÃO
-   * =====================================================
-   */
+  async function confirmarRelacionamentoProdutos() {
+    fecharModalRelacionarProdutos();
 
-  const formatarData = (
-    data: string | null,
-  ): string => {
+    await buscarListaProdutos();
 
-    if (!data) {
-      return "-";
-    }
+    abrirModalRelacionaMento();
+  }
 
-    const dataFormatada =
-      new Date(data);
+  // =========================================================
+  // NÃO - NÃO RELACIONAR
+  // =========================================================
 
-    if (
-      Number.isNaN(
-        dataFormatada.getTime(),
-      )
-    ) {
+  function naoRelacionarProdutos() {
+    fecharModalRelacionarProdutos();
 
-      return "-";
+    console.log("Usuário escolheu não relacionar os produtos.");
 
-    }
+    // Aqui você poderá continuar
+    // o processo da entrada.
+  }
 
-    return dataFormatada.toLocaleString(
-      "pt-BR",
+  // =========================================================
+  // ALTERAR PRODUTO DO SISTEMA
+  // =========================================================
+
+  function alterarProdutoSistema(id: number, produtoSistemaId: number | null) {
+    setListaProdutosRelacionados((produtos) =>
+      produtos.map((produto) =>
+        produto.id === id
+          ? {
+              ...produto,
+              produtoSistemaId,
+            }
+          : produto,
+      ),
     );
+  }
 
-  };
+  // =========================================================
+  // ALTERAR TIPO DE CÁLCULO
+  // =========================================================
 
-  /*
-   * =====================================================
-   * COLUNAS
-   * =====================================================
-   */
+  function alterarTipoCalculo(
+    id: number,
+    tipoCalculo: "MULTIPLICAR" | "DIVIDIR",
+  ) {
+    setListaProdutosRelacionados((produtos) =>
+      produtos.map((produto) => {
+        if (produto.id !== id) {
+          return produto;
+        }
 
-  const columns: TableColumn<Entrada>[] =
-    [
+        const fator = produto.fatorCalculo || 1;
 
-      {
-        key: "id",
-        label: "ID",
-        width: "70px",
-        align: "center",
-      },
+        const quantidadeCalculada =
+          tipoCalculo === "MULTIPLICAR"
+            ? produto.quantidade * fator
+            : produto.quantidade / fator;
 
-      {
-        key: "nomeTipoEntrada",
-        label: "Tipo de entrada",
-      },
+        return {
+          ...produto,
 
-      {
-        key: "numeroNF",
-        label: "Nota Fiscal",
+          tipoCalculo,
 
-        render: (
-          value: unknown,
-        ): ReactNode => {
+          quantidadeCalculada,
+        };
+      }),
+    );
+  }
 
-          if (
-            value === null ||
-            value === undefined ||
-            value === ""
-          ) {
+  // =========================================================
+  // ALTERAR FATOR
+  // =========================================================
 
-            return "Sem NF";
+  function alterarFatorCalculo(id: number, fatorCalculo: number) {
+    setListaProdutosRelacionados((produtos) =>
+      produtos.map((produto) => {
+        if (produto.id !== id) {
+          return produto;
+        }
 
-          }
+        const fator = fatorCalculo || 1;
 
-          return String(
-            value,
-          );
+        const quantidadeCalculada =
+          produto.tipoCalculo === "MULTIPLICAR"
+            ? produto.quantidade * fator
+            : produto.quantidade / fator;
 
-        },
+        return {
+          ...produto,
 
-      },
+          fatorCalculo,
 
-      {
-        key: "obs",
-        label: "Observação",
+          quantidadeCalculada,
+        };
+      }),
+    );
+  }
 
-        render: (
-          value: unknown,
-        ): ReactNode => {
+  // =========================================================
+  // ALTERAR VALIDADE
+  // =========================================================
 
-          if (
-            value === null ||
-            value === undefined ||
-            value === ""
-          ) {
+  function alterarValidade(id: number, possuiValidade: boolean) {
+    setListaProdutosRelacionados((produtos) =>
+      produtos.map((produto) =>
+        produto.id === id
+          ? {
+              ...produto,
 
-            return "-";
+              possuiValidade,
 
-          }
+              dataValidade: possuiValidade ? "" : null,
+            }
+          : produto,
+      ),
+    );
+  }
 
-          return String(
-            value,
-          );
+  // =========================================================
+  // ALTERAR DATA DE VALIDADE
+  // =========================================================
 
-        },
+  function alterarDataValidade(id: number, dataValidade: string) {
+    setListaProdutosRelacionados((produtos) =>
+      produtos.map((produto) =>
+        produto.id === id
+          ? {
+              ...produto,
+              dataValidade,
+            }
+          : produto,
+      ),
+    );
+  }
 
-      },
+  // =========================================================
+  // COLUNAS - RELACIONAMENTO
+  // =========================================================
 
-      {
-        key: "dataCriacao",
-        label: "Data",
+  const colunasRelacionamento: TableColumn<ProdutosRelacionado>[] = [
+    // -------------------------------------------------------
+    // CÓDIGO
+    // -------------------------------------------------------
 
-        render: (
-          value: unknown,
-        ): ReactNode => {
+    {
+      key: "codigo",
 
-          if (!value) {
-            return "-";
-          }
+      label: "Cód. Produto",
 
-          return formatarData(
-            String(value),
-          );
+      width: "110px",
+    },
 
-        },
+    // -------------------------------------------------------
+    // DESCRIÇÃO
+    // -------------------------------------------------------
 
-      },
+    {
+      key: "descricao",
 
-      {
-        key: "dataUpdate",
-        label: "Atualização",
+      label: "Descrição do Produto da NF",
 
-        render: (
-          value: unknown,
-        ): ReactNode => {
+      width: "250px",
+    },
 
-          if (!value) {
-            return "-";
-          }
+    // -------------------------------------------------------
+    // QUANTIDADE
+    // -------------------------------------------------------
 
-          return formatarData(
-            String(value),
-          );
+    {
+      key: "quantidade",
 
-        },
+      label: "Quantidade",
 
-      },
+      width: "110px",
 
-    ];
+      align: "right",
 
-  /*
-   * =====================================================
-   * AÇÕES
-   * =====================================================
-   */
+      render: (value) =>
+        Number(value).toLocaleString("pt-BR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 3,
+        }),
+    },
 
-  const actions: TableAction<Entrada>[] =
-    [
+    // -------------------------------------------------------
+    // UNIDADE
+    // -------------------------------------------------------
 
-      {
-        label: "Visualizar",
+    {
+      key: "unidade",
 
-        variant: "secondary",
+      label: "Unidade da NF",
 
-        onClick:
-          visualizarEntrada,
+      width: "100px",
 
-      },
+      align: "center",
+    },
 
-      {
-        label: "Editar",
+    // -------------------------------------------------------
+    // PRODUTO DO SISTEMA
+    // -------------------------------------------------------
 
-        variant: "primary",
+    {
+      key: "produtoSistemaId",
 
-        onClick: (
-          entrada: Entrada,
-        ) => {
+      label: "Produto do Sistema",
 
-          console.log(
-            "Editar entrada:",
-            entrada,
-          );
+      width: "220px",
 
-        },
+      render: (_, row) => (
+        <select
+          className="campo-tabela select-produto"
+          value={row.produtoSistemaId ?? ""}
+          onChange={(event) => {
+            const valor = event.target.value;
 
-      },
+            alterarProdutoSistema(
+              row.id,
 
-      {
-        label: "Excluir",
+              valor ? Number(valor) : null,
+            );
+          }}
+        >
+          <option value="">Selecionar produto</option>
 
-        variant: "danger",
+          {listaProdutos.map((produto) => (
+            <option key={produto.id} value={produto.id}>
+              {produto.nome}
+            </option>
+          ))}
+        </select>
+      ),
+    },
 
-        onClick:
-          excluir,
+    // -------------------------------------------------------
+    // CÁLCULO
+    // -------------------------------------------------------
 
-      },
+    {
+      key: "tipoCalculo",
 
-    ];
+      label: "Cálculo",
 
-  /*
-   * =====================================================
-   * RENDER
-   * =====================================================
-   */
+      width: "130px",
+
+      render: (_, row) => (
+        <select
+          className="campo-tabela select-calculo"
+          value={row.tipoCalculo}
+          onChange={(event) => {
+            alterarTipoCalculo(
+              row.id,
+
+              event.target.value as "MULTIPLICAR" | "DIVIDIR",
+            );
+          }}
+        >
+          <option value="MULTIPLICAR">Multiplicar</option>
+
+          <option value="DIVIDIR">Dividir</option>
+        </select>
+      ),
+    },
+
+    // -------------------------------------------------------
+    // FATOR
+    // -------------------------------------------------------
+
+    {
+      key: "fatorCalculo",
+
+      label: "Fator",
+
+      width: "90px",
+
+      align: "right",
+
+      render: (_, row) => (
+        <input
+          type="number"
+          className="campo-tabela input-fator"
+          min="1"
+          step="1"
+          value={row.fatorCalculo}
+          onChange={(event) => {
+            alterarFatorCalculo(
+              row.id,
+
+              Number(event.target.value),
+            );
+          }}
+        />
+      ),
+    },
+
+    // -------------------------------------------------------
+    // QUANTIDADE CALCULADA
+    // -------------------------------------------------------
+
+    {
+      key: "quantidadeCalculada",
+
+      label: "Quantidade Calculada",
+
+      width: "150px",
+
+      align: "right",
+
+      render: (value) => (
+        <span className="quantidade-calculada">
+          {Number(value).toLocaleString("pt-BR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 3,
+          })}
+        </span>
+      ),
+    },
+
+    // -------------------------------------------------------
+    // VALIDADE
+    // -------------------------------------------------------
+
+    {
+      key: "possuiValidade",
+
+      label: "Possui Validade",
+
+      width: "120px",
+
+      align: "center",
+
+      render: (_, row) => (
+        <select
+          className="campo-tabela select-validade"
+          value={row.possuiValidade ? "SIM" : "NAO"}
+          onChange={(event) => {
+            alterarValidade(
+              row.id,
+
+              event.target.value === "SIM",
+            );
+          }}
+        >
+          <option value="NAO">Não</option>
+
+          <option value="SIM">Sim</option>
+        </select>
+      ),
+    },
+
+    // -------------------------------------------------------
+    // DATA DE VALIDADE
+    // -------------------------------------------------------
+
+    {
+      key: "dataValidade",
+
+      label: "Data de Validade",
+
+      width: "150px",
+
+      render: (_, row) => (
+        <input
+          type="date"
+          className="campo-tabela input-validade"
+          value={row.dataValidade ?? ""}
+          disabled={!row.possuiValidade}
+          onChange={(event) => {
+            alterarDataValidade(
+              row.id,
+
+              event.target.value,
+            );
+          }}
+        />
+      ),
+    },
+  ];
+
+  // =========================================================
+  // FINALIZAR RELACIONAMENTO
+  // =========================================================
+
+  function finalizarRelacionamento() {
+    console.log("Produtos relacionados:", listaProdutosRelacionados);
+
+    // Aqui posteriormente
+    // você enviará os relacionamentos
+    // para o backend.
+
+    fecharModalRelacionaMento();
+  }
+
+  // =========================================================
+  // JSX
+  // =========================================================
 
   return (
-
     <div className="entradas-page">
-
-      {/* =====================================
+      {/* =====================================================
           CABEÇALHO
-      ====================================== */}
+      ====================================================== */}
 
-      <div className="entradas-header">
-
+      <div className="page-header">
         <div>
+          <h1>Entradas</h1>
 
-          <h1>
-            Entradas
-          </h1>
-
-          <p>
-            Gerencie as entradas de
-            produtos realizadas no estoque.
-          </p>
-
+          <p>Controle de entradas de produtos</p>
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-          }}
+        <button
+          type="button"
+          className="btn-primary"
+          onClick={abriModalTipoEntrada}
         >
-
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={
-              abrirNFsExistentes
-            }
-          >
-            Conciliar NF Existente
-          </button>
-
-          <button
-            type="button"
-            className="btn-primary"
-            onClick={
-              abrirNovaEntrada
-            }
-          >
-            Nova Entrada
-          </button>
-
-        </div>
-
+          + Nova Entrada
+        </button>
       </div>
 
-      {/* =====================================
-          TABELA
-      ====================================== */}
+      {/* =====================================================
+          TABELA PRINCIPAL
+      ====================================================== */}
 
-      <div className="entradas-card">
+      <div className="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
 
-        <Table
-          columns={columns}
-          data={entradas}
-          actions={actions}
-          rowKey="id"
-          loading={loadingDados}
+              <th>Tipo de Entrada</th>
+
+              <th>NF</th>
+
+              <th>Observação</th>
+
+              <th>Data</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <td
+                colSpan={5}
+                style={{
+                  textAlign: "center",
+                  padding: "30px",
+                }}
+              >
+                Nenhuma entrada carregada.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        {/* ===================================================
+            MODAL - TIPOS DE ENTRADA
+        ==================================================== */}
+
+        <Modal
+          isOpen={openModalSelecionarTipoEntrada}
+          onClose={fecharModalTipoEntrada}
+          title="Tipos De Entrada"
+        >
+          <div className="tipo-entrada-selection">
+            <div className="tipo-entrada-header">
+              <h3>Selecione o tipo de entrada</h3>
+
+              <p>Escolha como deseja realizar o registro da entrada.</p>
+            </div>
+
+            <div className="tipo-entrada-options">
+              {/* ENTRADA COM NF */}
+
+              <div className="tipo-entrada-card">
+                <div className="tipo-entrada-icon">
+                  <span>NF</span>
+                </div>
+
+                <div className="tipo-entrada-info">
+                  <h4>Entrada com NF</h4>
+
+                  <p>Registre uma entrada vinculada a uma Nota Fiscal.</p>
+                </div>
+
+                <button
+                  type="button"
+                  className="tipo-entrada-button"
+                  onClick={abriModalInportacaoNf}
+                >
+                  Selecionar
+                </button>
+              </div>
+
+              {/* ENTRADA SEM NF */}
+
+              <div className="tipo-entrada-card">
+                <div className="tipo-entrada-icon tipo-entrada-icon-sem-nf">
+                  <span>↗</span>
+                </div>
+
+                <div className="tipo-entrada-info">
+                  <h4>Entrada sem NF</h4>
+
+                  <p>Registre uma entrada sem vínculo com uma Nota Fiscal.</p>
+                </div>
+
+                <button type="button" className="tipo-entrada-button">
+                  Selecionar
+                </button>
+              </div>
+            </div>
+          </div>
+        </Modal>
+
+        {/* ===================================================
+            MODAL - IMPORTAR NF
+        ==================================================== */}
+
+        <Modal
+          isOpen={openModalInportacaoNf}
+          onClose={fecharModalInportacaoNf}
+          title="Importar NF"
+          footer={
+            <>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={fecharModalInportacaoNf}
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={!arquivoNF}
+                onClick={() => impotortarNf(arquivoNF)}
+              >
+                Visualizar Nota
+              </button>
+            </>
+          }
+        >
+          <div className="importacao-nf">
+            <div className="importacao-nf-header">
+              <h3>Importar Nota Fiscal</h3>
+
+              <p>
+                Selecione o arquivo XML da Nota Fiscal para realizar a
+                importação.
+              </p>
+            </div>
+
+            <div className="upload-nf">
+              <div className="upload-nf-icon">
+                <span>XML</span>
+              </div>
+
+              <div className="upload-nf-content">
+                <h4>Arquivo XML da Nota Fiscal</h4>
+
+                <p>Selecione o arquivo XML da Nota Fiscal.</p>
+
+                <input
+                  ref={inputArquivoRef}
+                  type="file"
+                  accept=".xml,text/xml"
+                  onChange={handleArquivoSelecionado}
+                />
+
+                <span className="upload-nf-format">Formato aceito: .xml</span>
+              </div>
+            </div>
+
+            {/* ARQUIVO */}
+
+            {arquivoNF && (
+              <div className="arquivo-nf-selecionado">
+                <div className="arquivo-nf-icon">XML</div>
+
+                <div className="arquivo-nf-info">
+                  <strong>{arquivoNF.name}</strong>
+
+                  <span>{(arquivoNF.size / 1024).toFixed(2)} KB</span>
+                </div>
+
+                <button
+                  type="button"
+                  className="arquivo-nf-remover"
+                  onClick={() => setArquivoNF(null)}
+                >
+                  Remover
+                </button>
+              </div>
+            )}
+          </div>
+        </Modal>
+
+        {/* ===================================================
+            MODAL - CADASTRO FORNECEDOR
+        ==================================================== */}
+
+        <FornecedorModal
+          isOpen={abrirModalCadastroDeFornecedor}
+          fornecedor={null}
+          modo="criar"
+          dadosIniciais={{
+            razaoSocial: fornecedor?.razaoSocial,
+
+            nomeFantasia: fornecedor?.nomeFantasia,
+
+            inscricaoEstadual: fornecedor?.inscricaoEstadual,
+
+            cnpj: fornecedor?.cnpj,
+          }}
+          loading={loadingFornecedor}
+          onClose={fecharModalCadastroDeFornecedor}
+          onSave={salvarFornecedor}
         />
 
-      </div>
+        {/* ===================================================
+            MODAL - PREVISUALIZAÇÃO DA NF
+        ==================================================== */}
 
-      {/* =====================================
-          NOVA ENTRADA
-      ====================================== */}
-
-      <Modal
-        isOpen={
-          modalNovaEntradaAberto
-        }
-
-        onClose={
-          fecharNovaEntrada
-        }
-
-        onOpenChange={(aberto) => {
-
-          if (!aberto) {
-            fecharNovaEntrada();
-          }
-
-        }}
-
-        title="Nova Entrada"
-
-        footer={
-
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={
-              fecharNovaEntrada
-            }
-          >
-            Cancelar
-          </button>
-
-        }
-      >
-
-        <div className="nova-entrada-opcoes">
-
-          <button
-            type="button"
-            className="entrada-opcao"
-            onClick={() => {
-
-              console.log(
-                "Abrir entrada sem NF",
-              );
-
-            }}
-          >
-
-            <div className="entrada-opcao-conteudo">
-
-              <strong>
-                Entrada sem NF
-              </strong>
-
-              <span>
-                Registrar uma entrada de
-                produtos sem vincular uma
-                nota fiscal.
-              </span>
-
-            </div>
-
-          </button>
-
-          <button
-            type="button"
-            className="entrada-opcao"
-            onClick={
-              abrirEntradaComNF
-            }
-          >
-
-            <div className="entrada-opcao-conteudo">
-
-              <strong>
-                Entrada com NF
-              </strong>
-
-              <span>
-                Registrar uma entrada
-                vinculada a uma nota fiscal.
-              </span>
-
-            </div>
-
-          </button>
-
-        </div>
-
-      </Modal>
-
-      {/* =====================================
-          IMPORTAÇÃO NF
-      ====================================== */}
-
-      <EntradaComNFModal
-        isOpen={
-          modalEntradaNFAberto
-        }
-
-        onClose={
-          fecharEntradaComNF
-        }
-
-        onFornecedorNaoEncontrado={
-          tratarFornecedorNaoEncontrado
-        }
-
-        onImportacaoConcluida={
-          handleImportacaoConcluida
-        }
-      />
-
-      {/* =====================================
-          FORNECEDOR
-      ====================================== */}
-
-      <FornecedorModal
-        isOpen={
-          modalFornecedorAberto
-        }
-
-        fornecedor={null}
-
-        modo="criar"
-
-        loading={
-          loadingFornecedor
-        }
-
-        dadosIniciais={{
-
-          razaoSocial:
-            fornecedorImportado
-              ?.razaoSocial,
-
-          nomeFantasia:
-            fornecedorImportado
-              ?.nomeFantasia,
-
-          inscricaoEstadual:
-            fornecedorImportado
-              ?.inscricaoEstadual,
-
-          cnpj:
-            fornecedorImportado
-              ?.cnpj,
-
-        }}
-
-        onClose={
-          fecharFornecedor
-        }
-
-        onSave={
-          handleSalvarFornecedor
-        }
-
-      />
-
-      {/* =====================================
-          SUCESSO DA IMPORTAÇÃO
-      ====================================== */}
-
-      <Modal
-        isOpen={
-          modalSucessoImportacao
-        }
-
-        onClose={
-          fecharSucessoImportacao
-        }
-
-        onOpenChange={(aberto) => {
-
-          if (!aberto) {
-            fecharSucessoImportacao();
-          }
-
-        }}
-
-        title="NF Importada com Sucesso"
-
-        footer={
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: "10px",
-            }}
-          >
-
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={
-                fecharSucessoImportacao
-              }
-            >
-              Fechar
-            </button>
-
-            <button
-              type="button"
-              className="btn-primary"
-              onClick={
-                seguirParaConciliacao
-              }
-            >
-              Seguir para Conciliação
-            </button>
-
-          </div>
-
-        }
-      >
-
-        <div
-          style={{
-            padding: "10px 0",
-          }}
-        >
-
-          <h3>
-            Nota Fiscal importada com sucesso!
-          </h3>
-
-          {notaFiscalImportada && (
-
+        <Modal
+          isOpen={modalConfimacaoInportacao}
+          onClose={fecharModalConfimacaoInportacao}
+          width="100%"
+          title={`Nota Fiscal - ${
+            dadosNF?.fornecedor?.nomeFantasia ||
+            dadosNF?.fornecedor?.razaoSocial ||
+            "Fornecedor"
+          } - Nº ${dadosNF?.numero || "-"}`}
+          footer={
             <>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={fecharModalConfimacaoInportacao}
+              >
+                Cancelar
+              </button>
 
-              <p>
-                Número da NF:{" "}
-                <strong>
-                  {
-                    notaFiscalImportada.numero
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={async () => {
+                  if (!dadosNF) {
+                    toast.error("Nenhuma nota fiscal foi carregada.");
+
+                    return;
                   }
-                </strong>
-              </p>
 
-              <p>
-                Fornecedor:{" "}
-                <strong>
-                  {
-                    notaFiscalImportada
-                      .nomeFantasiaFornecedor
-                  }
-                </strong>
-              </p>
-
-              <p>
-                Produtos importados:{" "}
-                <strong>
-                  {
-                    notaFiscalImportada
-                      .produtos
-                      .length
-                  }
-                </strong>
-              </p>
-
-              <p>
-                A NF foi salva com sucesso.
-              </p>
-
-              <p>
-                Você pode fazer a conciliação
-                agora ou posteriormente.
-              </p>
-
+                  await cadastraNF(dadosNF);
+                }}
+              >
+                Confirmar Importação
+              </button>
             </>
-
-          )}
-
-        </div>
-
-      </Modal>
-
-      {/* =====================================
-          NFS EXISTENTES
-      ====================================== */}
-
-      <Modal
-        isOpen={
-          modalNFsAberto
-        }
-
-        onClose={() =>
-          setModalNFsAberto(false)
-        }
-
-        onOpenChange={(aberto) => {
-
-          if (!aberto) {
-            setModalNFsAberto(false);
           }
-
-        }}
-
-        title="Notas Fiscais"
-
-        footer={
-
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={() =>
-              setModalNFsAberto(false)
-            }
-          >
-            Fechar
-          </button>
-
-        }
-      >
-
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "10px",
-          }}
         >
+          <div className="preview-nf">
+            {/* DADOS DA NOTA */}
 
-          {loadingNFs && (
+            <section className="preview-nf-section">
+              <div className="preview-nf-section-header">
+                <h3>Dados da Nota Fiscal</h3>
+              </div>
 
-            <p>
-              Carregando notas fiscais...
-            </p>
+              <div className="preview-nf-grid">
+                <div className="preview-nf-field">
+                  <span>Número da NF</span>
 
-          )}
+                  <strong>{dadosNF?.numero || "-"}</strong>
+                </div>
 
-          {!loadingNFs &&
-            notasFiscais.length === 0 && (
+                <div className="preview-nf-field">
+                  <span>Série</span>
 
-              <p>
-                Nenhuma nota fiscal encontrada.
-              </p>
+                  <strong>{dadosNF?.serie || "-"}</strong>
+                </div>
 
-            )}
+                <div className="preview-nf-field">
+                  <span>Data de Emissão</span>
 
-          {!loadingNFs &&
-            notasFiscais.map(
-              (nf) => (
-
-                <div
-                  key={nf.id}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "15px",
-                    border: "1px solid var(--border)",
-                    borderRadius: "8px",
-                    gap: "15px",
-                  }}
-                >
-
-                  <div>
-
-                    <strong>
-                      NF {nf.numero}
-                    </strong>
-
-                    <div>
-                      {
-                        nf.nomeFantasiaFornecedor ||
-                        nf.razaoSocialFornecedor
-                      }
-                    </div>
-
-                    <small>
-                      Criada em{" "}
-                      {
-                        formatarData(
-                          nf.dataCriacao,
+                  <strong>
+                    {dadosNF?.dataEmissao
+                      ? new Date(dadosNF.dataEmissao).toLocaleDateString(
+                          "pt-BR",
                         )
-                      }
-                    </small>
-
-                  </div>
-
-                  <button
-                    type="button"
-                    className="btn-primary"
-                    onClick={() =>
-                      abrirNFParaConciliacao(
-                        nf,
-                      )
-                    }
-                    disabled={
-                      loadingProdutosNF
-                    }
-                  >
-                    Conciliar
-                  </button>
-
+                      : "-"}
+                  </strong>
                 </div>
 
-              ),
-            )}
-
-        </div>
-
-      </Modal>
-
-      {/* =====================================
-          CONCILIAÇÃO
-      ====================================== */}
-
-      <ConciliacaoProdutosModal
-        isOpen={
-          modalConciliacaoAberto
-        }
-
-        produtosNF={
-          notaFiscalParaConciliacao?.produtos ?? []
-        }
-
-        produtosPadrao={
-          produtosPadrao
-        }
-
-        numeroNF={
-          notaFiscalParaConciliacao?.numero
-        }
-
-        onClose={
-          fecharConciliacao
-        }
-
-        onConfirmar={
-          confirmarConciliacao
-        }
-
-        loading={
-          loadingProdutosNF
-        }
-      />
-
-      {/* =====================================
-          VISUALIZAÇÃO
-      ====================================== */}
-
-      <Modal
-        isOpen={
-          modalVisualizacaoAberto
-        }
-
-        onClose={
-          fecharVisualizacao
-        }
-
-        onOpenChange={(aberto) => {
-
-          if (!aberto) {
-            fecharVisualizacao();
-          }
-
-        }}
-
-        title="Visualizar Entrada"
-
-        footer={
-
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={
-              fecharVisualizacao
-            }
-          >
-            Fechar
-          </button>
-
-        }
-      >
-
-        {entradaSelecionada && (
-
-          <div className="entrada-visualizacao">
-
-            <section className="entrada-section">
-
-              <h3>
-                Informações da entrada
-              </h3>
-
-              <div className="entrada-info-grid">
-
-                <div className="entrada-info">
-
-                  <span>
-                    ID
-                  </span>
+                <div className="preview-nf-field">
+                  <span>Valor Total</span>
 
                   <strong>
-                    {
-                      entradaSelecionada.id
-                    }
+                    {dadosNF?.valorTotal != null
+                      ? dadosNF.valorTotal.toLocaleString("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        })
+                      : "-"}
                   </strong>
-
                 </div>
 
-                <div className="entrada-info">
+                <div className="preview-nf-field preview-nf-field-full">
+                  <span>Chave de Acesso</span>
 
-                  <span>
-                    Tipo de entrada
-                  </span>
-
-                  <strong>
-                    {
-                      entradaSelecionada
-                        .nomeTipoEntrada
-                    }
+                  <strong className="chave-acesso">
+                    {dadosNF?.chaveAcesso || "-"}
                   </strong>
-
                 </div>
-
-                <div className="entrada-info">
-
-                  <span>
-                    Data de criação
-                  </span>
-
-                  <strong>
-                    {
-                      formatarData(
-                        entradaSelecionada
-                          .dataCriacao,
-                      )
-                    }
-                  </strong>
-
-                </div>
-
-                <div className="entrada-info">
-
-                  <span>
-                    Última atualização
-                  </span>
-
-                  <strong>
-                    {
-                      formatarData(
-                        entradaSelecionada
-                          .dataUpdate,
-                      )
-                    }
-                  </strong>
-
-                </div>
-
               </div>
-
             </section>
 
-            <section className="entrada-section">
+            {/* FORNECEDOR */}
 
-              <h3>
-                Nota Fiscal
-              </h3>
-
-              <div className="entrada-info-grid">
-
-                <div className="entrada-info">
-
-                  <span>
-                    NF
-                  </span>
-
-                  <strong>
-                    {
-                      entradaSelecionada
-                        .numeroNF ||
-                      "Sem NF"
-                    }
-                  </strong>
-
-                </div>
-
-                <div className="entrada-info">
-
-                  <span>
-                    ID da NF
-                  </span>
-
-                  <strong>
-                    {
-                      entradaSelecionada
-                        .nfId ??
-                      "-"
-                    }
-                  </strong>
-
-                </div>
-
+            <section className="preview-nf-section">
+              <div className="preview-nf-section-header">
+                <h3>Fornecedor</h3>
               </div>
 
+              <div className="preview-nf-grid">
+                <div className="preview-nf-field preview-nf-field-full">
+                  <span>Razão Social</span>
+
+                  <strong>{dadosNF?.fornecedor?.razaoSocial || "-"}</strong>
+                </div>
+
+                <div className="preview-nf-field">
+                  <span>Nome Fantasia</span>
+
+                  <strong>{dadosNF?.fornecedor?.nomeFantasia || "-"}</strong>
+                </div>
+
+                <div className="preview-nf-field">
+                  <span>CNPJ</span>
+
+                  <strong>{dadosNF?.fornecedor?.cnpj || "-"}</strong>
+                </div>
+
+                <div className="preview-nf-field">
+                  <span>Inscrição Estadual</span>
+
+                  <strong>
+                    {dadosNF?.fornecedor?.inscricaoEstadual || "-"}
+                  </strong>
+                </div>
+
+                <div className="preview-nf-field">
+                  <span>Município</span>
+
+                  <strong>{dadosNF?.fornecedor?.municipio || "-"}</strong>
+                </div>
+
+                <div className="preview-nf-field">
+                  <span>UF</span>
+
+                  <strong>{dadosNF?.fornecedor?.uf || "-"}</strong>
+                </div>
+              </div>
             </section>
 
-            <section className="entrada-section">
+            {/* PRODUTOS */}
 
-              <h3>
-                Observação
-              </h3>
-
-              <div className="entrada-observacao">
-
-                {
-                  entradaSelecionada.obs ||
-                  "Nenhuma observação informada."
-                }
-
+            <section className="preview-nf-section">
+              <div className="preview-nf-section-header">
+                <h3>
+                  Produtos
+                  <span className="preview-nf-count">
+                    {dadosNF?.produtos?.length || 0}
+                  </span>
+                </h3>
               </div>
 
+              <div className="preview-nf-produtos">
+                <Table
+                  columns={colunasProdutosNF}
+                  data={dadosNF?.produtos || []}
+                  loading={false}
+                />
+              </div>
             </section>
-
           </div>
+        </Modal>
 
-        )}
+        {/* ===================================================
+            MODAL - PERGUNTA RELACIONAMENTO
+        ==================================================== */}
 
-      </Modal>
+        <RelacionarProdutosModal
+          isOpen={openModalRelacionarProdutos}
+          onClose={fecharModalRelacionarProdutos}
+          onSim={confirmarRelacionamentoProdutos}
+          onNao={naoRelacionarProdutos}
+          title="Relacionamento de Produtos"
+          subtitulo="Deseja realizar o relacionamento dos produtos desta Nota?"
+          descriacao="O relacionamento permite associar os produtos da NF aos produtos cadastrados no sistema."
+        />
 
+        {/* ===================================================
+            MODAL - RELACIONAMENTO DOS PRODUTOS
+        ==================================================== */}
+
+        <Modal
+          isOpen={openModalRelacionaMento}
+          onClose={fecharModalRelacionaMento}
+          title="Relacionamento de Produtos"
+          width="1400px"
+          footer={
+            <div className="relacionamento-footer">
+              <button
+                type="button"
+                className="btn-relacionamento btn-cancelar"
+                onClick={fecharModalRelacionaMento}
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                className="btn-relacionamento btn-finalizar"
+                onClick={finalizarRelacionamento}
+              >
+                Finalizar
+              </button>
+            </div>
+          }
+        >
+          <div className="relacionamento-container">
+            {/* DADOS DA NF */}
+
+            <div className="dados-nota">
+              <div className="campo-nota">
+                <label>Número da NF</label>
+
+                <span>{dadosNF?.numero || "-"}</span>
+              </div>
+
+              <div className="campo-nota">
+                <label>Fornecedor</label>
+
+                <span>
+                  {dadosNF?.fornecedor?.nomeFantasia ||
+                    dadosNF?.fornecedor?.razaoSocial ||
+                    "-"}
+                </span>
+              </div>
+
+              <div className="campo-nota">
+                <label>Chave de Acesso</label>
+
+                <span>{dadosNF?.chaveAcesso || "-"}</span>
+              </div>
+            </div>
+
+            {/* TÍTULO */}
+
+            <div className="relacionamento-header">
+              <div>
+                <h3>Produtos da Nota Fiscal</h3>
+
+                <p>
+                  Relacione os produtos da nota fiscal com os produtos
+                  cadastrados no sistema.
+                </p>
+              </div>
+            </div>
+
+            {/* TABLE */}
+
+            <div className="relacionamento-tabela">
+              <Table
+                columns={colunasRelacionamento}
+                data={listaProdutosRelacionados}
+                rowKey="id"
+                loading={loadingProdutos}
+              />
+            </div>
+          </div>
+        </Modal>
+      </div>
     </div>
-
   );
-
 }

@@ -37,7 +37,11 @@ CREATE TABLE tb_entrada_produtos (
 
     produto_id BIGINT NOT NULL,
 
-    quant_itens INTEGER NOT NULL,
+    id_produto_nf BIGINT NOT NULL,
+
+    data_de_validade DATE,
+
+    quant_itens NUMERIC(15,2) NOT NULL,
 
     valor_uni NUMERIC(15,2) NOT NULL,
 
@@ -47,13 +51,27 @@ CREATE TABLE tb_entrada_produtos (
 
     data_update TIMESTAMP,
 
-    user_id BIGINT,
+    -- ========================================================
+    -- FK PARA ENTRADA
+    -- ========================================================
 
     CONSTRAINT fk_entrada_produtos_entrada
         FOREIGN KEY (entrada_id)
         REFERENCES entrada(id),
 
+    -- ========================================================
+    -- FK PARA PRODUTO DO ESTOQUE
+    -- ========================================================
+
     CONSTRAINT fk_entrada_produtos_produto
         FOREIGN KEY (produto_id)
-        REFERENCES produtos(id)
+        REFERENCES produtos(id),
+
+    -- ========================================================
+    -- FK PARA PRODUTO REGISTRADO NA NF
+    -- ========================================================
+
+    CONSTRAINT fk_entrada_produtos_produto_nf
+        FOREIGN KEY (id_produto_nf)
+        REFERENCES produtos_registro_nf(id)
 );

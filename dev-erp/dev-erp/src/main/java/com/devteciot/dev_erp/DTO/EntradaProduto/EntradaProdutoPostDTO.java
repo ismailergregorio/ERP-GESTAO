@@ -1,0 +1,26 @@
+package com.devteciot.dev_erp.DTO.EntradaProduto;
+
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+public record EntradaProdutoPostDTO(
+
+  @NotNull(message = "A entrada é obrigatória") Long entradaId,
+
+  @NotNull(message = "O produto é obrigatório") Long produtoId,
+
+  @NotNull(message = "O produto da NF é obrigatório") Long produtoNFId,
+
+  LocalDate dataValidade,
+
+  @NotNull(message = "A quantidade de itens é obrigatória") @DecimalMin(value = "0.01", message = "A quantidade deve ser maior que zero") BigDecimal quantidadeItens,
+
+  @NotNull(message = "O valor unitário é obrigatório") @DecimalMin(value = "0.00", message = "O valor unitário não pode ser negativo") BigDecimal valorUnitario,
+
+  @NotNull(message = "O valor total é obrigatório") @DecimalMin(value = "0.00", message = "O valor total não pode ser negativo") BigDecimal valorTotal
+
+) {
+}

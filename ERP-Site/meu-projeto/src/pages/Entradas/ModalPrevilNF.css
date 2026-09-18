@@ -1,0 +1,166 @@
+.preview-nf {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 20px;
+}
+
+/* =========================================
+   SEÇÕES
+========================================= */
+
+.preview-nf-section {
+  width: 100%;
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  background: var(--surface);
+
+  overflow: hidden;
+}
+
+/* =========================================
+   CABEÇALHO DA SEÇÃO
+========================================= */
+
+.preview-nf-section-header {
+  display: flex;
+  align-items: center;
+
+  padding: 14px 18px;
+
+  border-bottom: 1px solid var(--border);
+
+  background: var(--background);
+}
+
+.preview-nf-section-header h3 {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  margin: 0;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  color: var(--text-primary);
+}
+
+/* =========================================
+   GRID DOS DADOS
+========================================= */
+
+.preview-nf-grid {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  width: 100%;
+}
+
+.preview-nf-field {
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+
+  min-width: 0;
+
+  padding: 13px 18px;
+
+  border-bottom: 1px solid var(--border);
+}
+
+.preview-nf-field-full {
+  grid-column: 1 / -1;
+}
+
+.preview-nf-field span {
+  font-size: 11px;
+  font-weight: 500;
+
+  color: var(--text-secondary);
+}
+
+.preview-nf-field strong {
+  overflow: hidden;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  color: var(--text-primary);
+
+  text-overflow: ellipsis;
+}
+
+.chave-acesso {
+  font-family: monospace;
+
+  font-size: 12px !important;
+
+  letter-spacing: 0.3px;
+}
+
+/* =========================================
+   CONTADOR DE PRODUTOS
+========================================= */
+
+.preview-nf-count {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-width: 22px;
+  height: 22px;
+
+  padding: 0 7px;
+
+  border-radius: 20px;
+
+  background: rgba(11, 42, 85, 0.08);
+
+  color: var(--primary);
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* =========================================
+   TABELA DOS PRODUTOS
+========================================= */
+
+.preview-nf-produtos {
+  width: 100%;
+
+  overflow-x: auto;
+}
+
+/* =========================================
+   RESPONSIVO
+========================================= */
+
+@media (max-width: 800px) {
+  .preview-nf-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 550px) {
+  .preview-nf-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-nf-field-full {
+    grid-column: auto;
+  }
+
+  .preview-nf-produtos {
+    overflow-x: auto;
+  }
+}

@@ -1,0 +1,24 @@
+.relacionar-produtos-content {
+  padding: 10px 5px;
+  text-align: center;
+}
+
+.relacionar-produtos-content p {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.relacionar-produtos-content span {
+  display: block;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.relacionar-produtos-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
