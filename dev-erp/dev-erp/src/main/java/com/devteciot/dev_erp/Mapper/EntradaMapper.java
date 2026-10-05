@@ -14,6 +14,7 @@ public class EntradaMapper {
   Entrada entrada = new Entrada();
 
   entrada.setObs(dto.obs());
+  entrada.setNumeroNFManual(dto.numeroNF());
 
   return entrada;
  }
@@ -45,7 +46,9 @@ public class EntradaMapper {
     entrada.getDataCriacao(),
     entrada.getDataUpdate(),
     nfId,
-    numeroNF);
+    numeroNF != null ? numeroNF : entrada.getNumeroNFManual(),
+    entrada.getNumeroNFManual(),
+    entrada.getAtivo());
  }
 
  public void updateEntity(
@@ -53,5 +56,6 @@ public class EntradaMapper {
    EntradaPostDTO dto) {
 
   entrada.setObs(dto.obs());
+  entrada.setNumeroNFManual(dto.numeroNF());
  }
 }

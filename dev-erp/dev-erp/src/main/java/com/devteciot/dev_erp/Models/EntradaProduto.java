@@ -51,7 +51,7 @@ public class EntradaProduto {
   */
 
  @ManyToOne(fetch = FetchType.LAZY)
- @JoinColumn(name = "id_produto_nf", nullable = false)
+ @JoinColumn(name = "id_produto_nf")
  private ProdutoRegistroNF produtoNF;
 
  /*

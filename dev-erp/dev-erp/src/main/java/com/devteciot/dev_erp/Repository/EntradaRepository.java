@@ -7,7 +7,11 @@ import java.util.List;
 
 public interface EntradaRepository extends JpaRepository<Entrada, Long> {
 
- List<Entrada> findByTipoEntradaId(Long tipoEntradaId);
+ List<Entrada> findByAtivoTrueOrderByDataCriacaoDesc();
 
- List<Entrada> findByNfId(Long nfId);
+ List<Entrada> findByIdAndAtivoTrue(Long id);
+
+ List<Entrada> findByTipoEntradaIdAndAtivoTrue(Long tipoEntradaId);
+
+ List<Entrada> findByNfIdAndAtivoTrue(Long nfId);
 }

@@ -56,3 +56,20 @@
 .erp-content > * {
   padding: 28px;
 }
+/* Polimento estrutural */
+.erp-layout {
+  background: var(--background);
+}
+
+.erp-content {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.72) 0, rgba(245,247,251,0) 170px),
+    var(--background);
+}
+
+.erp-content > * {
+  max-width: 1680px;
+  margin-left: auto;
+  margin-right: auto;
+}

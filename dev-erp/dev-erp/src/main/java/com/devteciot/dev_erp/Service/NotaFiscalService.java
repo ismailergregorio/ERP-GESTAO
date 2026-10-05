@@ -4,13 +4,16 @@ import com.devteciot.dev_erp.DTO.DTONotaFiscal.NotaFiscalGetDTO;
 import com.devteciot.dev_erp.DTO.DTONotaFiscal.NotaFiscalPostDTO;
 import com.devteciot.dev_erp.Exception.ResourceNotFoundException;
 import com.devteciot.dev_erp.Mapper.NotaFiscalMapper;
+import com.devteciot.dev_erp.Models.Entrada;
 import com.devteciot.dev_erp.Models.Fornecedor;
 import com.devteciot.dev_erp.Models.NotaFiscal;
+import com.devteciot.dev_erp.Repository.EntradaRepository;
 import com.devteciot.dev_erp.Repository.FornecedorRepository;
+import com.devteciot.dev_erp.Repository.EntradaProdutoRepository;
 import com.devteciot.dev_erp.Repository.NotaFiscalRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,287 +22,182 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NotaFiscalService {
 
-  private final NotaFiscalRepository repository;
+    private final NotaFiscalRepository repository;
+    private final FornecedorRepository fornecedorRepository;
+    private final NotaFiscalMapper mapper;
+    private final EntradaRepository entradaRepository;
+    private final EntradaProdutoRepository entradaProdutoRepository;
+    private final EntradaService entradaService;
 
-  private final FornecedorRepository fornecedorRepository;
+    @Transactional
+    public NotaFiscalGetDTO criar(NotaFiscalPostDTO dto) {
 
-  private final NotaFiscalMapper mapper;
+        if (repository.existsByChaveAcesso(dto.chaveAcesso())) {
+            throw new IllegalArgumentException(
+                    "Já existe uma nota fiscal cadastrada com esta chave de acesso.");
+        }
 
-  /*
-   * =====================================================
-   * CRIAR
-   * =====================================================
-   */
+        Fornecedor fornecedor = fornecedorRepository.findById(dto.fornecedorId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Fornecedor não encontrado com o ID: " + dto.fornecedorId()));
 
-  public NotaFiscalGetDTO criar(
-      NotaFiscalPostDTO dto) {
+        if (!Boolean.TRUE.equals(fornecedor.getAtivo())) {
+            throw new IllegalArgumentException("O fornecedor informado está inativo.");
+        }
 
-    /*
-     * ================================================
-     * VERIFICAR CHAVE DE ACESSO
-     * ================================================
-     */
+        if (repository.existsByNumeroAndFornecedorId(dto.numero(), dto.fornecedorId())) {
+            throw new IllegalArgumentException(
+                    "Já existe uma nota fiscal com o número " + dto.numero()
+                            + " para este fornecedor.");
+        }
 
-    if (repository.existsByChaveAcesso(
-        dto.chaveAcesso())) {
+        NotaFiscal nf = mapper.toEntity(dto);
+        nf.setFornecedor(fornecedor);
+        nf.setNf_vinculada(false);
+        nf.setAtivo(true);
 
-      throw new IllegalArgumentException(
-          "Já existe uma nota fiscal cadastrada "
-              + "com esta chave de acesso.");
+        return mapper.toGetDTO(repository.save(nf));
     }
 
-    /*
-     * ================================================
-     * VERIFICAR FORNECEDOR
-     * ================================================
-     */
-
-    Fornecedor fornecedor = fornecedorRepository.findById(
-        dto.fornecedorId()).orElseThrow(
-            () -> new ResourceNotFoundException(
-                "Fornecedor não encontrado "
-                    + "com o ID: "
-                    + dto.fornecedorId()));
-
-    /*
-     * ================================================
-     * VERIFICAR SE FORNECEDOR ESTÁ ATIVO
-     * ================================================
-     */
-
-    if (!Boolean.TRUE.equals(
-        fornecedor.getAtivo())) {
-
-      throw new IllegalArgumentException(
-          "O fornecedor informado está inativo.");
+    public List<NotaFiscalGetDTO> listar() {
+        return repository.findByAtivoTrueOrderByDataCriacaoDesc()
+                .stream()
+                .map(mapper::toGetDTO)
+                .toList();
     }
 
-    /*
-     * ================================================
-     * VERIFICAR NÚMERO DA NF
-     * ================================================
-     */
-
-    if (repository.existsByNumeroAndFornecedorId(
-        dto.numero(),
-        dto.fornecedorId())) {
-
-      throw new IllegalArgumentException(
-          "Já existe uma nota fiscal com o número "
-              + dto.numero()
-              + " para este fornecedor.");
+    public NotaFiscalGetDTO buscarPorId(Long id) {
+        NotaFiscal nf = buscarAtiva(id);
+        return mapper.toGetDTO(nf);
     }
 
-    /*
-     * ================================================
-     * CRIAR ENTIDADE
-     * ================================================
-     */
+    public List<NotaFiscalGetDTO> listarPorFornecedor(Long fornecedorId) {
+        fornecedorRepository.findById(fornecedorId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Fornecedor não encontrado com o ID: " + fornecedorId));
 
-    NotaFiscal nf = mapper.toEntity(dto);
-
-    /*
-     * ================================================
-     * ASSOCIAR FORNECEDOR
-     * ================================================
-     */
-
-    nf.setFornecedor(
-        fornecedor);
-
-    /*
-     * ================================================
-     * SALVAR
-     * ================================================
-     */
-
-    NotaFiscal salva = repository.save(nf);
-
-    return mapper.toGetDTO(
-        salva);
-  }
-
-  /*
-   * =====================================================
-   * LISTAR
-   * =====================================================
-   */
-
-  public List<NotaFiscalGetDTO> listar() {
-
-    return repository.findAll()
-        .stream()
-        .map(mapper::toGetDTO)
-        .toList();
-  }
-
-  /*
-   * =====================================================
-   * BUSCAR POR ID
-   * =====================================================
-   */
-
-  public NotaFiscalGetDTO buscarPorId(
-      Long id) {
-
-    NotaFiscal nf = repository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException(
-            "Nota fiscal não encontrada "
-                + "com o ID: "
-                + id));
-
-    return mapper.toGetDTO(nf);
-  }
-
-  /*
-   * =====================================================
-   * LISTAR POR FORNECEDOR
-   * =====================================================
-   */
-
-  public List<NotaFiscalGetDTO> listarPorFornecedor(
-      Long fornecedorId) {
-
-    /*
-     * Verifica se o fornecedor existe
-     */
-
-    fornecedorRepository.findById(
-        fornecedorId).orElseThrow(
-            () -> new ResourceNotFoundException(
-                "Fornecedor não encontrado "
-                    + "com o ID: "
-                    + fornecedorId));
-
-    return repository
-        .findByFornecedorId(
-            fornecedorId)
-        .stream()
-        .map(mapper::toGetDTO)
-        .toList();
-  }
-
-  /*
-   * =====================================================
-   * ATUALIZAR
-   * =====================================================
-   */
-
-  public NotaFiscalGetDTO atualizar(
-      Long id,
-      NotaFiscalPostDTO dto) {
-
-    NotaFiscal nf = repository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException(
-            "Nota fiscal não encontrada "
-                + "com o ID: "
-                + id));
-
-    /*
-     * ================================================
-     * VERIFICAR FORNECEDOR
-     * ================================================
-     */
-
-    Fornecedor fornecedor = fornecedorRepository.findById(
-        dto.fornecedorId()).orElseThrow(
-            () -> new ResourceNotFoundException(
-                "Fornecedor não encontrado "
-                    + "com o ID: "
-                    + dto.fornecedorId()));
-
-    /*
-     * ================================================
-     * FORNECEDOR ATIVO
-     * ================================================
-     */
-
-    if (!Boolean.TRUE.equals(
-        fornecedor.getAtivo())) {
-
-      throw new IllegalArgumentException(
-          "O fornecedor informado está inativo.");
+        return repository.findByFornecedorId(fornecedorId)
+                .stream()
+                .filter(nf -> Boolean.TRUE.equals(nf.getAtivo()))
+                .map(mapper::toGetDTO)
+                .toList();
     }
 
-    /*
-     * ================================================
-     * VERIFICAR CHAVE
-     * ================================================
-     */
+    @Transactional
+    public NotaFiscalGetDTO atualizar(Long id, NotaFiscalPostDTO dto) {
 
-    if (!nf.getChaveAcesso().equals(
-        dto.chaveAcesso())) {
+        NotaFiscal nf = buscarAtiva(id);
 
-      if (repository.existsByChaveAcesso(
-          dto.chaveAcesso())) {
+        Fornecedor fornecedor = fornecedorRepository.findById(dto.fornecedorId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Fornecedor não encontrado com o ID: " + dto.fornecedorId()));
 
-        throw new IllegalArgumentException(
-            "Já existe uma nota fiscal cadastrada "
-                + "com esta chave de acesso.");
-      }
+        if (!Boolean.TRUE.equals(fornecedor.getAtivo())) {
+            throw new IllegalArgumentException("O fornecedor informado está inativo.");
+        }
+
+        if (!nf.getChaveAcesso().equals(dto.chaveAcesso())
+                && repository.existsByChaveAcesso(dto.chaveAcesso())) {
+            throw new IllegalArgumentException(
+                    "Já existe uma nota fiscal cadastrada com esta chave de acesso.");
+        }
+
+        boolean numeroAlterado = !nf.getNumero().equals(dto.numero());
+        boolean fornecedorAlterado = !nf.getFornecedor().getId().equals(dto.fornecedorId());
+
+        if ((numeroAlterado || fornecedorAlterado)
+                && repository.existsByNumeroAndFornecedorId(dto.numero(), dto.fornecedorId())) {
+            throw new IllegalArgumentException(
+                    "Já existe uma nota fiscal com o número " + dto.numero()
+                            + " para este fornecedor.");
+        }
+
+        mapper.updateEntity(nf, dto);
+        nf.setFornecedor(fornecedor);
+
+        return mapper.toGetDTO(repository.save(nf));
     }
 
-    /*
-     * ================================================
-     * VERIFICAR NÚMERO + FORNECEDOR
-     * ================================================
-     * 
-     * O próprio registro não deve ser considerado.
+    /**
+     * Vincula uma NF já cadastrada a uma entrada já finalizada.
+     *
+     * Esta operação NÃO movimenta estoque. O estoque já foi alterado
+     * quando a entrada foi finalizada.
      */
+    @Transactional
+    public NotaFiscalGetDTO vincularEntrada(Long nfId, Long entradaId) {
 
-    boolean numeroAlterado = !nf.getNumero().equals(
-        dto.numero());
+        NotaFiscal nf = buscarAtiva(nfId);
 
-    boolean fornecedorAlterado = !nf.getFornecedor().getId().equals(
-        dto.fornecedorId());
+        List<Entrada> entradasDaNF =
+                entradaRepository.findByNfIdAndAtivoTrue(nfId);
 
-    if (numeroAlterado || fornecedorAlterado) {
+        if (!entradasDaNF.isEmpty()) {
+            if (entradasDaNF.stream().anyMatch(e -> e.getId().equals(entradaId))) {
+                return mapper.toGetDTO(nf);
+            }
 
-      if (repository.existsByNumeroAndFornecedorId(
-          dto.numero(),
-          dto.fornecedorId())) {
+            throw new IllegalArgumentException(
+                    "A nota fiscal já está vinculada a outra entrada ativa.");
+        }
 
-        throw new IllegalArgumentException(
-            "Já existe uma nota fiscal com o número "
-                + dto.numero()
-                + " para este fornecedor.");
-      }
+        Entrada entrada = entradaRepository.findByIdAndAtivoTrue(entradaId)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Entrada não encontrada ou está inativa com o ID: " + entradaId));
+
+        if (entrada.getNf() != null) {
+            throw new IllegalArgumentException(
+                    "A entrada já está vinculada a uma nota fiscal.");
+        }
+
+        if (entradaProdutoRepository.findByEntradaId(entradaId).isEmpty()) {
+            throw new IllegalArgumentException(
+                    "A entrada selecionada não possui produtos finalizados.");
+        }
+
+        entrada.setNf(nf);
+        entrada.setNumeroNFManual(null);
+        entradaRepository.save(entrada);
+
+        nf.setNf_vinculada(true);
+        repository.save(nf);
+
+        return mapper.toGetDTO(nf);
     }
 
-    /*
-     * ================================================
-     * ATUALIZAR
-     * ================================================
+    /**
+     * Desativa a NF e desfaz as entradas ativas vinculadas.
+     * O estoque é revertido pelo EntradaService.
      */
+    @Transactional
+    public void excluir(Long id) {
 
-    mapper.updateEntity(
-        nf,
-        dto);
+        NotaFiscal nf = buscarAtiva(id);
 
-    nf.setFornecedor(
-        fornecedor);
+        List<Entrada> entradas = entradaRepository.findByNfIdAndAtivoTrue(id);
 
-    NotaFiscal atualizada = repository.save(nf);
+        for (Entrada entrada : entradas) {
+            entradaService.excluir(entrada.getId());
+        }
 
-    return mapper.toGetDTO(
-        atualizada);
-  }
+        nf.setNf_vinculada(false);
+        nf.setAtivo(false);
 
-  /*
-   * =====================================================
-   * EXCLUIR
-   * =====================================================
-   */
+        repository.save(nf);
+    }
 
-  public void excluir(
-      Long id) {
+    private NotaFiscal buscarAtiva(Long id) {
+        NotaFiscal nf = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Nota fiscal não encontrada com o ID: " + id));
 
-    NotaFiscal nf = repository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException(
-            "Nota fiscal não encontrada "
-                + "com o ID: "
-                + id));
+        if (!Boolean.TRUE.equals(nf.getAtivo())) {
+            throw new ResourceNotFoundException(
+                    "Nota fiscal não encontrada ou está inativa com o ID: " + id);
+        }
 
-    repository.delete(nf);
-  }
+        return nf;
+    }
 }

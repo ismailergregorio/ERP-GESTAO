@@ -270,3 +270,46 @@
 .erp-layout.sidebar-closed .menu-title svg:last-child {
   display: none;
 }
+
+/* Polimento visual da navegação */
+.sidebar {
+  background:
+    radial-gradient(circle at 15% 0%, rgba(255,255,255,.08), transparent 24%),
+    linear-gradient(180deg, #0b2a55 0%, #071f40 100%);
+  box-shadow: 8px 0 28px rgba(7,29,59,.10);
+}
+
+.sidebar-logo {
+  position: relative;
+  min-height: 84px;
+  padding: 18px 20px !important;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.logo-icon {
+  box-shadow: 0 7px 18px rgba(0,0,0,.18);
+}
+
+.menu-link,
+.menu-title {
+  min-height: 44px;
+  border: 1px solid transparent;
+}
+
+.menu-link:hover,
+.menu-title:hover {
+  border-color: rgba(255,255,255,.07);
+  background: rgba(255,255,255,.075);
+}
+
+.menu-link.active {
+  box-shadow: 0 7px 18px rgba(229,31,42,.20);
+}
+
+.submenu a {
+  min-height: 36px;
+}
+
+.sidebar-menu::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.15);
+}

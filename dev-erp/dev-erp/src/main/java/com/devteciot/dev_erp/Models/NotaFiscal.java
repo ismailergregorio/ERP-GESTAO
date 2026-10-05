@@ -49,4 +49,7 @@ public class NotaFiscal {
 
   @Column(nullable = false)
   private Boolean nf_vinculada = false;
+
+  @Column(nullable = false)
+  private Boolean ativo = true;
 }

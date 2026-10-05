@@ -20,7 +20,9 @@ public record NotaFiscalGetDTO(
 
     LocalDateTime dataUpdate,
 
-    Boolean nf_vinculada
+    Boolean nf_vinculada,
+
+    Boolean ativo
 
 ) {
 }

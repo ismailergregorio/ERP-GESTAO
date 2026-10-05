@@ -17,4 +17,6 @@ public interface NotaFiscalRepository
 
  List<NotaFiscal> findByFornecedorId(
    Long fornecedorId);
+
+ List<NotaFiscal> findByAtivoTrueOrderByDataCriacaoDesc();
 }

@@ -98,6 +98,17 @@ public class NotaFiscalController {
       dto));
  }
 
+
+
+ @PostMapping("/{nfId}/vincular-entrada/{entradaId}")
+ public ResponseEntity<NotaFiscalGetDTO> vincularEntrada(
+   @PathVariable Long nfId,
+   @PathVariable Long entradaId) {
+
+  return ResponseEntity.ok(
+    service.vincularEntrada(nfId, entradaId));
+ }
+
  /*
   * =====================================================
   * DELETE

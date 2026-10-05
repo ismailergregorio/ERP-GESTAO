@@ -10,7 +10,7 @@ public record EntradaProdutoFinalizacaoPostDTO(
 
   @NotNull(message = "O produto é obrigatório") Long produtoId,
 
-  @NotNull(message = "O produto da NF é obrigatório") Long produtoNFId,
+  Long produtoNFId,
 
   LocalDate dataValidade,
 

@@ -18,7 +18,11 @@ public record EntradaGetDTO(
 
   Long nfId,
 
-  String numeroNF
+  String numeroNF,
+
+  String numeroNFManual,
+
+  Boolean ativo
 
 ) {
 }

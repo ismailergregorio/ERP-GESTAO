@@ -9,7 +9,9 @@ public record EntradaPostDTO(
 
   @Size(max = 500, message = "A observação deve possuir no máximo 500 caracteres") String obs,
 
-  Long nfId
+  Long nfId,
+
+  @Size(max = 60, message = "O número da nota deve possuir no máximo 60 caracteres") String numeroNF
 
 ) {
 }

@@ -1,0 +1,157 @@
+.saida-page {
+  width: 100%;
+}
+
+.saida-form {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-section h3 {
+  margin: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--primary);
+  font-size: var(--font-lg);
+  font-weight: var(--font-semibold);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.form-group label {
+  color: var(--text-primary);
+  font-size: var(--font-md);
+  font-weight: var(--font-semibold);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  outline: none;
+  background: var(--surface);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: var(--font-md);
+  transition: var(--transition-fast);
+  box-sizing: border-box;
+}
+
+.form-group input,
+.form-group select {
+  height: 44px;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(11, 42, 85, 0.08);
+}
+
+.form-group input:disabled,
+.form-group select:disabled,
+.form-group textarea:disabled {
+  background: var(--background);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.produto-item {
+  display: grid;
+  grid-template-columns: minmax(250px, 2fr) 150px 170px auto;
+  gap: 12px;
+  align-items: end;
+  padding: 15px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+}
+
+.form-group small {
+  color: var(--text-secondary);
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-remove {
+  height: 42px;
+  padding: 0 16px;
+  border-radius: var(--radius);
+  font-family: var(--font-family);
+  font-size: var(--font-md);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.btn-primary {
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn-secondary {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+.btn-remove {
+  border: 1px solid var(--danger);
+  background: transparent;
+  color: var(--danger);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.saida-total {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.saida-total span {
+  color: var(--primary);
+  font-weight: var(--font-bold);
+}
+
+@media (max-width: 900px) {
+  .form-grid,
+  .produto-item {
+    grid-template-columns: 1fr;
+  }
+}

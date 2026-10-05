@@ -29,6 +29,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -47,6 +49,8 @@ public class EntradaFinalizacaoService {
         private final ProdutoRegistroNFRepository produtoNFRepository;
 
         private final EntradaProdutoMapper entradaProdutoMapper;
+
+        private final EstoqueService estoqueService;
 
         /*
          * =====================================================
@@ -71,6 +75,19 @@ public class EntradaFinalizacaoService {
                                                                                 + "com o ID: "
                                                                                 + dto.tiposEntradaId()));
 
+                if (dto.produtos() == null || dto.produtos().isEmpty()) {
+                        throw new IllegalArgumentException(
+                                        "A entrada deve possuir pelo menos um produto.");
+                }
+
+                Set<Long> produtosInformados = new HashSet<>();
+                for (EntradaProdutoFinalizacaoPostDTO item : dto.produtos()) {
+                        if (!produtosInformados.add(item.produtoId())) {
+                                throw new IllegalArgumentException(
+                                                "O mesmo produto não pode ser informado mais de uma vez na entrada.");
+                        }
+                }
+
                 /*
                  * =================================================
                  * 2 - VERIFICAR NF
@@ -87,6 +104,17 @@ public class EntradaFinalizacaoService {
                                                                         "Nota fiscal não encontrada "
                                                                                         + "com o ID: "
                                                                                         + dto.nfId()));
+
+                        if (!Boolean.TRUE.equals(nf.getAtivo())) {
+                                throw new IllegalArgumentException(
+                                                "A nota fiscal informada está inativa.");
+                        }
+
+                        if (Boolean.TRUE.equals(nf.getNf_vinculada())
+                                        || !entradaRepository.findByNfIdAndAtivoTrue(nf.getId()).isEmpty()) {
+                                throw new IllegalArgumentException(
+                                                "A nota fiscal já está vinculada a uma entrada ativa.");
+                        }
                 }
 
                 /*
@@ -102,6 +130,14 @@ public class EntradaFinalizacaoService {
                 entrada.setObs(dto.obs());
 
                 entrada.setNf(nf);
+
+                String numeroNFInformado = dto.numeroNF();
+
+                if (nf != null) {
+                        numeroNFInformado = null;
+                }
+
+                entrada.setNumeroNFManual(numeroNFInformado);
 
                 /*
                  * =================================================
@@ -146,33 +182,35 @@ public class EntradaFinalizacaoService {
                          * =============================================
                          */
 
-                        ProdutoRegistroNF produtoNF = produtoNFRepository.findById(
-                                        produtoDTO.produtoNFId()).orElseThrow(
-                                                        () -> new ResourceNotFoundException(
-                                                                        "Produto da NF não encontrado "
-                                                                                        + "com o ID: "
-                                                                                        + produtoDTO.produtoNFId()));
+                        ProdutoRegistroNF produtoNF = null;
 
-                        /*
-                         * =============================================
-                         * VERIFICAR SE O PRODUTO DA NF
-                         * PERTENCE À NF DA ENTRADA
-                         * =============================================
-                         */
+                        if (produtoDTO.produtoNFId() != null) {
 
-                        if (nf != null) {
+                                if (nf == null) {
+                                        throw new IllegalArgumentException(
+                                                        "Uma entrada sem NF não pode possuir produto vinculado a NF.");
+                                }
+
+                                produtoNF = produtoNFRepository.findById(
+                                                produtoDTO.produtoNFId()).orElseThrow(
+                                                                () -> new ResourceNotFoundException(
+                                                                                "Produto da NF não encontrado "
+                                                                                                + "com o ID: "
+                                                                                                + produtoDTO.produtoNFId()));
 
                                 if (produtoNF.getNf() == null
-                                                ||
-                                                !produtoNF.getNf().getId().equals(
-                                                                nf.getId())) {
+                                                || !produtoNF.getNf().getId().equals(nf.getId())) {
 
                                         throw new IllegalArgumentException(
                                                         "O produto da NF com ID "
                                                                         + produtoDTO.produtoNFId()
-                                                                        + " não pertence à nota fiscal "
-                                                                        + "informada.");
+                                                                        + " não pertence à nota fiscal informada.");
                                 }
+                        }
+
+                        if (nf != null && produtoDTO.produtoNFId() == null) {
+                                throw new IllegalArgumentException(
+                                                "Toda entrada vinculada a uma NF deve informar o produto correspondente da NF.");
                         }
 
                         /*
@@ -236,6 +274,11 @@ public class EntradaFinalizacaoService {
 
                         entradaProdutoRepository.save(
                                         entradaProduto);
+
+                        estoqueService.registrarEntrada(
+                                        produto.getId(),
+                                        produtoDTO.quantidadeItens(),
+                                        produtoDTO.valorUnitario());
                 }
 
                 /*
@@ -253,7 +296,18 @@ public class EntradaFinalizacaoService {
 
                 /*
                  * =================================================
-                 * 7 - RETORNAR ENTRADA COMPLETA
+                 * 7 - ATUALIZAR ESTADO DA NF
+                 * =================================================
+                 */
+
+                if (nf != null) {
+                        nf.setNf_vinculada(true);
+                        notaFiscalRepository.save(nf);
+                }
+
+                /*
+                 * =================================================
+                 * 8 - RETORNAR ENTRADA COMPLETA
                  * =================================================
                  */
 

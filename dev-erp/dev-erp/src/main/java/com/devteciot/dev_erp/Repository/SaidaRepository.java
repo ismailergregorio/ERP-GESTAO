@@ -1,0 +1,1 @@
+package com.devteciot.dev_erp.Repository; import com.devteciot.dev_erp.Models.Saida; import org.springframework.data.jpa.repository.JpaRepository; import java.util.*; public interface SaidaRepository extends JpaRepository<Saida,Long>{List<Saida> findByAtivoTrueOrderByDataCriacaoDesc();}

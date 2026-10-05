@@ -113,6 +113,18 @@ export default function Sidebar() {
                 <LogIn size={17} />
                 Tipo de Entrada
               </NavLink>
+              <NavLink to="/funcionarios">
+                <UserRound size={17} />
+                Funcionários
+              </NavLink>
+              <NavLink to="/setores">
+                <Users size={17} />
+                Setores
+              </NavLink>
+              <NavLink to="/tipo-saida">
+                <LogIn size={17} />
+                Tipo de Saída
+              </NavLink>
               <NavLink to="/clientes">
                 <User size={17} />
                 Clientes

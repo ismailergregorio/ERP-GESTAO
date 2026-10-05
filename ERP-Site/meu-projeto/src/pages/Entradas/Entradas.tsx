@@ -1,9 +1,9 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Modal from "../../components/Modal/Modal";
 import Table from "../../components/Table/Table";
 
-import type { TableColumn } from "../../components/Table/Table";
+import type { TableColumn, TableAction } from "../../components/Table/Table";
 
 import "./Entradas.css";
 import "./InportacaoNf.css";
@@ -32,6 +32,7 @@ import { criarNotaFiscalCompleta } from "../../services/notaFiscalCompletaServic
 
 import type {
   NotaFiscalCompletaRequest,
+  NotaFiscalCompletaResponse,
   ProdutoNFCompletaRequest,
 } from "../../types/NotaFiscalCompleta";
 
@@ -42,6 +43,24 @@ import type { Produto } from "../../types/Produto";
 import { listarProdutos } from "../../services/produtoService";
 
 import type { ProdutosRelacionado } from "../../types/ProdutosRelacionado";
+
+import {
+  finalizarEntrada,
+  listarEntradas,
+  atualizarEntrada,
+  excluirEntrada,
+} from "../../services/entradaService";
+import type {
+  Entrada,
+  EntradaProdutoResponse,
+  EntradaRequest,
+} from "../../types/Entrada";
+import type { NotaFiscal } from "../../types/NotaFiscal";
+
+import { buscarNotaFiscalPorId } from "../../services/notaFiscalService";
+import { listarProdutosDaEntrada } from "../../services/entradaProdutoService";
+import { listarTiposEntradas } from "../../services/tipoEntradaService";
+import type { TipoEntrada } from "../../types/TipoEntrada";
 
 export default function Entradas() {
   // =========================================================
@@ -57,6 +76,214 @@ export default function Entradas() {
 
   function fecharModalTipoEntrada() {
     setOpenModalSelecionarTipoEntrada(false);
+  }
+
+  // =========================================================
+  // ENTRADA SEM NF
+  // =========================================================
+
+  const [openModalEntradaSemNF, setOpenModalEntradaSemNF] =
+    useState<boolean>(false);
+
+  const [tipoEntradaSemNF, setTipoEntradaSemNF] =
+    useState<TipoEntrada | null>(null);
+
+  // =========================================================
+  // VISUALIZAÇÃO / EDIÇÃO DAS ENTRADAS REALIZADAS
+  // =========================================================
+
+  const [entradaSelecionada, setEntradaSelecionada] =
+    useState<Entrada | null>(null);
+
+  const [produtosEntradaSelecionada, setProdutosEntradaSelecionada] =
+    useState<EntradaProdutoResponse[]>([]);
+
+  const [notaEntradaSelecionada, setNotaEntradaSelecionada] =
+    useState<NotaFiscal | null>(null);
+
+  const [loadingDetalhesEntrada, setLoadingDetalhesEntrada] = useState(false);
+
+  const [modalProdutosEntrada, setModalProdutosEntrada] = useState(false);
+  const [modalNotaEntrada, setModalNotaEntrada] = useState(false);
+  const [modalEditarEntrada, setModalEditarEntrada] = useState(false);
+
+  const [obsEdicao, setObsEdicao] = useState("");
+  const [numeroNFEdicao, setNumeroNFEdicao] = useState("");
+
+  const [numeroNFInformada, setNumeroNFInformada] =
+    useState("");
+
+  const [observacaoEntradaSemNF, setObservacaoEntradaSemNF] =
+    useState("");
+
+  const [produtosEntradaSemNF, setProdutosEntradaSemNF] = useState<
+    Array<{
+      produtoId: number;
+      quantidadeItens: number;
+      valorUnitario: number;
+      valorTotal: number;
+      possuiValidade: boolean;
+      dataValidade: string | null;
+    }>
+  >([]);
+
+  async function abrirEntradaSemNF() {
+    try {
+      fecharModalTipoEntrada();
+
+      const [tipos, produtos] = await Promise.all([
+        listarTiposEntradas(),
+        listarProdutos(),
+      ]);
+
+      const normalizar = (valor: string) =>
+        valor
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .trim();
+
+      const tipo = tipos.find((item) => {
+        const nome = normalizar(item.nome);
+        return (
+          nome.includes("entrada sem nota fiscal") ||
+          nome.includes("entrada sem nf")
+        );
+      });
+
+      if (!tipo) {
+        toast.error("O tipo de entrada sem NF não está cadastrado.");
+        return;
+      }
+
+      setTipoEntradaSemNF(tipo);
+      setListaProdutos(produtos.filter((produto) => produto.ativo));
+      setProdutosEntradaSemNF([]);
+      setNumeroNFInformada("");
+      setObservacaoEntradaSemNF("");
+      setOpenModalEntradaSemNF(true);
+    } catch (error: any) {
+      console.error("Erro ao preparar entrada sem NF:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Erro ao preparar a entrada sem Nota Fiscal.",
+      );
+    }
+  }
+
+  function fecharEntradaSemNF() {
+    setOpenModalEntradaSemNF(false);
+    setTipoEntradaSemNF(null);
+    setProdutosEntradaSemNF([]);
+  }
+
+  function adicionarProdutoEntradaSemNF(produtoId: number) {
+    const produto = listaProdutos.find((item) => item.id === produtoId);
+
+    if (!produto) return;
+
+    setProdutosEntradaSemNF((itens) => {
+      if (itens.some((item) => item.produtoId === produtoId)) {
+        return itens;
+      }
+
+      return [
+        ...itens,
+        {
+          produtoId,
+          quantidadeItens: 1,
+          valorUnitario: Number(produto.valorUnitario || 0),
+          valorTotal: Number(produto.valorUnitario || 0),
+          possuiValidade: false,
+          dataValidade: null,
+        },
+      ];
+    });
+  }
+
+  function atualizarProdutoEntradaSemNF(
+    produtoId: number,
+    campo: "quantidadeItens" | "valorUnitario" | "possuiValidade" | "dataValidade",
+    valor: number | boolean | string | null,
+  ) {
+    setProdutosEntradaSemNF((itens) =>
+      itens.map((item) => {
+        if (item.produtoId !== produtoId) return item;
+
+        const atualizado = { ...item, [campo]: valor };
+
+        if (campo === "quantidadeItens" || campo === "valorUnitario") {
+          atualizado.valorTotal =
+            Number(atualizado.quantidadeItens || 0) *
+            Number(atualizado.valorUnitario || 0);
+        }
+
+        if (campo === "possuiValidade" && valor === false) {
+          atualizado.dataValidade = null;
+        }
+
+        return atualizado;
+      }),
+    );
+  }
+
+  function removerProdutoEntradaSemNF(produtoId: number) {
+    setProdutosEntradaSemNF((itens) =>
+      itens.filter((item) => item.produtoId !== produtoId),
+    );
+  }
+
+  async function finalizarEntradaSemNF() {
+    if (!tipoEntradaSemNF) {
+      toast.error("Tipo de entrada não identificado.");
+      return;
+    }
+
+    if (produtosEntradaSemNF.length === 0) {
+      toast.error("Adicione pelo menos um produto à entrada.");
+      return;
+    }
+
+    const produtoInvalido = produtosEntradaSemNF.find(
+      (item) =>
+        item.quantidadeItens <= 0 ||
+        item.valorUnitario < 0 ||
+        (item.possuiValidade && !item.dataValidade),
+    );
+
+    if (produtoInvalido) {
+      toast.error(
+        "Revise a quantidade, o valor e a validade dos produtos informados.",
+      );
+      return;
+    }
+
+    try {
+      const resposta = await finalizarEntrada({
+        tiposEntradaId: tipoEntradaSemNF.id,
+        obs: observacaoEntradaSemNF.trim(),
+        nfId: null,
+        numeroNF: numeroNFInformada.trim() || null,
+        produtos: produtosEntradaSemNF.map((item) => ({
+          produtoId: item.produtoId,
+          produtoNFId: null,
+          dataValidade: item.dataValidade,
+          quantidadeItens: item.quantidadeItens,
+          valorUnitario: item.valorUnitario,
+          valorTotal: item.valorTotal,
+        })),
+      });
+
+      toast.success(`Entrada #${resposta.id} registrada com sucesso!`);
+      fecharEntradaSemNF();
+      await carregarEntradas();
+    } catch (error: any) {
+      console.error("Erro ao finalizar entrada sem NF:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Erro ao finalizar a entrada sem Nota Fiscal.",
+      );
+    }
   }
 
   // =========================================================
@@ -83,6 +310,9 @@ export default function Entradas() {
   const [arquivoNF, setArquivoNF] = useState<File | null>(null);
 
   const inputArquivoRef = useRef<HTMLInputElement>(null);
+
+  const [dadosNfRelacionamento, setDadosNfRelacionamento] =
+    useState<NotaFiscalCompletaResponse>();
 
   const handleArquivoSelecionado = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -438,6 +668,10 @@ export default function Entradas() {
 
         unidade: p.unidade,
 
+        valorUnitario: p.valorUnitario,
+
+        valorTotal: p.valorTotal,
+
         produtoSistemaId: null,
 
         tipoCalculo: "MULTIPLICAR",
@@ -466,7 +700,7 @@ export default function Entradas() {
       // =====================================================
 
       abrirModalRelacionarProdutos();
-
+      setDadosNfRelacionamento(resp);
       return resp;
     } catch (error: any) {
       console.error("Erro ao cadastrar NF:", error);
@@ -847,8 +1081,7 @@ export default function Entradas() {
       render: (value) => (
         <span className="quantidade-calculada">
           {Number(value).toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 3,
+            maximumFractionDigits: 4,
           })}
         </span>
       ),
@@ -919,15 +1152,307 @@ export default function Entradas() {
   // FINALIZAR RELACIONAMENTO
   // =========================================================
 
-  function finalizarRelacionamento() {
-    console.log("Produtos relacionados:", listaProdutosRelacionados);
+  async function finalizarRelacionamento() {
+    if (!dadosNfRelacionamento) {
+      toast.error("Nota Fiscal não identificada.");
+      return;
+    }
 
-    // Aqui posteriormente
-    // você enviará os relacionamentos
-    // para o backend.
+    const produtosSemRelacionamento = listaProdutosRelacionados.filter(
+      (item) => item.produtoSistemaId === null,
+    );
 
-    fecharModalRelacionaMento();
+    if (produtosSemRelacionamento.length > 0) {
+      toast.error("Relacione todos os produtos da NF antes de finalizar.");
+      return;
+    }
+
+    const produtoComValidadeInvalida = listaProdutosRelacionados.find(
+      (item) => item.possuiValidade && !item.dataValidade,
+    );
+
+    if (produtoComValidadeInvalida) {
+      toast.error("Informe a validade dos produtos que possuem validade.");
+      return;
+    }
+
+    try {
+      const resposta = await finalizarEntrada({
+        tiposEntradaId: await obterTipoEntradaNF(),
+        obs: "",
+        nfId: dadosNfRelacionamento.id,
+        numeroNF: null,
+        produtos: listaProdutosRelacionados.map((item) => ({
+          produtoId: item.produtoSistemaId as number,
+          produtoNFId: item.id,
+          dataValidade: item.dataValidade,
+          quantidadeItens: item.quantidadeCalculada,
+          valorUnitario: item.valorUnitario,
+          valorTotal: item.valorTotal,
+        })),
+      });
+
+      toast.success(`Entrada #${resposta.id} registrada com sucesso!`);
+      fecharModalRelacionaMento();
+      setDadosNfRelacionamento(undefined);
+      await carregarEntradas();
+    } catch (error: any) {
+      console.error("Erro ao finalizar entrada com NF:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Erro ao finalizar a entrada com Nota Fiscal.",
+      );
+    }
   }
+
+  async function obterTipoEntradaNF(): Promise<number> {
+    const tipos = await listarTiposEntradas();
+
+    const normalizar = (valor: string) =>
+      valor
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+
+    const tipo = tipos.find((item) => {
+      const nome = normalizar(item.nome);
+      return (
+        (nome.includes("entrada") && nome.includes("nf")) ||
+        (nome.includes("entrada") && nome.includes("nota fiscal"))
+      );
+    });
+
+    if (!tipo) {
+      throw new Error("O tipo de entrada para NF não está cadastrado.");
+    }
+
+    return tipo.id;
+  }
+
+  // =========================================================
+  // ENTRADAS REGISTRADAS
+  // =========================================================
+
+  const [entradas, setEntradas] = useState<Entrada[]>([]);
+  const [loadingEntradas, setLoadingEntradas] = useState(false);
+
+  async function carregarEntradas() {
+    try {
+      setLoadingEntradas(true);
+      const resposta = await listarEntradas();
+      setEntradas(resposta);
+    } catch (error: any) {
+      console.error("Erro ao carregar entradas:", error);
+      toast.error(
+        error.response?.data?.message || "Erro ao carregar as entradas.",
+      );
+    } finally {
+      setLoadingEntradas(false);
+    }
+  }
+
+  useEffect(() => {
+    void carregarEntradas();
+  }, []);
+
+  // =========================================================
+  // VISUALIZAR NOTA DA ENTRADA
+  // =========================================================
+
+  async function visualizarNotaEntrada(entrada: Entrada) {
+    setEntradaSelecionada(entrada);
+    setNotaEntradaSelecionada(null);
+    setModalNotaEntrada(true);
+
+    if (!entrada.nfId) {
+      return;
+    }
+
+    try {
+      setLoadingDetalhesEntrada(true);
+      const nota = await buscarNotaFiscalPorId(entrada.nfId);
+      setNotaEntradaSelecionada(nota);
+    } catch (error: any) {
+      console.error("Erro ao carregar nota fiscal da entrada:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Não foi possível carregar a nota fiscal.",
+      );
+    } finally {
+      setLoadingDetalhesEntrada(false);
+    }
+  }
+
+  // =========================================================
+  // VISUALIZAR PRODUTOS DA ENTRADA
+  // =========================================================
+
+  async function visualizarProdutosEntrada(entrada: Entrada) {
+    setEntradaSelecionada(entrada);
+    setProdutosEntradaSelecionada([]);
+    setModalProdutosEntrada(true);
+
+    try {
+      setLoadingDetalhesEntrada(true);
+      const produtos = await listarProdutosDaEntrada(entrada.id);
+      setProdutosEntradaSelecionada(produtos);
+    } catch (error: any) {
+      console.error("Erro ao carregar produtos da entrada:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Não foi possível carregar os produtos da entrada.",
+      );
+    } finally {
+      setLoadingDetalhesEntrada(false);
+    }
+  }
+
+  // =========================================================
+  // EDITAR ENTRADA
+  // =========================================================
+
+  function abrirEdicaoEntrada(entrada: Entrada) {
+    setEntradaSelecionada(entrada);
+    setObsEdicao(entrada.obs || "");
+    setNumeroNFEdicao(entrada.numeroNFManual || (entrada.nfId ? "" : entrada.numeroNF || ""));
+    setModalEditarEntrada(true);
+  }
+
+  async function salvarEdicaoEntrada() {
+    if (!entradaSelecionada) {
+      return;
+    }
+
+    try {
+      setLoadingDetalhesEntrada(true);
+
+      const dados: EntradaRequest = {
+        tiposEntradaId: entradaSelecionada.tiposEntradaId,
+        obs: obsEdicao.trim(),
+        nfId: entradaSelecionada.nfId,
+        numeroNF: entradaSelecionada.nfId
+        ? null
+        : numeroNFEdicao.trim() || null,
+      };
+
+      await atualizarEntrada(entradaSelecionada.id, dados);
+
+      toast.success("Entrada atualizada com sucesso!");
+      setModalEditarEntrada(false);
+      await carregarEntradas();
+    } catch (error: any) {
+      console.error("Erro ao atualizar entrada:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Não foi possível atualizar a entrada.",
+      );
+    } finally {
+      setLoadingDetalhesEntrada(false);
+    }
+  }
+
+  // =========================================================
+  // DESATIVAR ENTRADA
+  // =========================================================
+
+  async function desativarEntrada(entrada: Entrada) {
+    const confirmar = window.confirm(
+      `Deseja desativar a entrada #${entrada.id}? Ela não será apagada do banco de dados.`,
+    );
+
+    if (!confirmar) {
+      return;
+    }
+
+    try {
+      setLoadingEntradas(true);
+      await excluirEntrada(entrada.id);
+      toast.success("Entrada desativada com sucesso!");
+      await carregarEntradas();
+    } catch (error: any) {
+      console.error("Erro ao desativar entrada:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Não foi possível desativar a entrada.",
+      );
+    } finally {
+      setLoadingEntradas(false);
+    }
+  }
+
+  // =========================================================
+  // COLUNAS - ENTRADAS
+  // =========================================================
+
+  const colunasEntradas: TableColumn<Entrada>[] = [
+    {
+      key: "id",
+      label: "ID",
+      width: "70px",
+      align: "center",
+    },
+    {
+      key: "nomeTipoEntrada",
+      label: "Tipo de Entrada",
+      width: "190px",
+    },
+    {
+      key: "numeroNF",
+      label: "NF",
+      width: "110px",
+      align: "center",
+      render: (value) => String(value || "-"),
+    },
+    {
+      key: "obs",
+      label: "Observação",
+      render: (value) => String(value || "-"),
+    },
+    {
+      key: "dataCriacao",
+      label: "Data de Criação",
+      width: "170px",
+      render: (value) => formatarDataEntrada(String(value)),
+    },
+    {
+      key: "ativo",
+      label: "Status",
+      width: "100px",
+      align: "center",
+      render: (value) => (
+        <span className={value ? "status-active" : "status-inactive"}>
+          {value ? "Ativo" : "Inativo"}
+        </span>
+      ),
+    },
+  ];
+
+  const acoesEntradas: TableAction<Entrada>[] = [
+    {
+      label: "Ver Nota",
+      variant: "secondary",
+      onClick: visualizarNotaEntrada,
+      disabled: (entrada) => !entrada.nfId && !entrada.numeroNF,
+    },
+    {
+      label: "Ver Produtos",
+      variant: "secondary",
+      onClick: visualizarProdutosEntrada,
+    },
+    {
+      label: "Editar",
+      variant: "primary",
+      onClick: abrirEdicaoEntrada,
+      disabled: (entrada) => !entrada.ativo,
+    },
+    {
+      label: "Desativar",
+      variant: "danger",
+      onClick: desativarEntrada,
+      disabled: (entrada) => !entrada.ativo,
+    },
+  ];
 
   // =========================================================
   // JSX
@@ -959,36 +1484,129 @@ export default function Entradas() {
           TABELA PRINCIPAL
       ====================================================== */}
 
-      <div className="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
+      <Table
+        columns={colunasEntradas}
+        data={entradas}
+        actions={acoesEntradas}
+        rowKey="id"
+        loading={loadingEntradas}
+        emptyMessage="Nenhuma entrada realizada."
+      />
 
-              <th>Tipo de Entrada</th>
+        {/* ===================================================
+            MODAL - VISUALIZAR NOTA DA ENTRADA
+        ==================================================== */}
 
-              <th>NF</th>
+        <Modal
+          isOpen={modalNotaEntrada}
+          onClose={() => setModalNotaEntrada(false)}
+          title={`Nota da Entrada #${entradaSelecionada?.id ?? "-"}`}
+        >
+          {loadingDetalhesEntrada ? (
+            <p>Carregando nota fiscal...</p>
+          ) : !entradaSelecionada?.nfId ? (
+            <div>
+              <p>Esta entrada não possui uma Nota Fiscal vinculada.</p>
+              <p>
+                <strong>Número informado:</strong>{" "}
+                {entradaSelecionada?.numeroNF || "-"}
+              </p>
+            </div>
+          ) : notaEntradaSelecionada ? (
+            <div>
+              <p><strong>Número:</strong> {notaEntradaSelecionada.numero}</p>
+              <p><strong>Fornecedor:</strong> {notaEntradaSelecionada.nomeFantasiaFornecedor || notaEntradaSelecionada.razaoSocialFornecedor || "-"}</p>
+              <p><strong>Chave de acesso:</strong> {notaEntradaSelecionada.chaveAcesso || "-"}</p>
+              <p><strong>Data de cadastro:</strong> {formatarDataEntrada(notaEntradaSelecionada.dataCriacao)}</p>
+            </div>
+          ) : (
+            <p>Nota fiscal não encontrada.</p>
+          )}
+        </Modal>
 
-              <th>Observação</th>
+        {/* ===================================================
+            MODAL - VISUALIZAR PRODUTOS DA ENTRADA
+        ==================================================== */}
 
-              <th>Data</th>
-            </tr>
-          </thead>
+        <Modal
+          isOpen={modalProdutosEntrada}
+          onClose={() => setModalProdutosEntrada(false)}
+          title={`Produtos da Entrada #${entradaSelecionada?.id ?? "-"}`}
+          width="100%"
+        >
+          <Table
+            columns={[
+              { key: "produtoId", label: "ID Produto", width: "100px", align: "center" },
+              { key: "nomeProduto", label: "Produto" },
+              { key: "quantidadeItens", label: "Quantidade", width: "120px", align: "right", render: (value) => Number(value).toLocaleString("pt-BR", { maximumFractionDigits: 4 }) },
+              { key: "valorUnitario", label: "Valor Unit.", width: "120px", align: "right", render: (value) => Number(value).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) },
+              { key: "valorTotal", label: "Valor Total", width: "120px", align: "right", render: (value) => Number(value).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) },
+              { key: "dataValidade", label: "Validade", width: "120px", align: "center", render: (value) => String(value || "-") },
+            ] as TableColumn<EntradaProdutoResponse>[]}
+            data={produtosEntradaSelecionada}
+            loading={loadingDetalhesEntrada}
+            emptyMessage="Nenhum produto encontrado para esta entrada."
+            rowKey="id"
+          />
+        </Modal>
 
-          <tbody>
-            <tr>
-              <td
-                colSpan={5}
-                style={{
-                  textAlign: "center",
-                  padding: "30px",
-                }}
+        {/* ===================================================
+            MODAL - EDITAR ENTRADA
+        ==================================================== */}
+
+        <Modal
+          isOpen={modalEditarEntrada}
+          onClose={() => setModalEditarEntrada(false)}
+          title={`Editar Entrada #${entradaSelecionada?.id ?? "-"}`}
+          footer={
+            <>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setModalEditarEntrada(false)}
+                disabled={loadingDetalhesEntrada}
               >
-                Nenhuma entrada carregada.
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={salvarEdicaoEntrada}
+                disabled={loadingDetalhesEntrada}
+              >
+                Salvar Alterações
+              </button>
+            </>
+          }
+        >
+          <div>
+            <div style={{ marginBottom: 18 }}>
+              <label>Observação</label>
+              <textarea
+                className="campo-tabela"
+                value={obsEdicao}
+                maxLength={500}
+                onChange={(event) => setObsEdicao(event.target.value)}
+                rows={4}
+                style={{ width: "100%", resize: "vertical" }}
+              />
+            </div>
+
+            <div>
+              <label>Número da NF (opcional)</label>
+              <input
+                type="text"
+                className="campo-tabela"
+                value={numeroNFEdicao}
+                maxLength={60}
+                disabled={Boolean(entradaSelecionada?.nfId)}
+                onChange={(event) => setNumeroNFEdicao(event.target.value)}
+                style={{ width: "100%" }}
+                placeholder={entradaSelecionada?.nfId ? "NF vinculada ao cadastro" : "Informe apenas se necessário"}
+              />
+            </div>
+          </div>
+        </Modal>
 
         {/* ===================================================
             MODAL - TIPOS DE ENTRADA
@@ -1042,10 +1660,239 @@ export default function Entradas() {
                   <p>Registre uma entrada sem vínculo com uma Nota Fiscal.</p>
                 </div>
 
-                <button type="button" className="tipo-entrada-button">
+                <button
+                  type="button"
+                  className="tipo-entrada-button"
+                  onClick={abrirEntradaSemNF}
+                >
                   Selecionar
                 </button>
               </div>
+            </div>
+          </div>
+        </Modal>
+
+        {/* ===================================================
+            MODAL - ENTRADA SEM NF
+        ==================================================== */}
+
+        <Modal
+          isOpen={openModalEntradaSemNF}
+          onClose={fecharEntradaSemNF}
+          title="Entrada sem NF"
+          width="100%"
+          footer={
+            <div className="relacionamento-footer">
+              <button
+                type="button"
+                className="btn-relacionamento btn-cancelar"
+                onClick={fecharEntradaSemNF}
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                className="btn-relacionamento btn-finalizar"
+                onClick={finalizarEntradaSemNF}
+              >
+                Finalizar Entrada
+              </button>
+            </div>
+          }
+        >
+          <div className="relacionamento-container">
+            <div className="dados-nota">
+              <div className="campo-nota">
+                <label>Tipo de Entrada</label>
+                <span>{tipoEntradaSemNF?.nome || "Entrada sem Nota Fiscal"}</span>
+              </div>
+
+              <div className="campo-nota">
+                <label>Número da NF (opcional)</label>
+                <input
+                  className="campo-tabela"
+                  type="text"
+                  maxLength={60}
+                  value={numeroNFInformada}
+                  onChange={(event) => setNumeroNFInformada(event.target.value)}
+                  placeholder="Informe somente se necessário"
+                />
+              </div>
+
+              <div className="campo-nota">
+                <label>Observação</label>
+                <input
+                  className="campo-tabela"
+                  type="text"
+                  maxLength={500}
+                  value={observacaoEntradaSemNF}
+                  onChange={(event) => setObservacaoEntradaSemNF(event.target.value)}
+                  placeholder="Observação da entrada"
+                />
+              </div>
+            </div>
+
+            <div className="relacionamento-header">
+              <div>
+                <h3>Produtos da Entrada</h3>
+                <p>Selecione somente produtos já cadastrados no sistema.</p>
+              </div>
+            </div>
+
+            <div className="dados-nota">
+              <div className="campo-nota">
+                <label>Produto</label>
+                <select
+                  className="campo-tabela select-produto"
+                  value=""
+                  onChange={(event) => {
+                    if (event.target.value) {
+                      adicionarProdutoEntradaSemNF(Number(event.target.value));
+                    }
+                  }}
+                >
+                  <option value="">Selecionar produto</option>
+                  {listaProdutos.map((produto) => (
+                    <option
+                      key={produto.id}
+                      value={produto.id}
+                      disabled={produtosEntradaSemNF.some(
+                        (item) => item.produtoId === produto.id,
+                      )}
+                    >
+                      {produto.nome}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="relacionamento-tabela">
+              <Table
+                columns={[
+                  {
+                    key: "produtoId",
+                    label: "Produto",
+                    width: "250px",
+                    render: (_, row) =>
+                      listaProdutos.find((produto) => produto.id === row.produtoId)?.nome || "-",
+                  },
+                  {
+                    key: "quantidadeItens",
+                    label: "Quantidade",
+                    width: "130px",
+                    render: (_, row) => (
+                      <input
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        className="campo-tabela"
+                        value={row.quantidadeItens}
+                        onChange={(event) =>
+                          atualizarProdutoEntradaSemNF(
+                            row.produtoId,
+                            "quantidadeItens",
+                            Number(event.target.value),
+                          )
+                        }
+                      />
+                    ),
+                  },
+                  {
+                    key: "valorUnitario",
+                    label: "Valor Unitário",
+                    width: "140px",
+                    render: (_, row) => (
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        className="campo-tabela"
+                        value={row.valorUnitario}
+                        onChange={(event) =>
+                          atualizarProdutoEntradaSemNF(
+                            row.produtoId,
+                            "valorUnitario",
+                            Number(event.target.value),
+                          )
+                        }
+                      />
+                    ),
+                  },
+                  {
+                    key: "valorTotal",
+                    label: "Valor Total",
+                    width: "140px",
+                    align: "right",
+                    render: (_, row) =>
+                      Number(row.valorTotal).toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      }),
+                  },
+                  {
+                    key: "possuiValidade",
+                    label: "Possui Validade",
+                    width: "130px",
+                    render: (_, row) => (
+                      <select
+                        className="campo-tabela select-validade"
+                        value={row.possuiValidade ? "SIM" : "NAO"}
+                        onChange={(event) =>
+                          atualizarProdutoEntradaSemNF(
+                            row.produtoId,
+                            "possuiValidade",
+                            event.target.value === "SIM",
+                          )
+                        }
+                      >
+                        <option value="NAO">Não</option>
+                        <option value="SIM">Sim</option>
+                      </select>
+                    ),
+                  },
+                  {
+                    key: "dataValidade",
+                    label: "Validade",
+                    width: "150px",
+                    render: (_, row) => (
+                      <input
+                        type="date"
+                        className="campo-tabela input-validade"
+                        value={row.dataValidade ?? ""}
+                        disabled={!row.possuiValidade}
+                        onChange={(event) =>
+                          atualizarProdutoEntradaSemNF(
+                            row.produtoId,
+                            "dataValidade",
+                            event.target.value,
+                          )
+                        }
+                      />
+                    ),
+                  },
+                  {
+                    key: "acoes",
+                    label: "Ações",
+                    width: "100px",
+                    align: "center",
+                    render: (_, row) => (
+                      <button
+                        type="button"
+                        className="table-action danger"
+                        onClick={() => removerProdutoEntradaSemNF(row.produtoId)}
+                      >
+                        Remover
+                      </button>
+                    ),
+                  },
+                ]}
+                data={produtosEntradaSemNF}
+                rowKey="produtoId"
+                loading={false}
+                emptyMessage="Nenhum produto adicionado à entrada."
+              />
             </div>
           </div>
         </Modal>
@@ -1190,6 +2037,7 @@ export default function Entradas() {
                   }
 
                   await cadastraNF(dadosNF);
+                  console.log(dadosNF);
                 }}
               >
                 Confirmar Importação
@@ -1346,7 +2194,7 @@ export default function Entradas() {
           isOpen={openModalRelacionaMento}
           onClose={fecharModalRelacionaMento}
           title="Relacionamento de Produtos"
-          width="1400px"
+          width="100%"
           footer={
             <div className="relacionamento-footer">
               <button
@@ -1374,15 +2222,15 @@ export default function Entradas() {
               <div className="campo-nota">
                 <label>Número da NF</label>
 
-                <span>{dadosNF?.numero || "-"}</span>
+                <span>{dadosNfRelacionamento?.numero || "-"}</span>
               </div>
 
               <div className="campo-nota">
                 <label>Fornecedor</label>
 
                 <span>
-                  {dadosNF?.fornecedor?.nomeFantasia ||
-                    dadosNF?.fornecedor?.razaoSocial ||
+                  {dadosNfRelacionamento?.nomeFantasiaFornecedor ||
+                    dadosNfRelacionamento?.razaoSocialFornecedor ||
                     "-"}
                 </span>
               </div>
@@ -1390,7 +2238,7 @@ export default function Entradas() {
               <div className="campo-nota">
                 <label>Chave de Acesso</label>
 
-                <span>{dadosNF?.chaveAcesso || "-"}</span>
+                <span>{dadosNfRelacionamento?.chaveAcesso || "-"}</span>
               </div>
             </div>
 
@@ -1419,7 +2267,23 @@ export default function Entradas() {
             </div>
           </div>
         </Modal>
-      </div>
     </div>
   );
+}
+
+
+function formatarDataEntrada(data: string): string {
+  const date = new Date(data);
+
+  if (Number.isNaN(date.getTime())) {
+    return data;
+  }
+
+  return date.toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }

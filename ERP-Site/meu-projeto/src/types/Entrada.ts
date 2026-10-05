@@ -1,3 +1,10 @@
+export interface EntradaRequest {
+  tiposEntradaId: number;
+  obs: string;
+  nfId: number | null;
+  numeroNF?: string | null;
+}
+
 export interface Entrada {
   id: number;
 
@@ -14,6 +21,10 @@ export interface Entrada {
   nfId: number | null;
 
   numeroNF: string | null;
+
+  numeroNFManual?: string | null;
+
+  ativo: boolean;
 }
 
 /*
@@ -25,7 +36,7 @@ export interface Entrada {
 export interface EntradaFinalizarProdutoRequest {
   produtoId: number;
 
-  produtoNFId: number;
+  produtoNFId: number | null;
 
   dataValidade: string | null;
 
@@ -49,6 +60,8 @@ export interface FinalizarEntradaRequest {
 
   nfId: number | null;
 
+  numeroNF?: string | null;
+
   produtos: EntradaFinalizarProdutoRequest[];
 }
 
@@ -67,11 +80,11 @@ export interface EntradaProdutoResponse {
 
   nomeProduto: string;
 
-  produtoNFId: number;
+  produtoNFId: number | null;
 
-  codigoProdutoNF: string;
+  codigoProdutoNF: string | null;
 
-  descricaoProdutoNF: string;
+  descricaoProdutoNF: string | null;
 
   dataValidade: string | null;
 

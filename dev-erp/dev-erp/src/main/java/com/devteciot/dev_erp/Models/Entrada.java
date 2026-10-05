@@ -40,4 +40,10 @@ public class Entrada {
  @ManyToOne(fetch = FetchType.LAZY)
  @JoinColumn(name = "nf_id")
  private NotaFiscal nf;
+
+ @Column(name = "numero_nf_manual", length = 60)
+ private String numeroNFManual;
+
+ @Column(name = "ativo", nullable = false)
+ private Boolean ativo = true;
 }
