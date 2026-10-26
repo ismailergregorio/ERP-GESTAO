@@ -22,6 +22,9 @@ export interface Saida {
   dataCriacao: string;
   dataUpdate: string | null;
   produtos: SaidaProduto[];
+  saidaEpi?: boolean;
+  assinaturaColetada?: boolean;
+  dataAssinatura?: string | null;
 }
 
 export interface SaidaProdutoRequest {
@@ -36,4 +39,12 @@ export interface SaidaRequest {
   finalidade: string;
   obs?: string;
   produtos: SaidaProdutoRequest[];
+}
+
+export interface SaidaEpiRequest extends SaidaRequest {
+  assinaturaBase64: string;
+}
+
+export interface AssinaturaSaidaRequest {
+  assinaturaBase64: string;
 }

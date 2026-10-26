@@ -163,6 +163,8 @@ export default function Sidebar() {
 
               <NavLink to="/estoque/saidas">Saídas</NavLink>
 
+              <NavLink to="/estoque/saidas-epi">Saída de EPIs e Uniformes</NavLink>
+
               <NavLink to="/estoque/transferencias">Transferências</NavLink>
 
               <NavLink to="/estoque/movimentacoes">Movimentações</NavLink>

@@ -17,6 +17,9 @@ public class Saida {
  @Column(nullable=false,length=255) private String finalidade;
  @Column(length=500) private String obs;
  @Column(nullable=false) private Boolean ativo=true;
+ @Column(name="saida_epi", nullable=false) private Boolean saidaEpi=false;
+ @Column(name="assinatura_funcionario", columnDefinition="BYTEA") private byte[] assinaturaFuncionario;
+ @Column(name="data_assinatura") private LocalDateTime dataAssinatura;
  @CreatedDate @Column(name="data_criacao",nullable=false,updatable=false) private LocalDateTime dataCriacao;
  @LastModifiedDate @Column(name="data_update") private LocalDateTime dataUpdate;
  @OneToMany(mappedBy="saida",cascade=CascadeType.ALL,orphanRemoval=true,fetch=FetchType.LAZY) private List<SaidaProduto> produtos=new ArrayList<>();

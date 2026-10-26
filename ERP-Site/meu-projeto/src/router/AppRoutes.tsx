@@ -10,6 +10,7 @@ import ProdutosRegistroNF from "../pages/ProdutosRegistroNF/ProdutosRegistroNF";
 import TiposEntradas from "../pages/TiposEntradas/TiposEntradas";
 import Entradas from "../pages/Entradas/Entradas";
 import Saidas from "../pages/Saidas/Saidas";
+import SaidasEpi from "../pages/SaidasEpi/SaidasEpi";
 import Estoque from "../pages/Estoque/Estoque";
 import Movimentacoes from "../pages/Movimentacoes";
 import Funcionarios from "../pages/Funcionarios/Funcionarios";
@@ -30,6 +31,7 @@ export default function AppRoutes() {
       <Route path="/entradas" element={<Entradas />} />
       <Route path="/estoque" element={<Estoque />} />
       <Route path="/estoque/saidas" element={<Saidas />} />
+      <Route path="/estoque/saidas-epi" element={<SaidasEpi />} />
       <Route path="/estoque/movimentacoes" element={<Movimentacoes />} />
       <Route path="/funcionarios" element={<Funcionarios />} />
       <Route path="/setores" element={<Setores />} />
