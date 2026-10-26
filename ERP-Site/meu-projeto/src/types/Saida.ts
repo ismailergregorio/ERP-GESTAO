@@ -39,6 +39,7 @@ export interface SaidaRequest {
   finalidade: string;
   obs?: string;
   produtos: SaidaProdutoRequest[];
+  assinaturaBase64?: string;
 }
 
 export interface SaidaEpiRequest extends SaidaRequest {

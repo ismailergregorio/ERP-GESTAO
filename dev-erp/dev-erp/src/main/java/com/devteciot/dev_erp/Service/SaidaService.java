@@ -41,6 +41,12 @@ public class SaidaService {
         Saida saida = new Saida();
         preencher(saida, dto.funcionarioId(), dto.setorId(), dto.tipoSaidaId(), dto.finalidade(), dto.obs());
         saida.setSaidaEpi(false);
+        // A saída convencional aceita assinatura já na criação, mas mantém compatibilidade
+        // com clientes antigos que não enviam o campo assinaturaBase64.
+        if (dto.assinaturaBase64() != null && !dto.assinaturaBase64().isBlank()) {
+            saida.setAssinaturaFuncionario(decodificarAssinatura(dto.assinaturaBase64()));
+            saida.setDataAssinatura(LocalDateTime.now());
+        }
         return criarItensEFinalizar(saida, dto.produtos());
     }
 

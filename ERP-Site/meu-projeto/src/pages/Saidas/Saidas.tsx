@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import Modal from "../../components/Modal/Modal";
 import Table from "../../components/Table/Table";
 import type { TableAction, TableColumn } from "../../components/Table/Table";
@@ -15,6 +15,7 @@ import {
   criarSaida,
   desativarSaida,
   listarSaidas,
+  abrirPdfSaida,
 } from "../../services/saidaService";
 import type { Produto } from "../../types/Produto";
 import type { Saida, SaidaRequest } from "../../types/Saida";
@@ -48,12 +49,26 @@ export default function Saidas() {
   const [finalidade, setFinalidade] = useState("");
   const [obs, setObs] = useState("");
   const [itens, setItens] = useState<ItemFormulario[]>([itemVazio()]);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const desenhandoRef = useRef(false);
+  const [coletarAssinatura, setColetarAssinatura] = useState(false);
+  const [temAssinatura, setTemAssinatura] = useState(false);
 
   const carregarDados = async () => {
     try {
       setLoading(true);
-      const [saidasData, produtosData, funcionariosData, setoresData, tiposData] = await Promise.all([
-        listarSaidas(), listarProdutosAtivos(), listarFuncionarios(), listarSetores(), listarTiposSaidas(),
+      const [
+        saidasData,
+        produtosData,
+        funcionariosData,
+        setoresData,
+        tiposData,
+      ] = await Promise.all([
+        listarSaidas(),
+        listarProdutosAtivos(),
+        listarFuncionarios(),
+        listarSetores(),
+        listarTiposSaidas(),
       ]);
       setSaidas(saidasData);
       setProdutos(produtosData);
@@ -72,6 +87,50 @@ export default function Saidas() {
     carregarDados();
   }, []);
 
+  const limparAssinatura = () => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const context = canvas.getContext("2d");
+      context?.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    setTemAssinatura(false);
+  };
+
+  const iniciarAssinatura = (event: PointerEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const context = canvas.getContext("2d");
+    if (!context) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = (event.clientX - rect.left) * (canvas.width / rect.width);
+    const y = (event.clientY - rect.top) * (canvas.height / rect.height);
+    desenhandoRef.current = true;
+    canvas.setPointerCapture(event.pointerId);
+    context.beginPath();
+    context.moveTo(x, y);
+    context.lineWidth = 3;
+    context.lineCap = "round";
+    context.lineJoin = "round";
+    context.strokeStyle = "#14213d";
+    setTemAssinatura(true);
+  };
+
+  const desenharAssinatura = (event: PointerEvent<HTMLCanvasElement>) => {
+    if (!desenhandoRef.current || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const context = canvas.getContext("2d");
+    if (!context) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = (event.clientX - rect.left) * (canvas.width / rect.width);
+    const y = (event.clientY - rect.top) * (canvas.height / rect.height);
+    context.lineTo(x, y);
+    context.stroke();
+  };
+
+  const finalizarTraco = () => {
+    desenhandoRef.current = false;
+  };
+
   const limparFormulario = () => {
     setFuncionarioId("");
     setSetorId("");
@@ -79,6 +138,9 @@ export default function Saidas() {
     setFinalidade("");
     setObs("");
     setItens([itemVazio()]);
+    setColetarAssinatura(false);
+    setTemAssinatura(false);
+    limparAssinatura();
     setSaidaSelecionada(null);
     setModoVisualizacao(false);
   };
@@ -100,6 +162,8 @@ export default function Saidas() {
     setTipoSaidaId(saida.tipoSaidaId);
     setFinalidade(saida.finalidade);
     setObs(saida.obs ?? "");
+    setColetarAssinatura(false);
+    setTemAssinatura(false);
     setItens(
       saida.produtos.map((item) => ({
         produtoId: item.produtoId,
@@ -120,6 +184,8 @@ export default function Saidas() {
       setTipoSaidaId(dados.tipoSaidaId);
       setFinalidade(dados.finalidade);
       setObs(dados.obs ?? "");
+      setColetarAssinatura(false);
+      setTemAssinatura(false);
       setItens(
         dados.produtos.map((item) => ({
           produtoId: item.produtoId,
@@ -172,12 +238,25 @@ export default function Saidas() {
   }, [itens, produtos]);
 
   const salvar = async () => {
-    if (funcionarioId === "" || setorId === "" || tipoSaidaId === "" || !finalidade.trim()) {
+    if (
+      funcionarioId === "" ||
+      setorId === "" ||
+      tipoSaidaId === "" ||
+      !finalidade.trim()
+    ) {
       toast.error("Preencha funcionário, setor, tipo de saída e finalidade.");
       return;
     }
 
-    if (itens.length === 0 || itens.some((item) => item.produtoId === "" || item.quantidade === "" || Number(item.quantidade) <= 0)) {
+    if (
+      itens.length === 0 ||
+      itens.some(
+        (item) =>
+          item.produtoId === "" ||
+          item.quantidade === "" ||
+          Number(item.quantidade) <= 0,
+      )
+    ) {
       toast.error("Informe corretamente os produtos e as quantidades.");
       return;
     }
@@ -186,6 +265,21 @@ export default function Saidas() {
     if (new Set(ids).size !== ids.length) {
       toast.error("O mesmo produto não pode ser informado mais de uma vez.");
       return;
+    }
+
+    let assinaturaBase64: string | undefined;
+    if (coletarAssinatura) {
+      if (!temAssinatura || !canvasRef.current) {
+        toast.error("Desenhe a assinatura ou desative a opção de assinatura.");
+        return;
+      }
+      assinaturaBase64 = canvasRef.current.toDataURL("image/png");
+      if (assinaturaBase64.length > 2_800_000) {
+        toast.error(
+          "A assinatura ficou muito grande. Limpe e assine novamente.",
+        );
+        return;
+      }
     }
 
     const dados: SaidaRequest = {
@@ -198,6 +292,7 @@ export default function Saidas() {
         produtoId: Number(item.produtoId),
         quantidade: Number(item.quantidade),
       })),
+      ...(assinaturaBase64 ? { assinaturaBase64 } : {}),
     };
 
     try {
@@ -258,6 +353,12 @@ export default function Saidas() {
       render: (_, row) => row.produtos.length,
     },
     {
+      key: "assinaturaColetada",
+      label: "Assinatura",
+      align: "center",
+      render: (value) => (value ? "Coletada" : "Não informada"),
+    },
+    {
       key: "dataCriacao",
       label: "Data",
       render: (value) =>
@@ -275,6 +376,18 @@ export default function Saidas() {
       label: "Editar",
       variant: "primary",
       onClick: abrirEdicao,
+    },
+    {
+      label: "PDF",
+      variant: "secondary",
+      onClick: async (saida) => {
+        try {
+          await abrirPdfSaida(saida.id);
+        } catch (error) {
+          console.error("Erro ao abrir PDF da saída:", error);
+          toast.error("Não foi possível gerar ou abrir o PDF da saída.");
+        }
+      },
     },
     {
       label: "Desativar",
@@ -309,20 +422,39 @@ export default function Saidas() {
       <Modal
         isOpen={modalAberto}
         onClose={fecharModal}
-        title={modoVisualizacao ? `Saída #${saidaSelecionada?.id}` : saidaSelecionada ? "Editar Saída" : "Nova Saída"}
+        title={
+          modoVisualizacao
+            ? `Saída #${saidaSelecionada?.id}`
+            : saidaSelecionada
+              ? "Editar Saída"
+              : "Nova Saída"
+        }
         width="900px"
         footer={
           !modoVisualizacao ? (
             <>
-              <button type="button" className="btn-secondary" onClick={fecharModal}>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={fecharModal}
+              >
                 Cancelar
               </button>
-              <button type="button" className="btn-primary" onClick={salvar} disabled={loading}>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={salvar}
+                disabled={loading}
+              >
                 {saidaSelecionada ? "Salvar alterações" : "Registrar saída"}
               </button>
             </>
           ) : (
-            <button type="button" className="btn-secondary" onClick={fecharModal}>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={fecharModal}
+            >
               Fechar
             </button>
           )
@@ -335,33 +467,78 @@ export default function Saidas() {
             <div className="form-grid">
               <div className="form-group">
                 <label>Funcionário que está retirando *</label>
-                <select value={funcionarioId} onChange={(e) => setFuncionarioId(e.target.value ? Number(e.target.value) : "")} disabled={modoVisualizacao}>
+                <select
+                  value={funcionarioId}
+                  onChange={(e) =>
+                    setFuncionarioId(
+                      e.target.value ? Number(e.target.value) : "",
+                    )
+                  }
+                  disabled={modoVisualizacao}
+                >
                   <option value="">Selecione o funcionário</option>
-                  {funcionarios.map((f) => <option key={f.id} value={f.id}>{f.nome}{f.cpf ? ` — ${f.cpf}` : ""}</option>)}
+                  {funcionarios.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.nome}
+                      {f.cpf ? ` — ${f.cpf}` : ""}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="form-group">
                 <label>Setor *</label>
-                <select value={setorId} onChange={(e) => setSetorId(e.target.value ? Number(e.target.value) : "")} disabled={modoVisualizacao}>
+                <select
+                  value={setorId}
+                  onChange={(e) =>
+                    setSetorId(e.target.value ? Number(e.target.value) : "")
+                  }
+                  disabled={modoVisualizacao}
+                >
                   <option value="">Selecione o setor</option>
-                  {setores.map((s) => <option key={s.id} value={s.id}>{s.nome}</option>)}
+                  {setores.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.nome}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="form-group">
                 <label>Tipo de saída *</label>
-                <select value={tipoSaidaId} onChange={(e) => setTipoSaidaId(e.target.value ? Number(e.target.value) : "")} disabled={modoVisualizacao}>
+                <select
+                  value={tipoSaidaId}
+                  onChange={(e) =>
+                    setTipoSaidaId(e.target.value ? Number(e.target.value) : "")
+                  }
+                  disabled={modoVisualizacao}
+                >
                   <option value="">Selecione o tipo</option>
-                  {tiposSaidas.map((t) => <option key={t.id} value={t.id}>{t.nome}</option>)}
+                  {tiposSaidas.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.nome}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="form-group">
                 <label>Finalidade *</label>
-                <input value={finalidade} onChange={(e) => setFinalidade(e.target.value)} disabled={modoVisualizacao} placeholder="Finalidade da retirada" />
-              </div>            </div>
+                <input
+                  value={finalidade}
+                  onChange={(e) => setFinalidade(e.target.value)}
+                  disabled={modoVisualizacao}
+                  placeholder="Finalidade da retirada"
+                />
+              </div>{" "}
+            </div>
 
             <div className="form-group">
               <label>Observações</label>
-              <textarea value={obs} onChange={(e) => setObs(e.target.value)} disabled={modoVisualizacao} placeholder="Observações da saída" rows={3} />
+              <textarea
+                value={obs}
+                onChange={(e) => setObs(e.target.value)}
+                disabled={modoVisualizacao}
+                placeholder="Observações da saída"
+                rows={3}
+              />
             </div>
           </div>
 
@@ -369,7 +546,11 @@ export default function Saidas() {
             <div className="section-header">
               <h3>Produtos</h3>
               {!modoVisualizacao && (
-                <button type="button" className="btn-secondary" onClick={adicionarItem}>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={adicionarItem}
+                >
                   Adicionar produto
                 </button>
               )}
@@ -380,13 +561,22 @@ export default function Saidas() {
               const disponivel = produto?.estoque ?? 0;
 
               return (
-                <div className="produto-item" key={`${index}-${item.produtoId}`}>
+                <div
+                  className="produto-item"
+                  key={`${index}-${item.produtoId}`}
+                >
                   <div className="form-group produto-select">
                     <label>Produto *</label>
                     <select
                       value={item.produtoId}
                       disabled={modoVisualizacao}
-                      onChange={(e) => alterarItem(index, "produtoId", e.target.value ? Number(e.target.value) : "")}
+                      onChange={(e) =>
+                        alterarItem(
+                          index,
+                          "produtoId",
+                          e.target.value ? Number(e.target.value) : "",
+                        )
+                      }
                     >
                       <option value="">Selecione o produto</option>
                       {produtos.map((p) => (
@@ -405,25 +595,123 @@ export default function Saidas() {
                       max={disponivel || undefined}
                       value={item.quantidade}
                       disabled={modoVisualizacao}
-                      onChange={(e) => alterarItem(index, "quantidade", e.target.value ? Number(e.target.value) : "")}
+                      onChange={(e) =>
+                        alterarItem(
+                          index,
+                          "quantidade",
+                          e.target.value ? Number(e.target.value) : "",
+                        )
+                      }
                     />
-                    {produto && <small>Disponível: {disponivel} {produto.siglaUnidadeMedida}</small>}
+                    {produto && (
+                      <small>
+                        Disponível: {disponivel} {produto.siglaUnidadeMedida}
+                      </small>
+                    )}
                   </div>
 
                   <div className="form-group valor-input">
                     <label>Valor estimado</label>
-                    <input value={produto ? `R$ ${(produto.valorUnitario * Number(item.quantidade || 0)).toFixed(2)}` : "-"} disabled />
+                    <input
+                      value={
+                        produto
+                          ? `R$ ${(produto.valorUnitario * Number(item.quantidade || 0)).toFixed(2)}`
+                          : "-"
+                      }
+                      disabled
+                    />
                   </div>
 
                   {!modoVisualizacao && (
-                    <button type="button" className="btn-remove" onClick={() => removerItem(index)} title="Remover produto">
+                    <button
+                      type="button"
+                      className="btn-remove"
+                      onClick={() => removerItem(index)}
+                      title="Remover produto"
+                    >
                       Remover
                     </button>
                   )}
                 </div>
               );
             })}
-
+            <div className="form-section">
+              <h3>Assinatura do funcionário (opcional)</h3>
+              {modoVisualizacao || saidaSelecionada ? (
+                <div className="signature-existing">
+                  <span
+                    className={
+                      saidaSelecionada?.assinaturaColetada
+                        ? "signature-status is-signed"
+                        : "signature-status"
+                    }
+                  >
+                    {saidaSelecionada?.assinaturaColetada
+                      ? `Assinatura registrada${saidaSelecionada.dataAssinatura ? ` em ${new Date(saidaSelecionada.dataAssinatura).toLocaleString("pt-BR")}` : ""}.`
+                      : "Esta saída não possui assinatura registrada."}
+                  </span>
+                </div>
+              ) : (
+                <>
+                  <label className="signature-toggle">
+                    <input
+                      type="checkbox"
+                      checked={coletarAssinatura}
+                      onChange={(event) => {
+                        setColetarAssinatura(event.target.checked);
+                        setTemAssinatura(false);
+                        const canvas = canvasRef.current;
+                        const context = canvas?.getContext("2d");
+                        if (canvas && context)
+                          context.clearRect(0, 0, canvas.width, canvas.height);
+                      }}
+                    />
+                    <span>Solicitar assinatura no documento desta saída</span>
+                  </label>
+                  {coletarAssinatura && (
+                    <div className="signature-panel">
+                      <p className="signature-help">
+                        Peça ao funcionário para assinar no quadro. A assinatura
+                        será enviada à API junto com a saída.
+                      </p>
+                      <canvas
+                        ref={canvasRef}
+                        className="signature-canvas"
+                        width={1000}
+                        height={260}
+                        aria-label="Área opcional para assinatura do funcionário"
+                        onPointerDown={iniciarAssinatura}
+                        onPointerMove={desenharAssinatura}
+                        onPointerUp={finalizarTraco}
+                        onPointerCancel={finalizarTraco}
+                        onPointerLeave={finalizarTraco}
+                      />
+                      <div className="signature-controls">
+                        <span
+                          className={
+                            temAssinatura
+                              ? "signature-status is-signed"
+                              : "signature-status"
+                          }
+                        >
+                          {temAssinatura
+                            ? "Assinatura capturada"
+                            : "Assinatura opcional: desenhe acima ou desmarque a opção."}
+                        </span>
+                        <button
+                          type="button"
+                          className="btn-secondary"
+                          onClick={limparAssinatura}
+                        >
+                          Limpar assinatura
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+            
             <div className="saida-total">
               <strong>Total estimado:</strong>
               <span>R$ {totalSaida.toFixed(2)}</span>

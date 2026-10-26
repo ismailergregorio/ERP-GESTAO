@@ -85,7 +85,13 @@ export default function Entradas() {
   const [openModalEntradaSemNF, setOpenModalEntradaSemNF] =
     useState<boolean>(false);
 
+  const [tiposEntradaDisponiveis, setTiposEntradaDisponiveis] =
+    useState<TipoEntrada[]>([]);
+
   const [tipoEntradaSemNF, setTipoEntradaSemNF] =
+    useState<TipoEntrada | null>(null);
+
+  const [tipoEntradaNF, setTipoEntradaNF] =
     useState<TipoEntrada | null>(null);
 
   // =========================================================
@@ -136,27 +142,14 @@ export default function Entradas() {
         listarProdutos(),
       ]);
 
-      const normalizar = (valor: string) =>
-        valor
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .toLowerCase()
-          .trim();
-
-      const tipo = tipos.find((item) => {
-        const nome = normalizar(item.nome);
-        return (
-          nome.includes("entrada sem nota fiscal") ||
-          nome.includes("entrada sem nf")
-        );
-      });
-
-      if (!tipo) {
-        toast.error("O tipo de entrada sem NF não está cadastrado.");
+      if (!tipos.length) {
+        toast.error("Não há tipos de entrada cadastrados.");
         return;
       }
 
-      setTipoEntradaSemNF(tipo);
+      setTiposEntradaDisponiveis(tipos);
+      // O usuário deve escolher explicitamente o tipo de entrada.
+      setTipoEntradaSemNF(null);
       setListaProdutos(produtos.filter((produto) => produto.ativo));
       setProdutosEntradaSemNF([]);
       setNumeroNFInformada("");
@@ -772,9 +765,29 @@ export default function Entradas() {
   async function confirmarRelacionamentoProdutos() {
     fecharModalRelacionarProdutos();
 
-    await buscarListaProdutos();
+    try {
+      const [produtos, tipos] = await Promise.all([
+        listarProdutos(),
+        listarTiposEntradas(),
+      ]);
 
-    abrirModalRelacionaMento();
+      setListaProdutos(produtos);
+      setTiposEntradaDisponiveis(tipos);
+      setTipoEntradaNF(null);
+
+      if (!tipos.length) {
+        toast.error("Não há tipos de entrada cadastrados.");
+        return;
+      }
+
+      abrirModalRelacionaMento();
+    } catch (error: any) {
+      console.error("Erro ao preparar relacionamento da entrada:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Não foi possível carregar produtos e tipos de entrada.",
+      );
+    }
   }
 
   // =========================================================
@@ -1158,6 +1171,11 @@ export default function Entradas() {
       return;
     }
 
+    if (!tipoEntradaNF) {
+      toast.error("Selecione o tipo de entrada antes de finalizar.");
+      return;
+    }
+
     const produtosSemRelacionamento = listaProdutosRelacionados.filter(
       (item) => item.produtoSistemaId === null,
     );
@@ -1178,7 +1196,7 @@ export default function Entradas() {
 
     try {
       const resposta = await finalizarEntrada({
-        tiposEntradaId: await obterTipoEntradaNF(),
+        tiposEntradaId: tipoEntradaNF.id,
         obs: "",
         nfId: dadosNfRelacionamento.id,
         numeroNF: null,
@@ -1203,31 +1221,6 @@ export default function Entradas() {
           "Erro ao finalizar a entrada com Nota Fiscal.",
       );
     }
-  }
-
-  async function obterTipoEntradaNF(): Promise<number> {
-    const tipos = await listarTiposEntradas();
-
-    const normalizar = (valor: string) =>
-      valor
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .trim();
-
-    const tipo = tipos.find((item) => {
-      const nome = normalizar(item.nome);
-      return (
-        (nome.includes("entrada") && nome.includes("nf")) ||
-        (nome.includes("entrada") && nome.includes("nota fiscal"))
-      );
-    });
-
-    if (!tipo) {
-      throw new Error("O tipo de entrada para NF não está cadastrado.");
-    }
-
-    return tipo.id;
   }
 
   // =========================================================
@@ -1704,8 +1697,26 @@ export default function Entradas() {
           <div className="relacionamento-container">
             <div className="dados-nota">
               <div className="campo-nota">
-                <label>Tipo de Entrada</label>
-                <span>{tipoEntradaSemNF?.nome || "Entrada sem Nota Fiscal"}</span>
+                <label htmlFor="tipoEntradaSemNF">Tipo de Entrada *</label>
+                <select
+                  id="tipoEntradaSemNF"
+                  className="campo-tabela"
+                  value={tipoEntradaSemNF?.id ?? ""}
+                  onChange={(event) => {
+                    const tipoId = Number(event.target.value);
+                    setTipoEntradaSemNF(
+                      tiposEntradaDisponiveis.find((tipo) => tipo.id === tipoId) ?? null,
+                    );
+                  }}
+                  required
+                >
+                  <option value="">Selecione o tipo de entrada</option>
+                  {tiposEntradaDisponiveis.map((tipo) => (
+                    <option key={tipo.id} value={tipo.id}>
+                      {tipo.nome}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="campo-nota">
@@ -2219,6 +2230,29 @@ export default function Entradas() {
             {/* DADOS DA NF */}
 
             <div className="dados-nota">
+              <div className="campo-nota">
+                <label htmlFor="tipoEntradaNF">Tipo de Entrada *</label>
+                <select
+                  id="tipoEntradaNF"
+                  className="campo-tabela"
+                  value={tipoEntradaNF?.id ?? ""}
+                  onChange={(event) => {
+                    const tipoId = Number(event.target.value);
+                    setTipoEntradaNF(
+                      tiposEntradaDisponiveis.find((tipo) => tipo.id === tipoId) ?? null,
+                    );
+                  }}
+                  required
+                >
+                  <option value="">Selecione o tipo de entrada</option>
+                  {tiposEntradaDisponiveis.map((tipo) => (
+                    <option key={tipo.id} value={tipo.id}>
+                      {tipo.nome}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="campo-nota">
                 <label>Número da NF</label>
 
