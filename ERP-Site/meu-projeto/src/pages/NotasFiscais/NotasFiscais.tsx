@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Table from "../../components/Table/Table";
 
 import NotaFiscalModal from "../../components/NotaFiscalModal/NotaFiscalModal";
+import RelacionarProdutosNFModal from "../../components/RelacionarProdutosNFModal/RelacionarProdutosNFModal";
 
 import type { TableColumn, TableAction } from "../../components/Table/Table";
 
@@ -43,6 +44,8 @@ export default function NotasFiscais() {
   const [modoModal, setModoModal] = useState<"criar" | "editar" | "visualizar">(
     "criar",
   );
+
+  const [notaParaVincular, setNotaParaVincular] = useState<NotaFiscal | null>(null);
 
   /*
    * =====================================================
@@ -93,6 +96,14 @@ export default function NotasFiscais() {
    * NOVA NF
    * =====================================================
    */
+
+  const abrirVinculacao = (nota: NotaFiscal) => {
+    setNotaParaVincular(nota);
+  };
+
+  const fecharVinculacao = () => {
+    setNotaParaVincular(null);
+  };
 
   const abrirNovaNota = () => {
     setNotaFiscalSelecionada(null);
@@ -326,6 +337,16 @@ export default function NotasFiscais() {
     },
 
     {
+      label: "Vincular produtos",
+
+      variant: "primary",
+
+      onClick: abrirVinculacao,
+
+      disabled: (nota) => nota.nf_vinculada,
+    },
+
+    {
       label: "Excluir",
 
       variant: "danger",
@@ -386,6 +407,13 @@ export default function NotasFiscais() {
         loading={loading}
         onClose={fecharModal}
         onSave={salvarNota}
+      />
+
+      <RelacionarProdutosNFModal
+        isOpen={notaParaVincular !== null}
+        notaFiscal={notaParaVincular}
+        onClose={fecharVinculacao}
+        onSuccess={carregarDados}
       />
     </section>
   );
