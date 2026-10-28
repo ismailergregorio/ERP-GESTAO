@@ -16,11 +16,15 @@ import Movimentacoes from "../pages/Movimentacoes";
 import Funcionarios from "../pages/Funcionarios/Funcionarios";
 import Setores from "../pages/Setores/Setores";
 import TiposSaidas from "../pages/TiposSaidas/TiposSaidas";
+import Perfil from "../pages/Perfil/Perfil";
+import UsuariosAcesso from "../pages/UsuariosAcesso/UsuariosAcesso";
 
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Dashboard />} />
+      <Route path="/perfil" element={<Perfil />} />
+      <Route path="/usuarios" element={<UsuariosAcesso />} />
       <Route path="/categorias" element={<CategoriaProdutos />} />
       <Route path="/unidades-medida" element={<UnidadeMedida />} />
       <Route path="/produtos" element={<Produtos />} />

@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "ERP Retiradas",
+    "slug": "erp-mobile-retiradas",
+    "version": "1.0.0",
+    "orientation": "default",
+    "userInterfaceStyle": "light",
+    "splash": { "backgroundColor": "#f4f7fb" },
+    "android": { "package": "br.com.devteciot.erpmobile", "usesCleartextTraffic": true },
+    "ios": { "bundleIdentifier": "br.com.devteciot.erpmobile" }
+  }
+}

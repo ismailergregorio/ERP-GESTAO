@@ -25,10 +25,6 @@ import "./Sidebar.css";
 export default function Sidebar() {
   const [cadastrosOpen, setCadastrosOpen] = useState(true);
   const [estoqueOpen, setEstoqueOpen] = useState(false);
-  const [comprasOpen, setComprasOpen] = useState(false);
-  const [vendasOpen, setVendasOpen] = useState(false);
-  const [financeiroOpen, setFinanceiroOpen] = useState(false);
-  const [relatoriosOpen, setRelatoriosOpen] = useState(false);
   const [configuracoesOpen, setConfiguracoesOpen] = useState(false);
 
   return (
@@ -163,8 +159,6 @@ export default function Sidebar() {
 
               <NavLink to="/estoque/saidas">Saídas</NavLink>
 
-              <NavLink to="/estoque/saidas-epi">Saída de EPIs e Uniformes</NavLink>
-
               <NavLink to="/estoque/transferencias">Transferências</NavLink>
 
               <NavLink to="/estoque/movimentacoes">Movimentações</NavLink>
@@ -173,124 +167,67 @@ export default function Sidebar() {
         </div>
 
         {/* =================================================
-            COMPRAS
+            COMPRAS — INDISPONÍVEL NESTA VERSÃO
            ================================================= */}
 
-        <div className="menu-section">
-          <button
-            className="menu-title"
-            onClick={() => setComprasOpen(!comprasOpen)}
+        <div className="menu-section menu-section-disabled">
+          <div
+            className="menu-title menu-title-disabled"
+            aria-disabled="true"
+            title="Funcionalidade ainda não configurada"
           >
             <ShoppingCart size={21} />
-
             <span>Compras</span>
-
-            <ChevronDown
-              size={16}
-              className={comprasOpen ? "arrow-open" : ""}
-            />
-          </button>
-
-          {comprasOpen && (
-            <div className="submenu">
-              <NavLink to="/compras">Pedidos de Compra</NavLink>
-
-              <NavLink to="/compras/cotacoes">Cotações</NavLink>
-
-              <NavLink to="/compras/recebimentos">Recebimentos</NavLink>
-            </div>
-          )}
+            <span className="menu-coming-soon">Em breve</span>
+          </div>
         </div>
 
         {/* =================================================
-            VENDAS
+            VENDAS — INDISPONÍVEL NESTA VERSÃO
            ================================================= */}
 
-        <div className="menu-section">
-          <button
-            className="menu-title"
-            onClick={() => setVendasOpen(!vendasOpen)}
+        <div className="menu-section menu-section-disabled">
+          <div
+            className="menu-title menu-title-disabled"
+            aria-disabled="true"
+            title="Funcionalidade ainda não configurada"
           >
             <BarChart3 size={21} />
-
             <span>Vendas</span>
-
-            <ChevronDown size={16} className={vendasOpen ? "arrow-open" : ""} />
-          </button>
-
-          {vendasOpen && (
-            <div className="submenu">
-              <NavLink to="/vendas">Pedidos de Venda</NavLink>
-
-              <NavLink to="/vendas/faturamento">Faturamento</NavLink>
-            </div>
-          )}
+            <span className="menu-coming-soon">Em breve</span>
+          </div>
         </div>
 
         {/* =================================================
-            FINANCEIRO
+            FINANCEIRO — INDISPONÍVEL NESTA VERSÃO
            ================================================= */}
 
-        <div className="menu-section">
-          <button
-            className="menu-title"
-            onClick={() => setFinanceiroOpen(!financeiroOpen)}
+        <div className="menu-section menu-section-disabled">
+          <div
+            className="menu-title menu-title-disabled"
+            aria-disabled="true"
+            title="Funcionalidade ainda não configurada"
           >
             <DollarSign size={21} />
-
             <span>Financeiro</span>
-
-            <ChevronDown
-              size={16}
-              className={financeiroOpen ? "arrow-open" : ""}
-            />
-          </button>
-
-          {financeiroOpen && (
-            <div className="submenu">
-              <NavLink to="/financeiro">Visão Geral</NavLink>
-
-              <NavLink to="/financeiro/contas-pagar">Contas a Pagar</NavLink>
-
-              <NavLink to="/financeiro/contas-receber">
-                Contas a Receber
-              </NavLink>
-
-              <NavLink to="/financeiro/fluxo-caixa">Fluxo de Caixa</NavLink>
-            </div>
-          )}
+            <span className="menu-coming-soon">Em breve</span>
+          </div>
         </div>
 
         {/* =================================================
-            RELATÓRIOS
+            RELATÓRIOS — INDISPONÍVEL NESTA VERSÃO
            ================================================= */}
 
-        <div className="menu-section">
-          <button
-            className="menu-title"
-            onClick={() => setRelatoriosOpen(!relatoriosOpen)}
+        <div className="menu-section menu-section-disabled">
+          <div
+            className="menu-title menu-title-disabled"
+            aria-disabled="true"
+            title="Funcionalidade ainda não configurada"
           >
             <FileText size={21} />
-
             <span>Relatórios</span>
-
-            <ChevronDown
-              size={16}
-              className={relatoriosOpen ? "arrow-open" : ""}
-            />
-          </button>
-
-          {relatoriosOpen && (
-            <div className="submenu">
-              <NavLink to="/relatorios/estoque">Estoque</NavLink>
-
-              <NavLink to="/relatorios/compras">Compras</NavLink>
-
-              <NavLink to="/relatorios/vendas">Vendas</NavLink>
-
-              <NavLink to="/relatorios/financeiro">Financeiro</NavLink>
-            </div>
-          )}
+            <span className="menu-coming-soon">Em breve</span>
+          </div>
         </div>
 
         {/* USUÁRIOS */}
@@ -324,7 +261,7 @@ export default function Sidebar() {
             <div className="submenu">
               <NavLink to="/configuracoes">Geral</NavLink>
 
-              <NavLink to="/configuracoes/perfil">Perfil</NavLink>
+              <NavLink to="/perfil">Meu perfil</NavLink>
 
               <NavLink to="/configuracoes/permissoes">Permissões</NavLink>
             </div>
