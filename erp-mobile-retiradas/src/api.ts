@@ -1,4 +1,5 @@
 import axios, { AxiosError } from "axios";
+import { buscarToken } from "./services/tokenStorage";
 
 /**
  * Instância HTTP única do app.
@@ -18,7 +19,12 @@ export const api = axios.create({
 
 // Não registra tokens, dados pessoais nem corpos de requisição no log.
 api.interceptors.request.use(
-  (config) => config,
+  async (config) => {
+    const token = await buscarToken();
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    else if (config.headers.Authorization) delete config.headers.Authorization;
+    return config;
+  },
   (error) => Promise.reject(error),
 );
 

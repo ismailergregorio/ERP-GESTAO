@@ -5,8 +5,9 @@ import { listarSaidas } from "../services/saidaService";
 import { mensagemErroApi } from "../api";
 import type { Saida } from "../types";
 import { colors } from "../theme/colors";
+import type { UsuarioSessao } from "../services/authService";
 
-type Props = { onNovaRetirada: () => void };
+type Props = { usuario: UsuarioSessao; onNovaRetirada: () => void; onPerfil: () => void };
 
 const dataFormatada = (value?: string) => {
   if (!value) return "Data não informada";
@@ -14,7 +15,7 @@ const dataFormatada = (value?: string) => {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
 };
 
-export default function HomeScreen({ onNovaRetirada }: Props) {
+export default function HomeScreen({ usuario, onNovaRetirada, onPerfil }: Props) {
   const [saidas, setSaidas] = useState<Saida[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -49,9 +50,12 @@ export default function HomeScreen({ onNovaRetirada }: Props) {
           <Ionicons name="cube-outline" size={27} color="#fff" />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={{ color: "#fff", fontSize: 20, fontWeight: "800" }}>ERP • Retiradas</Text>
-          <Text style={{ color: "#DCE7FF", marginTop: 3, fontSize: 13 }}>Controle de saídas de produtos</Text>
+          <Text style={{ color: "#fff", fontSize: 20, fontWeight: "800" }}>Dev ERP</Text>
+          <Text style={{ color: "#DCE7FF", marginTop: 3, fontSize: 13 }}>{usuario.nome} • {usuario.perfil}</Text>
         </View>
+        <Pressable onPress={onPerfil} style={{ padding: 8 }} accessibilityLabel="Meu perfil">
+          <Ionicons name="person-circle-outline" size={25} color="#fff" />
+        </Pressable>
         <Pressable onPress={() => void carregar(true)} style={{ padding: 8 }} accessibilityLabel="Atualizar retiradas">
           <Ionicons name="refresh" size={22} color="#fff" />
         </Pressable>
@@ -66,7 +70,7 @@ export default function HomeScreen({ onNovaRetirada }: Props) {
           <View>
             <Text style={{ color: "#182230", fontSize: 25, fontWeight: "800" }}>Início</Text>
             <Text style={{ color: "#667085", marginTop: 5, marginBottom: 18, lineHeight: 20 }}>Consulte as retiradas recentes ou inicie uma nova entrega.</Text>
-            <Pressable onPress={onNovaRetirada} style={{ backgroundColor: colors.green, borderRadius: 16, padding: 18, flexDirection: "row", alignItems: "center", gap: 13, marginBottom: 25 }}>
+            {usuario.perfil !== "CONSULTA" && <Pressable onPress={onNovaRetirada} style={{ backgroundColor: colors.green, borderRadius: 16, padding: 18, flexDirection: "row", alignItems: "center", gap: 13, marginBottom: 25 }}>
               <View style={{ width: 46, height: 46, borderRadius: 13, backgroundColor: "rgba(255,255,255,0.18)", alignItems: "center", justifyContent: "center" }}>
                 <Ionicons name="add-circle-outline" size={29} color="#fff" />
               </View>
@@ -75,7 +79,11 @@ export default function HomeScreen({ onNovaRetirada }: Props) {
                 <Text style={{ color: "#E5FFF2", fontSize: 12, marginTop: 3 }}>Registrar saída de produtos ou EPI</Text>
               </View>
               <Ionicons name="chevron-forward" size={22} color="#fff" />
-            </Pressable>
+            </Pressable>}
+            {usuario.perfil === "CONSULTA" && <View style={{ backgroundColor: "#EAF1FF", borderRadius: 12, padding: 13, marginBottom: 20, flexDirection: "row", gap: 9, alignItems: "center" }}>
+              <Ionicons name="eye-outline" size={21} color={colors.primary} />
+              <Text style={{ color: colors.primaryDark, flex: 1, fontSize: 12 }}>Seu perfil permite consultar os dados, mas não registrar retiradas.</Text>
+            </View>}
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
               <Text style={{ color: "#182230", fontSize: 18, fontWeight: "800" }}>Últimas retiradas</Text>
               <Text style={{ color: "#667085", fontSize: 12 }}>Mais recentes</Text>
