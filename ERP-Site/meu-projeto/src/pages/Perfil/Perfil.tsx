@@ -1,4 +1,5 @@
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
 import { KeyRound, Save, UserRound } from "lucide-react";
 import { toast } from "react-toastify";
 import {

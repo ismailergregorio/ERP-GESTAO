@@ -740,23 +740,23 @@ export default function Entradas() {
 
   const [listaProdutos, setListaProdutos] = useState<Produto[]>([]);
 
-  const [loadingProdutos, setLoadingProdutos] = useState(false);
+  const [loadingProdutos] = useState(false);
 
-  async function buscarListaProdutos() {
-    try {
-      setLoadingProdutos(true);
+  // async function buscarListaProdutos() {
+  //   try {
+  //     setLoadingProdutos(true);
 
-      const resp = await listarProdutos();
+  //     const resp = await listarProdutos();
 
-      setListaProdutos(resp);
-    } catch (error: any) {
-      console.error("Erro ao buscar produtos:", error);
+  //     setListaProdutos(resp);
+  //   } catch (error: any) {
+  //     console.error("Erro ao buscar produtos:", error);
 
-      toast.error(error.response?.data?.message || "Erro ao buscar produtos.");
-    } finally {
-      setLoadingProdutos(false);
-    }
-  }
+  //     toast.error(error.response?.data?.message || "Erro ao buscar produtos.");
+  //   } finally {
+  //     setLoadingProdutos(false);
+  //   }
+  // }
 
   // =========================================================
   // SIM - RELACIONAR PRODUTOS

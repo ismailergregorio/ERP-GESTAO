@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { History, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import Table from "../../components/Table/Table";
 import Modal from "../../components/Modal/Modal";
 import type { TableAction, TableColumn } from "../../components/Table/Table";

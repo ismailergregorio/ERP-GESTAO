@@ -38,7 +38,7 @@ export default function CategoriaProdutos() {
 
   const [nome, setNome] = useState("");
 
-  const [carregando, setCarregando] = useState(false);
+  const [, setCarregando] = useState(false);
 
   const [salvando, setSalvando] = useState(false);
 

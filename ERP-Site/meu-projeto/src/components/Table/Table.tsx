@@ -75,7 +75,7 @@ export default function Table<T extends object>({
 
   onPageChange,
 
-  itemsPerPage = 10,
+  // itemsPerPage = 10,
 
   totalItems,
 }: TableProps<T>) {

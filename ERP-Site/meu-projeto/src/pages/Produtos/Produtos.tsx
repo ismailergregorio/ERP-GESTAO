@@ -8,7 +8,7 @@ import type { TableColumn, TableAction } from "../../components/Table/Table";
 
 import type { Produto } from "../../types/Produto";
 
-import type { Categoria, CategoriaProdutoGet } from "../../types/categoriaType";
+import type { CategoriaProdutoGet } from "../../types/categoriaType";
 
 import type { UnidadeMedida } from "../../types/UnidadeMedida";
 

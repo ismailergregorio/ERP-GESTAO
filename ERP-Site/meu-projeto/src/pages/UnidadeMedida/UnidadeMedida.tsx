@@ -11,7 +11,7 @@ import {
   criarUnidadeMedida,
   atualizarUnidadeMedida,
   excluirUnidadeMedida as excluirUnidadeMedidaApi,
-} from "../../services/unidadeMedidaService"
+} from "../../services/unidadeMedidaService";
 
 import "./UnidadeMedida.css";
 
@@ -238,10 +238,9 @@ export default function UnidadeMedida() {
           ),
         );
       } else {
-
-      /*
-       * NOVA
-       */
+        /*
+         * NOVA
+         */
         const novaUnidade = await criarUnidadeMedida({
           nome: nome.trim(),
 
@@ -296,8 +295,8 @@ export default function UnidadeMedida() {
       key: "dataUpdate" as const,
       label: "Última Atualização",
 
-      render: (value: string | null) => {
-        if (!value) {
+      render: (value: unknown) => {
+        if (typeof value !== "string" || !value) {
           return "-";
         }
 
@@ -309,11 +308,15 @@ export default function UnidadeMedida() {
       key: "ativo" as const,
       label: "Status",
 
-      render: (value: boolean) => (
-        <span className={value ? "status-active" : "status-inactive"}>
-          {value ? "Ativa" : "Inativa"}
-        </span>
-      ),
+      render: (value: unknown) => {
+        const ativo = value === true;
+
+        return (
+          <span className={ativo ? "status-active" : "status-inactive"}>
+            {ativo ? "Ativa" : "Inativa"}
+          </span>
+        );
+      },
     },
   ];
 

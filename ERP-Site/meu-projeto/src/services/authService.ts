@@ -73,3 +73,47 @@ export function obterUsuario(): UsuarioAcesso | null {
   if (!raw) return null;
   try { return JSON.parse(raw) as UsuarioAcesso; } catch { return null; }
 }
+
+
+export type PerfilAcesso = UsuarioAcesso["perfil"];
+
+export interface CriarUsuarioRequest {
+  nome: string;
+  nomeUsuario: string;
+  senhaTemporaria: string;
+  perfil: PerfilAcesso;
+}
+
+/**
+ * Lista todos os usuários cadastrados.
+ */
+export async function listarUsuarios(): Promise<UsuarioAcesso[]> {
+  const response = await api.get<UsuarioAcesso[]>("/usuarios");
+  return response.data;
+}
+
+/**
+ * Cria um novo usuário.
+ */
+export async function criarUsuario(
+  dados: CriarUsuarioRequest
+): Promise<UsuarioAcesso> {
+  const response = await api.post<UsuarioAcesso>("/usuarios", dados);
+  return response.data;
+}
+
+/**
+ * Altera o status de um usuário.
+ */
+export async function alterarStatusUsuario(
+  id: number,
+  ativo: boolean
+): Promise<UsuarioAcesso> {
+  const response = await api.patch<UsuarioAcesso>(
+    `/usuarios/${id}/status`,
+    { ativo }
+  );
+
+  return response.data;
+}
+

@@ -140,9 +140,9 @@ export default function NotaFiscalModal({
     return new Date(data).toLocaleString("pt-BR");
   };
 
-  const fornecedorSelecionado = fornecedores.find(
-    (fornecedor) => fornecedor.id === notaFiscal?.fornecedorId
-  );
+  // const fornecedorSelecionado = fornecedores.find(
+  //   (fornecedor) => fornecedor.id === notaFiscal?.fornecedorId
+  // );
 
   const titulo =
     modo === "criar"
